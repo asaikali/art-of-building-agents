@@ -1,0 +1,76 @@
+{
+    "profiles": {
+        "terroni-adelaide": {
+            "noiseLevel": "lively",
+            "priceRangePerPerson": "$$ (40–70 CAD)"
+        },
+        "black-blue-steakhouse": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$$$ (100–160 CAD)"
+        },
+        "baro": {
+            "noiseLevel": "loud",
+            "priceRangePerPerson": "$$$ (70–100 CAD)"
+        },
+        "alobar-downtown": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$$ (70–110 CAD)"
+        },
+        "reign": {
+            "noiseLevel": "quiet",
+            "priceRangePerPerson": "$$$$ (110–160 CAD)"
+        },
+        "hothouse": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$ (35–65 CAD)"
+        },
+        "wvrst-king-west": {
+            "noiseLevel": "loud",
+            "priceRangePerPerson": "$$ (30–55 CAD)"
+        },
+        "irish-embassy": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$ (35–60 CAD)"
+        },
+        "the-chase": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$$ (75–120 CAD)"
+        },
+        "athens-danforth": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$ (30–55 CAD)"
+        },
+        "messini-gyros": {
+            "noiseLevel": "lively",
+            "priceRangePerPerson": "$ (20–35 CAD)"
+        },
+        "gabbys-danforth": {
+            "noiseLevel": "loud",
+            "priceRangePerPerson": "$$ (30–55 CAD)"
+        },
+        "daldongnae-kbbq": {
+            "noiseLevel": "loud",
+            "priceRangePerPerson": "$$–$$$ (45–80 CAD)"
+        },
+        "yummy-korean": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$ (30–50 CAD)"
+        },
+        "kintori-yakitori": {
+            "noiseLevel": "lively",
+            "priceRangePerPerson": "$$$ (60–95 CAD)"
+        },
+        "canoe": {
+            "noiseLevel": "quiet",
+            "priceRangePerPerson": "$$$ (70–110 CAD)"
+        },
+        "planta-queen": {
+            "noiseLevel": "moderate",
+            "priceRangePerPerson": "$$–$$$ (45–80 CAD)"
+        },
+        "rol-san": {
+            "noiseLevel": "lively",
+            "priceRangePerPerson": "$ (20–35 CAD)"
+        }
+    }
+}

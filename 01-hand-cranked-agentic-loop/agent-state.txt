@@ -1,0 +1,3 @@
+# Agent State — Hand-Cranked Agentic Loop
+# This file is append-only.
+# Do not delete earlier iterations.
