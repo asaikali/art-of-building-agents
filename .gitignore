@@ -1,24 +1,166 @@
-# Compiled class file
+# .gitignore Quick Reference
+#
+# Syntax rules:
+#   • Lines starting with '#' are comments.
+#   • Blank lines are ignored.
+#   • Patterns are evaluated top-to-bottom; the last matching rule wins.
+#
+# Pattern basics:
+#   • No leading '/'  = match anywhere in the repo.
+#   • Leading '/'     = match only from the repo root.
+#   • Trailing '/'    = match only directories, not files.
+#   • '*'  = match zero or more characters in a single path segment.
+#   • '**' = match across directory levels.
+#   • '!'  = negate (unignore) a match from a previous rule.
+#
+# Common pattern meanings:
+#   Pattern       Matches
+#   -------       ----------------------------------------------------------
+#   build         Any file OR directory named "build" at any depth.
+#   build/        Any directory named "build" at any depth.
+#   /build/       Directory named "build" at repo root only.
+#   *.log         Any file ending in .log at any depth.
+#   src/**/temp/  "temp" directories anywhere under a "src" folder.
+#
+# Edge case – directory vs file with same name:
+#   • To ignore the directory but keep a file with the same name:
+#       build/         # ignore directories named "build"
+#       !build         # keep a file literally named "build"
+#
+# Negation example:
+#   build/              # ignore all build directories
+#   !src/main/resources/build/   # but keep this specific one
+#
+
+###############################################################################
+#  Java
+###############################################################################
+### Compiled output ###
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+### Package archives ###
 *.jar
 *.war
-*.nar
 *.ear
+*.nar
+*.car
+*.sar
+*.mar
+
+### Archives ###
 *.zip
 *.tar.gz
-*.rar
+*.tgz
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+### JVM crash/heap dumps ###
 hs_err_pid*
 replay_pid*
+*.hprof
+
+### Gradle ###
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/testFixtures/**/build/
+
+### Maven ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/testFixtures/**/target/
+
+###############################################################################
+#  JavaScript
+###############################################################################
+### node_modules ###
+node_modules/
+
+### vite ###
+# Build output
+dist/
+!**/src/main/**/dist/
+!**/src/test/**/dist/
+!**/src/testFixtures/**/dist/
+
+# Cache
+.vite/
+.eslintcache
+.stylelintcache
+
+###############################################################################
+#  IDEs
+###############################################################################
+### Eclipse and Spring Tool Suite ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+!**/src/testFixtures/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/testFixtures/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+###############################################################################
+#  Operating System Noise
+###############################################################################
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+### Windows ###
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+### Linux/editor temps ###
+*~
+.nfs*
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+###############################################################################
+#  Logs and diagnostics
+###############################################################################
+*.log
+
+###############################################################################
+#  Secrets and local config
+###############################################################################
+.env
+.env.local
+.env.*.local
