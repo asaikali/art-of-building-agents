@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@import "splitpanes/dist/splitpanes.css";
+@plugin "@tailwindcss/typography";
+
+/* Ensure the outer splitpanes fills flex container properly */
+.splitpanes.flex-1 {
+  height: auto;
+  flex: 1 1 0%;
+  min-height: 0;
+}
+
+/* Ensure nested splitpanes fill their parent pane completely */
+.splitpanes__pane > .splitpanes {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Remove default-theme gray pane backgrounds — our components set their own */
+.splitpanes.default-theme .splitpanes__pane {
+  background-color: transparent;
+}
+
+/* ── Splitpane divider overrides ── */
+
+/* Vertical splitters (between columns) */
+.default-theme.splitpanes--vertical > .splitpanes__splitter,
+.default-theme .splitpanes--vertical > .splitpanes__splitter {
+  width: 8px;
+  background: #d1d5db;          /* gray-300 — visible against white panels */
+  border-left: none;
+  margin-left: 0;
+}
+.default-theme.splitpanes--vertical > .splitpanes__splitter:hover,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:hover {
+  background: #9ca3af;          /* gray-400 on hover */
+}
+
+/* Vertical splitter grip dots (the two thin lines) */
+.default-theme.splitpanes--vertical > .splitpanes__splitter:before,
+.default-theme.splitpanes--vertical > .splitpanes__splitter:after,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:before,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:after {
+  width: 2px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 1px;
+}
+.default-theme.splitpanes--vertical > .splitpanes__splitter:before,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:before {
+  margin-left: -3px;
+}
+.default-theme.splitpanes--vertical > .splitpanes__splitter:after,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:after {
+  margin-left: 2px;
+}
+.default-theme.splitpanes--vertical > .splitpanes__splitter:hover:before,
+.default-theme.splitpanes--vertical > .splitpanes__splitter:hover:after,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:hover:before,
+.default-theme .splitpanes--vertical > .splitpanes__splitter:hover:after {
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+/* Horizontal splitters (between rows — State / Events) */
+.default-theme.splitpanes--horizontal > .splitpanes__splitter,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter {
+  height: 8px;
+  background: #d1d5db;
+  border-top: none;
+  margin-top: 0;
+}
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:hover,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:hover {
+  background: #9ca3af;
+}
+
+/* Horizontal splitter grip dots */
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:before,
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:after,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:before,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:after {
+  height: 2px;
+  width: 40px;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 1px;
+}
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:before,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:before {
+  margin-top: -3px;
+}
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:after,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:after {
+  margin-top: 2px;
+}
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:hover:before,
+.default-theme.splitpanes--horizontal > .splitpanes__splitter:hover:after,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:hover:before,
+.default-theme .splitpanes--horizontal > .splitpanes__splitter:hover:after {
+  background-color: rgba(0, 0, 0, 0.45);
+}
