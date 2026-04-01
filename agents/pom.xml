@@ -15,5 +15,7 @@
 
   <modules>
     <module>basic-chatbot</module>
+    <module>02-tool-calling</module>
+    <module>03-guardrails</module>
   </modules>
 </project>
