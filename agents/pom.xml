@@ -22,5 +22,6 @@
     <module>06-mcp-server</module>
     <module>06-mcp-client</module>
     <module>07-memory</module>
+    <module>08-human-in-the-loop</module>
   </modules>
 </project>

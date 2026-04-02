@@ -28,12 +28,13 @@
 - [x] All 6 steps pass `run-workshop-tests.sh`
 - [x] Step 07 `07-memory` — CompactionMemoryAdvisor with FileSystemMemoryStore + gpt-4o-mini compaction. memory-core:0.1.0 + memory-advisor:0.1.0 released.
 - [x] All 7 steps pass `run-workshop-tests.sh`
+- [x] Step 08 `08-human-in-the-loop` — AskUserQuestionTool with CompletableFuture bridge to Inspector web UI
+- [x] All 8 steps pass `run-workshop-tests.sh`
 
 ## Next — Build Remaining Steps
 
 | Step | Module | What It Adds | Artifact |
 |------|--------|-------------|----------|
-| 08 | `08-human-in-the-loop` | AskUserQuestionTool | spring-ai-agent-utils |
 | 09 | `09-subagent` | TaskTool delegation | spring-ai-agent-utils |
 | 10 | `10-a2a` | Expense policy as A2A agent | spring-ai-a2a |
 | 11 | `11-acp` | Jarvis as ACP endpoint | acp-java |
