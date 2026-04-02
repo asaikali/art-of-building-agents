@@ -36,12 +36,8 @@
 - [x] All 10 steps pass `run-workshop-tests.sh`
 - [x] Step 11 `11-acp` — Jarvis as ACP agent with @AcpAgent/@Prompt annotations. WebSocket transport (port 8083) for demos, stdio for IDE integration. acp-java:0.10.0-SNAPSHOT.
 - [x] Step 11 test passes via ACP in-memory transport
-
-## Next — Build Remaining Steps
-
-| Step | Module | What It Adds | Artifact |
-|------|--------|-------------|----------|
-| 12 | `12-wrap-path` | agent-client wrapping CLI agents | agent-client |
+- [x] Step 12 `12-wrap-path` — Claude Code wrapped as Spring component via agent-client. No ChatClient, no @Tool — configuration only. agent-client-core:0.11.0 + agent-claude:0.11.0.
+- [x] All 12 steps complete
 
 ## Backlog
 
