@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: 06-mcp-server
+  ai:
+    mcp:
+      server:
+        name: restaurant-tools
+        version: 1.0.0
+        protocol: STREAMABLE
+
+server:
+  port: 8081

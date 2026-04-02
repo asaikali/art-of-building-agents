@@ -1,0 +1,10 @@
+{
+  "description": "Step 06: MCP — Tools served from remote MCP server, discovered dynamically",
+  "testMessage": "I need a restaurant in Eixample for 4 people, budget is 30 euros per person, one guest is vegetarian",
+  "timeoutSec": 120,
+  "successPatterns": ["Teresa Carles"],
+  "dependsOn": {
+    "module": "06-mcp-server",
+    "port": 8081
+  }
+}
