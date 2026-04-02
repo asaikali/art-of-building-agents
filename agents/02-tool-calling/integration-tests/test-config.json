@@ -1,0 +1,6 @@
+{
+  "description": "Step 02: Tool-calling agent — system prompt + searchRestaurants + ToolCallAdvisor",
+  "testMessage": "Search for restaurants in the Gothic Quarter for a business dinner",
+  "timeoutSec": 120,
+  "successPatterns": ["Can Culleretes"]
+}

@@ -12,6 +12,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,7 +72,11 @@ public class TurnLimitsHandler implements AgentHandler {
 
   public TurnLimitsHandler(ChatClient.Builder chatClientBuilder, RestaurantTools restaurantTools) {
     // AgentLoopAdvisor replaces ToolCallAdvisor — same loop, now governed
-    var advisor = AgentLoopAdvisor.builder().maxTurns(15).build();
+    var advisor =
+        AgentLoopAdvisor.builder()
+            .toolCallingManager(ToolCallingManager.builder().build())
+            .maxTurns(15)
+            .build();
 
     this.chatClient =
         chatClientBuilder

@@ -1,0 +1,6 @@
+{
+  "description": "Step 01: Basic chatbot — bare ChatClient, no tools, no system prompt",
+  "testMessage": "What is the capital of France?",
+  "timeoutSec": 60,
+  "successPatterns": ["Paris"]
+}
