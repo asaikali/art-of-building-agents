@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: 11-acp
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+  main:
+    web-application-type: none

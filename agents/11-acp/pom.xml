@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>agents</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>11-acp</artifactId>
+  <packaging>jar</packaging>
+  <description>Step 11 — ACP: Jarvis exposed as an Agent Communication Protocol endpoint</description>
+
+  <properties>
+    <acp.version>0.10.0-SNAPSHOT</acp.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-model-openai</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <!-- ACP agent support — annotation-based agent framework -->
+    <dependency>
+      <groupId>com.agentclientprotocol</groupId>
+      <artifactId>acp-agent-support</artifactId>
+      <version>${acp.version}</version>
+    </dependency>
+    <!-- WebSocket transport — network-accessible ACP endpoint -->
+    <dependency>
+      <groupId>com.agentclientprotocol</groupId>
+      <artifactId>acp-websocket-jetty</artifactId>
+      <version>${acp.version}</version>
+    </dependency>
+    <!-- ACP test utilities — in-memory transport for testing -->
+    <dependency>
+      <groupId>com.agentclientprotocol</groupId>
+      <artifactId>acp-test</artifactId>
+      <version>${acp.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
