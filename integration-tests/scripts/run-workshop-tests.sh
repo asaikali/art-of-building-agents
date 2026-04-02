@@ -80,12 +80,27 @@ wait_for_startup() {
   return 1
 }
 
+# Wait for a specific port to respond
+wait_for_port() {
+  local port="$1"
+  local elapsed=0
+  while [ $elapsed -lt $STARTUP_TIMEOUT ]; do
+    if curl -s "http://localhost:$port/" > /dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+  return 1
+}
+
 # Run a single step's test
 run_step_test() {
   local step_name="$1"
   local step_dir="$REPO_ROOT/agents/$step_name"
   local config_file="$step_dir/integration-tests/test-config.json"
   local log_file="$LOG_DIR/${step_name}-$(date +%Y%m%d-%H%M%S).log"
+  local dep_pid=""
 
   echo -e "\n${YELLOW}━━━ Testing: $step_name ━━━${NC}"
 
@@ -98,14 +113,48 @@ run_step_test() {
     echo "  $description"
   fi
 
+  # Check for dependency (e.g. MCP server that must be running first)
+  local dep_module=$(jq -r '.dependsOn.module // ""' "$config_file")
+  local dep_port=$(jq -r '.dependsOn.port // ""' "$config_file")
+
   # Clean up port
   cleanup_port
+  if [ -n "$dep_port" ]; then
+    local dep_old_pid=$(lsof -ti :"$dep_port" 2>/dev/null || true)
+    if [ -n "$dep_old_pid" ]; then
+      kill "$dep_old_pid" 2>/dev/null || true
+      sleep 1
+    fi
+  fi
 
-  # Build
+  # Build (include dependency module if needed)
   echo "  Building..."
-  if ! (cd "$REPO_ROOT" && ./mvnw package -pl "agents/$step_name" -am -DskipTests -q) >> "$log_file" 2>&1; then
+  local build_modules="agents/$step_name"
+  if [ -n "$dep_module" ]; then
+    build_modules="agents/$dep_module,agents/$step_name"
+  fi
+  if ! (cd "$REPO_ROOT" && ./mvnw package -pl "$build_modules" -am -DskipTests -q) >> "$log_file" 2>&1; then
     echo -e "  ${RED}FAIL: Build failed${NC} (see $log_file)"
     return 1
+  fi
+
+  # Start dependency server if needed
+  if [ -n "$dep_module" ]; then
+    local dep_dir="$REPO_ROOT/agents/$dep_module"
+    local dep_jar=$(find "$dep_dir/target" -name "*.jar" -not -name "*-sources*" -not -name "*-javadoc*" | head -1)
+    if [ -z "$dep_jar" ]; then
+      echo -e "  ${RED}FAIL: No JAR found for dependency $dep_module${NC}"
+      return 1
+    fi
+    echo "  Starting dependency: $dep_module (port $dep_port)..."
+    java -jar "$dep_jar" >> "$log_file" 2>&1 &
+    dep_pid=$!
+    if ! wait_for_port "$dep_port"; then
+      echo -e "  ${RED}FAIL: Dependency $dep_module did not start within ${STARTUP_TIMEOUT}s${NC}"
+      kill "$dep_pid" 2>/dev/null || true
+      return 1
+    fi
+    echo "  Dependency started (pid $dep_pid)"
   fi
 
   # Start app
@@ -113,6 +162,7 @@ run_step_test() {
   local jar=$(find "$step_dir/target" -name "*.jar" -not -name "*-sources*" -not -name "*-javadoc*" | head -1)
   if [ -z "$jar" ]; then
     echo -e "  ${RED}FAIL: No JAR found in target/${NC}"
+    [ -n "$dep_pid" ] && kill "$dep_pid" 2>/dev/null || true
     return 1
   fi
 
@@ -124,6 +174,7 @@ run_step_test() {
   if ! wait_for_startup; then
     echo -e "  ${RED}FAIL: App did not start within ${STARTUP_TIMEOUT}s${NC} (see $log_file)"
     kill "$app_pid" 2>/dev/null || true
+    [ -n "$dep_pid" ] && kill "$dep_pid" 2>/dev/null || true
     return 1
   fi
   echo "  App started (pid $app_pid)"
@@ -138,6 +189,7 @@ run_step_test() {
     echo -e "  ${RED}FAIL: Could not create session${NC}"
     echo "  Response: $session_response"
     kill "$app_pid" 2>/dev/null || true
+    [ -n "$dep_pid" ] && kill "$dep_pid" 2>/dev/null || true
     return 1
   fi
   echo "  Session: $session_id"
@@ -156,6 +208,7 @@ run_step_test() {
 
   # Tear down
   kill "$app_pid" 2>/dev/null || true
+  [ -n "$dep_pid" ] && kill "$dep_pid" 2>/dev/null || true
   sleep 1
 
   # Validate response

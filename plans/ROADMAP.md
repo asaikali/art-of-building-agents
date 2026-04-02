@@ -23,13 +23,14 @@
 - [x] Integration tests: `test-config.json` for all steps, deterministic patterns using hardcoded restaurant data
 - [x] Fix Step 04: `AgentLoopAdvisor.builder()` requires `toolCallingManager()` in workflow-core 0.2.0
 - [x] Step 05 `05-journal` — AgentLoopAdvisor + agent-journal recording to JSONL via `JournalLoopListener`
-- [x] All 5 steps pass `run-workshop-tests.sh` (Step 04 occasionally flaky — LLM asks follow-up instead of using tools)
+- [x] Step 06 `06-mcp-server` + `06-mcp-client` — Restaurant tools as MCP server (Streamable HTTP, port 8081), Jarvis discovers tools dynamically via MCP client. MCP SDK 1.1.1.
+- [x] Integration test script supports `dependsOn` for multi-process tests (MCP server → client)
+- [x] All 6 steps pass `run-workshop-tests.sh`
 
 ## Next — Build Remaining Steps
 
 | Step | Module | What It Adds | Artifact |
 |------|--------|-------------|----------|
-| 06 | `06-mcp-server` | Restaurant tools as MCP server | spring-ai MCP |
 | 07 | `07-memory` | CompactionMemoryAdvisor | agent-memory (not yet extracted) |
 | 08 | `08-human-in-the-loop` | AskUserQuestionTool | spring-ai-agent-utils |
 | 09 | `09-subagent` | TaskTool delegation | spring-ai-agent-utils |

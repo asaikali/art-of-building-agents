@@ -19,5 +19,7 @@
     <module>03-guardrails</module>
     <module>04-turn-limits</module>
     <module>05-journal</module>
+    <module>06-mcp-server</module>
+    <module>06-mcp-client</module>
   </modules>
 </project>

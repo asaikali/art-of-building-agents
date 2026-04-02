@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: 06-mcp-client
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+    mcp:
+      client:
+        streamable-http:
+          connections:
+            restaurant-server:
+              url: http://localhost:8081
+
+server:
+  port: 8080
