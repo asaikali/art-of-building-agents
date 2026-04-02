@@ -26,5 +26,6 @@
     <module>09-subagent</module>
     <module>10-a2a-expense</module>
     <module>10-a2a-client</module>
+    <module>11-acp</module>
   </modules>
 </project>
