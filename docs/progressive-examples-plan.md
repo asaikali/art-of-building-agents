@@ -18,7 +18,7 @@ Every step uses the same Jarvis restaurant domain: search restaurants, check exp
 | 02 | `02-tool-calling` | System prompt + `searchRestaurants` tool + `ToolCallAdvisor` (Spring AI's built-in agent loop). **First real agent.** | Spring AI | Done |
 | 03 | `03-guardrails` | Full tool set: search, `checkExpensePolicy`, `checkDietaryOptions`, `bookTable`. Constraint-aware system prompt with tool selection rules. | Spring AI | Done |
 | 04 | `04-turn-limits` | Replace `ToolCallAdvisor` with `AgentLoopAdvisor` — max turns, stuck detection, grace turn recovery. **First AgentWorks library.** | **agent-workflow** | Done |
-| 05 | `05-journal` | Wire `agent-journal` via `AgentLoop.builder().journalRun(run)`. Every tool call and LLM call recorded to JSONL. The seam between "build" and "measure." | **agent-journal** | TODO |
+| 05 | `05-journal` | Wire `agent-journal` via `JournalLoopListener` on `AgentLoopAdvisor`. Every turn recorded to JSONL. The seam between "build" and "measure." | **agent-journal** | Done |
 | 06 | `06-mcp-server` | Move restaurant tools to an MCP server (separate Spring Boot app). Agent discovers tools dynamically via `SyncMcpToolCallbackProvider`. | Spring AI MCP | TODO |
 | 07 | `07-memory` | Add `CompactionMemoryAdvisor` (from agent-memory). Context compaction with cheap model. | **agent-memory** | TODO |
 | 08 | `08-human-in-the-loop` | Add `AskUserQuestionTool` — agent asks user for dietary preferences instead of guessing. | spring-ai-agent-utils | TODO |

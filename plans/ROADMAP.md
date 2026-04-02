@@ -18,17 +18,17 @@
 - [x] `integration-tests/scripts/run-workshop-tests.sh` — Test runner script (written, untested)
 - [x] Pushed to `origin/progressive-agent-examples`
 
-## Recently Completed — Integration Testing
+## Recently Completed
 
-- [x] Create `test-config.json` for all 4 steps (deterministic patterns using hardcoded restaurant data)
+- [x] Integration tests: `test-config.json` for all steps, deterministic patterns using hardcoded restaurant data
 - [x] Fix Step 04: `AgentLoopAdvisor.builder()` requires `toolCallingManager()` in workflow-core 0.2.0
-- [x] All 4 steps pass `run-workshop-tests.sh` end-to-end
+- [x] Step 05 `05-journal` — AgentLoopAdvisor + agent-journal recording to JSONL via `JournalLoopListener`
+- [x] All 5 steps pass `run-workshop-tests.sh` (Step 04 occasionally flaky — LLM asks follow-up instead of using tools)
 
 ## Next — Build Remaining Steps
 
 | Step | Module | What It Adds | Artifact |
 |------|--------|-------------|----------|
-| 05 | `05-journal` | AgentLoop + agent-journal recording | workflow-agents + journal-core |
 | 06 | `06-mcp-server` | Restaurant tools as MCP server | spring-ai MCP |
 | 07 | `07-memory` | CompactionMemoryAdvisor | agent-memory (not yet extracted) |
 | 08 | `08-human-in-the-loop` | AskUserQuestionTool | spring-ai-agent-utils |
