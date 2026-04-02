@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: 10-a2a-expense
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8082

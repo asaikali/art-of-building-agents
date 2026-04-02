@@ -32,12 +32,13 @@
 - [x] All 8 steps pass `run-workshop-tests.sh`
 - [x] Step 09 `09-subagent` — Jarvis delegates to a researcher sub-agent with its own ChatClient, prompt, and tools
 - [x] All 9 steps pass `run-workshop-tests.sh`
+- [x] Step 10 `10-a2a-expense` + `10-a2a-client` — Expense policy as A2A agent (port 8082), Jarvis discovers and calls via A2A protocol. spring-ai-a2a-server-autoconfigure:0.3.0-SNAPSHOT + A2A Java SDK 0.3.3.Final.
+- [x] All 10 steps pass `run-workshop-tests.sh`
 
 ## Next — Build Remaining Steps
 
 | Step | Module | What It Adds | Artifact |
 |------|--------|-------------|----------|
-| 10 | `10-a2a` | Expense policy as A2A agent | spring-ai-a2a |
 | 11 | `11-acp` | Jarvis as ACP endpoint | acp-java |
 | 12 | `12-wrap-path` | agent-client wrapping CLI agents | agent-client |
 

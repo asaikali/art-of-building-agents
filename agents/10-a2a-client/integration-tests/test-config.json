@@ -1,0 +1,10 @@
+{
+  "description": "Step 10: A2A — Expense policy as remote A2A agent, Jarvis calls it via A2A protocol",
+  "testMessage": "I need a restaurant in Eixample for 4 people, budget is 30 euros per person, one guest is vegetarian",
+  "timeoutSec": 180,
+  "successPatterns": ["Teresa Carles"],
+  "dependsOn": {
+    "module": "10-a2a-expense",
+    "port": 8082
+  }
+}
