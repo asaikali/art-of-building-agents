@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: 10-a2a-client
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+  mvc:
+    async:
+      request-timeout: 180000
+
+server:
+  port: 8080
+
+remote:
+  expense-agent:
+    url: http://localhost:8082/

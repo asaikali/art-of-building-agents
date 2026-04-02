@@ -24,5 +24,7 @@
     <module>07-memory</module>
     <module>08-human-in-the-loop</module>
     <module>09-subagent</module>
+    <module>10-a2a-expense</module>
+    <module>10-a2a-client</module>
   </modules>
 </project>

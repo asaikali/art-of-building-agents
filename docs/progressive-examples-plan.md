@@ -1,7 +1,7 @@
 # Progressive Agent Examples — Build Plan
 
 > **Branch**: `progressive-agent-examples`
-> **Status**: Steps 01-09 implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.3
+> **Status**: Steps 01-10 implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.3
 > **Domain**: Jarvis — business dinner planning agent for Barcelona
 
 ## The Idea
@@ -23,7 +23,7 @@ Every step uses the same Jarvis restaurant domain: search restaurants, check exp
 | 07 | `07-memory` | Add `CompactionMemoryAdvisor` with `FileSystemMemoryStore`. Persistent memory across conversations, LLM-powered compaction via gpt-4o-mini. | **agent-memory** | Done |
 | 08 | `08-human-in-the-loop` | Add `AskUserQuestionTool` — agent pauses mid-loop to ask user for clarification. `CompletableFuture` bridge to Inspector web UI. | **spring-ai-agent-utils** | Done |
 | 09 | `09-subagent` | Jarvis delegates research to a sub-agent with its own ChatClient, system prompt, and tools. `ResearcherTool` creates fresh context per request. | Spring AI | Done |
-| 10 | `10-a2a` | Expense policy checker as a separate A2A agent. Jarvis discovers it via `AgentCard` and calls via `@Tool sendMessage()`. | **spring-ai-a2a** | TODO |
+| 10 | `10-a2a-expense` + `10-a2a-client` | Expense policy checker as A2A agent (port 8082). Jarvis discovers via `AgentCard` and calls via A2A Java SDK. `spring-ai-a2a-server-autoconfigure` + `a2a-java-sdk-client`. | **spring-ai-a2a** | Done |
 | 11 | `11-acp` | Expose Jarvis as an ACP endpoint. `@AcpAgent` + `@Prompt`. Web UI and IDE can talk to Jarvis. | **acp-java** | TODO |
 | 12 | `12-wrap-path` | Show `agent-client` wrapping Claude Code / Gemini CLI — same journal, same judges, different build path. | **agent-client** | TODO |
 
