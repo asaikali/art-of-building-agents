@@ -12,20 +12,26 @@ Every step uses the same Jarvis restaurant domain: search restaurants, check exp
 
 ## Steps
 
-| Step | Module | What It Adds | Status |
-|------|--------|-------------|--------|
-| 01 | `basic-chatbot` (Adib's) | Bare ChatClient, no tools. Pass-through to the model. | Done |
-| 02 | `02-tool-calling` | System prompt ("You are Jarvis...") + `searchRestaurants` tool + `ToolCallAdvisor`. **First real agent** — the LLM can now act. | Done |
-| 03 | `03-guardrails` | Full tool set: search, `checkExpensePolicy`, `checkDietaryOptions`, `bookTable`. Constraint-aware system prompt with tool selection rules. | Done |
-| 04 | `04-turn-limits` | Replace `ToolCallAdvisor` with `AgentLoopAdvisor` — max turns, stuck detection, grace turn recovery. Same tools, now governed. | TODO |
-| 05 | `05-journal` | Wire `agent-journal` via `MiniAgent.builder().journalRun(run)`. Every tool call and LLM call recorded to JSONL. The seam between "build" and "measure." | TODO |
-| 06 | `06-mcp-server` | Move restaurant tools to an MCP server (separate Spring Boot app). Agent discovers tools dynamically via `SyncMcpToolCallbackProvider`. | TODO |
-| 07 | `07-memory` | Add `CompactionMemoryAdvisor` (from agent-memory / wiggum-memory). Context compaction with cheap model. | TODO |
-| 08 | `08-human-in-the-loop` | Add `AskUserQuestionTool` — agent asks user for dietary preferences instead of guessing. | TODO |
-| 09 | `09-subagent` | Add `TaskTool` — delegate restaurant research to a sub-agent. | TODO |
-| 10 | `10-a2a` | Expense policy checker as a separate A2A agent. Jarvis discovers it via `AgentCard` and calls via `RemoteAgentConnections` `@Tool sendMessage()`. | TODO |
-| 11 | `11-acp` | Expose Jarvis as an ACP endpoint. `@AcpAgent` + `@Prompt`. Web UI and IDE can talk to Jarvis. | TODO |
-| 12 | `12-wrap-path` | Show `agent-client` wrapping Claude Code / Gemini CLI — same journal, same judges, different build path. | TODO |
+| Step | Module | What It Adds | Library Source | Status |
+|------|--------|-------------|---------------|--------|
+| 01 | `basic-chatbot` (Adib's) | Bare ChatClient, no tools. Pass-through to the model. | Spring AI | Done |
+| 02 | `02-tool-calling` | System prompt + `searchRestaurants` tool + `ToolCallAdvisor` (Spring AI's built-in agent loop). **First real agent.** | Spring AI | Done |
+| 03 | `03-guardrails` | Full tool set: search, `checkExpensePolicy`, `checkDietaryOptions`, `bookTable`. Constraint-aware system prompt with tool selection rules. | Spring AI | Done |
+| 04 | `04-turn-limits` | Replace `ToolCallAdvisor` with `AgentLoopAdvisor` — max turns, stuck detection, grace turn recovery. **First AgentWorks library.** | **agent-workflow** | TODO |
+| 05 | `05-journal` | Wire `agent-journal` via `MiniAgent.builder().journalRun(run)`. Every tool call and LLM call recorded to JSONL. The seam between "build" and "measure." | **agent-journal** | TODO |
+| 06 | `06-mcp-server` | Move restaurant tools to an MCP server (separate Spring Boot app). Agent discovers tools dynamically via `SyncMcpToolCallbackProvider`. | Spring AI MCP | TODO |
+| 07 | `07-memory` | Add `CompactionMemoryAdvisor` (from agent-memory). Context compaction with cheap model. | **agent-memory** | TODO |
+| 08 | `08-human-in-the-loop` | Add `AskUserQuestionTool` — agent asks user for dietary preferences instead of guessing. | spring-ai-agent-utils | TODO |
+| 09 | `09-subagent` | Add `TaskTool` — delegate restaurant research to a sub-agent. | spring-ai-agent-utils | TODO |
+| 10 | `10-a2a` | Expense policy checker as a separate A2A agent. Jarvis discovers it via `AgentCard` and calls via `@Tool sendMessage()`. | **spring-ai-a2a** | TODO |
+| 11 | `11-acp` | Expose Jarvis as an ACP endpoint. `@AcpAgent` + `@Prompt`. Web UI and IDE can talk to Jarvis. | **acp-java** | TODO |
+| 12 | `12-wrap-path` | Show `agent-client` wrapping Claude Code / Gemini CLI — same journal, same judges, different build path. | **agent-client** | TODO |
+
+### Dependency Boundary
+
+**Steps 01-03**: Pure Spring AI. No external dependencies beyond spring-ai-starter-model-openai.
+**Step 04**: First AgentWorks library enters (agent-workflow for AgentLoopAdvisor).
+**Steps 05-12**: Progressive AgentWorks + protocol libraries.
 
 ## How Each Step Works
 
@@ -71,7 +77,7 @@ cd agents/02-tool-calling
 
 ## Key Design Decisions
 
-1. **Spring AI 2.0.0-M3** — Using the latest milestone. `ToolCallAdvisor.builder().build()` with defaults.
+1. **Spring AI 2.0.0-M3** — Using the latest milestone. Steps 01-03 use `ToolCallAdvisor.builder().build()` (Spring AI's built-in agent loop — `do { call → execute tool → feed back } while (hasToolCalls)`). Step 04 replaces this with `AgentLoopAdvisor` from agent-workflow which adds turn limits, stuck detection, and cost tracking on top of the same loop.
 2. **Simulated data** — Restaurant data is hardcoded in `RestaurantTools.java`. No external database needed. 5 Barcelona restaurants with varying prices, cuisines, dietary options, and noise levels.
 3. **Deterministic tools become judges** — `checkExpensePolicy` and `checkDietaryOptions` apply business rules deterministically. In the measurement phase (Mark's portion of the workshop), the same logic becomes the basis for judges that evaluate whether the agent made good decisions.
 4. **Google Java Format** — Enforced by Spotless (Adib's existing config).
