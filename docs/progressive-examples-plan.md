@@ -1,7 +1,7 @@
 # Progressive Agent Examples — Build Plan
 
 > **Branch**: `progressive-agent-examples`
-> **Status**: Steps 01-06 implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.3
+> **Status**: Steps 01-07 implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.3
 > **Domain**: Jarvis — business dinner planning agent for Barcelona
 
 ## The Idea
@@ -20,7 +20,7 @@ Every step uses the same Jarvis restaurant domain: search restaurants, check exp
 | 04 | `04-turn-limits` | Replace `ToolCallAdvisor` with `AgentLoopAdvisor` — max turns, stuck detection, grace turn recovery. **First AgentWorks library.** | **agent-workflow** | Done |
 | 05 | `05-journal` | Wire `agent-journal` via `JournalLoopListener` on `AgentLoopAdvisor`. Every turn recorded to JSONL. The seam between "build" and "measure." | **agent-journal** | Done |
 | 06 | `06-mcp-server` + `06-mcp-client` | Move restaurant tools to an MCP server (port 8081, Streamable HTTP). Client agent discovers tools dynamically via `SyncMcpToolCallbackProvider`. MCP SDK 1.1.1. | Spring AI MCP | Done |
-| 07 | `07-memory` | Add `CompactionMemoryAdvisor` (from agent-memory). Context compaction with cheap model. | **agent-memory** | TODO |
+| 07 | `07-memory` | Add `CompactionMemoryAdvisor` with `FileSystemMemoryStore`. Persistent memory across conversations, LLM-powered compaction via gpt-4o-mini. | **agent-memory** | Done |
 | 08 | `08-human-in-the-loop` | Add `AskUserQuestionTool` — agent asks user for dietary preferences instead of guessing. | spring-ai-agent-utils | TODO |
 | 09 | `09-subagent` | Add `TaskTool` — delegate restaurant research to a sub-agent. | spring-ai-agent-utils | TODO |
 | 10 | `10-a2a` | Expense policy checker as a separate A2A agent. Jarvis discovers it via `AgentCard` and calls via `@Tool sendMessage()`. | **spring-ai-a2a** | TODO |
