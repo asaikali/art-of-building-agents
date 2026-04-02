@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: 13-workflow
+  main:
+    banner-mode: "off"
+    web-application-type: none
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+
+logging:
+  level:
+    com.example.agents.workflow: INFO
+    org.springframework.boot: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
