@@ -7,6 +7,8 @@ import com.example.agent.core.session.Session;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
 // DefaultToolCallingManager not needed — ToolCallAdvisor.builder() uses sensible defaults
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ToolCallingHandler implements AgentHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(ToolCallingHandler.class);
 
   private static final String SYSTEM_PROMPT =
       """
