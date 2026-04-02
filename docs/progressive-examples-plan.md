@@ -1,7 +1,7 @@
 # Progressive Agent Examples — Build Plan
 
 > **Branch**: `progressive-agent-examples`
-> **Status**: All 12 steps implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.3
+> **Status**: All 16 steps implemented, compiling on Spring AI 2.0.0-M3 + Spring Boot 4.1.0-M2 + AgentWorks BOM 1.0.4
 > **Domain**: Jarvis — business dinner planning agent for Barcelona
 
 ## The Idea
@@ -26,6 +26,10 @@ Every step uses the same Jarvis restaurant domain: search restaurants, check exp
 | 10 | `10-a2a-expense` + `10-a2a-client` | Expense policy checker as A2A agent (port 8082). Jarvis discovers via `AgentCard` and calls via A2A Java SDK. `spring-ai-a2a-server-autoconfigure` + `a2a-java-sdk-client`. | **spring-ai-a2a** | Done |
 | 11 | `11-acp` | Jarvis as ACP endpoint. `@AcpAgent` + `@Prompt` + `@Initialize`. WebSocket (demos) or stdio (IDE integration — IntelliJ, Zed, VS Code). | **acp-java** | Done |
 | 12 | `12-wrap-path` | Wrap Claude Code CLI as Spring component via `agent-client`. No ChatClient, no @Tool — config only. `AgentClient.Builder` auto-configured. | **agent-client** | Done |
+| 13 | `13-workflow` | Workflow DSL: deterministic → AI → validate sandwich (Stripe pattern). `Workflow.define()` with typed steps. | **agent-workflow** | Done |
+| 14 | `14-judge` | CascadedJury: 3-tier eval (deterministic fail-fast → dietary check → LLM quality). Verdict in Inspector state panel. | **agent-judge** | Done |
+| 15 | `15-trajectory` | Tool call classification into semantic states. Loop detection, hotspot analysis, efficiency scoring. | **agent-judge** | Done |
+| 16 | `16-quality-gate` | Workflow gate + JudgeGate: agent self-corrects on failure. Reflect → revise loop with max retries. | **agent-workflow + agent-judge** | Done |
 
 ### Dependency Boundary
 
