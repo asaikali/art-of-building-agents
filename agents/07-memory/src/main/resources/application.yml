@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: 07-memory
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+
+server:
+  port: 8080

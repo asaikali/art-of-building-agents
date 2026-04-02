@@ -21,5 +21,6 @@
     <module>05-journal</module>
     <module>06-mcp-server</module>
     <module>06-mcp-client</module>
+    <module>07-memory</module>
   </modules>
 </project>
