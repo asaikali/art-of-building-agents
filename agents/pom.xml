@@ -23,5 +23,6 @@
     <module>06-mcp-client</module>
     <module>07-memory</module>
     <module>08-human-in-the-loop</module>
+    <module>09-subagent</module>
   </modules>
 </project>

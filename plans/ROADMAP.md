@@ -30,12 +30,13 @@
 - [x] All 7 steps pass `run-workshop-tests.sh`
 - [x] Step 08 `08-human-in-the-loop` — AskUserQuestionTool with CompletableFuture bridge to Inspector web UI
 - [x] All 8 steps pass `run-workshop-tests.sh`
+- [x] Step 09 `09-subagent` — Jarvis delegates to a researcher sub-agent with its own ChatClient, prompt, and tools
+- [x] All 9 steps pass `run-workshop-tests.sh`
 
 ## Next — Build Remaining Steps
 
 | Step | Module | What It Adds | Artifact |
 |------|--------|-------------|----------|
-| 09 | `09-subagent` | TaskTool delegation | spring-ai-agent-utils |
 | 10 | `10-a2a` | Expense policy as A2A agent | spring-ai-a2a |
 | 11 | `11-acp` | Jarvis as ACP endpoint | acp-java |
 | 12 | `12-wrap-path` | agent-client wrapping CLI agents | agent-client |
