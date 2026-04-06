@@ -1,0 +1,17 @@
+{
+  "name": "art-of-building-agents-slidev",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "slidev slides.md",
+    "build": "slidev build",
+    "export": "slidev export"
+  },
+  "devDependencies": {
+    "@slidev/cli": "^52.2.5",
+    "@slidev/theme-default": "^0.25.0",
+    "playwright-chromium": "^1.56.0"
+  },
+  "overrides": {
+    "katex": "0.16.21"
+  }
+}
