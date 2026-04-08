@@ -1,0 +1,176 @@
+{
+  "restaurantId": "richmond-station",
+  "menuSections": [
+    {
+      "name": "Shares",
+      "items": [
+        {
+          "name": "Duck Liver Pate",
+          "description": "Maple-whisky gastrique, candied buckwheat, cellared squash, toasted brioche",
+          "price": 21.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Fried Oyster Mushrooms",
+          "description": "Shawarma spice, orange gastrique, tahini",
+          "price": 20.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Crispy Polenta Fries",
+          "description": "Lemon mayonnaise, parmigiano, chives",
+          "price": 18.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Brigid's Brie",
+          "description": "Plum compote, honey gastrique, almonds, brown butter croutons, grilled focaccia",
+          "price": 26.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Butcher's Selection of Charcuterie",
+          "description": "Pickles, preserves, mustards, sourdough focaccia",
+          "price": 30.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Appetizers",
+      "items": [
+        {
+          "name": "Cookstown Parsnip Soup",
+          "description": "Anjou pear, chives, brown butter",
+          "price": 21.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Hillview Farm Beef Tartare",
+          "description": "Caesar aioli, white anchovy, sourdough croutons, parmigiano, cured egg yolk",
+          "price": 24.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "New Brunswick Salmon Crudo",
+          "description": "Apple dashi gelee, sunchoke koji cream, honeycrisp apple, watermelon radish",
+          "price": 25.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Cookstown Beet Salad",
+          "description": "Shaved saganash cheese, cider vinaigrette, honeycrisp apple, spiced walnuts",
+          "price": 24.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Organic Nantes Carrots",
+          "description": "Candied pistachios, coffee-date puree, chicories, mint chutney",
+          "price": 23.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Mains",
+      "items": [
+        {
+          "name": "Mushroom & Sausage Fettuccine",
+          "description": "Roasted toulouse sausage, porcini beurre, parmigiano, sourdough pangrattato",
+          "price": 41.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Stn. Burger",
+          "description": "Pasture raised beef, aged cheddar, pickled onions, beet chutney, garlic aioli, rosemary fries. Sub chickpea patty and coriander aioli for $31",
+          "price": 33.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Charcoal Grilled Arctic Char",
+          "description": "Caper beurre blanc, grilled endive, potato rosti, pickled fennel",
+          "price": 46.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Grilled Eggplant",
+          "description": "Sunflower seed curry, chickpea panisse, tamarind gastrique, wild rice",
+          "price": 39.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Duo of Pastured Chicken",
+          "description": "Confit cabbage, grilled scallion, chili crisp, black vinegar",
+          "price": 44.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Duo of Tanjo Farms Muscovy Duck",
+          "description": "Duck sausage pastilla, madeira jus, freekeh, confit rutabaga",
+          "price": 47.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

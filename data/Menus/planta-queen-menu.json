@@ -1,0 +1,210 @@
+{
+  "restaurantId": "planta-queen",
+  "menuSections": [
+    {
+      "name": "Dim Sum & Small Bites",
+      "items": [
+        {
+          "name": "Shiitake Dumplings",
+          "description": "Steamed shiitake mushroom dumplings, truffle soy, chili oil.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Edamame",
+          "description": "Steamed edamame, togarashi, sea salt.",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Crispy Spring Rolls",
+          "description": "Vegetable spring rolls, sweet chili sauce.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Bang Bang Broccoli",
+          "description": "Crispy battered broccoli, sweet chili glaze, sesame.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lettuce Wraps",
+          "description": "Crispy tofu, water chestnuts, mushrooms, hoisin, iceberg cups.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sushi & Rolls",
+      "items": [
+        {
+          "name": "Watermelon Tuna Roll",
+          "description": "Watermelon 'tuna', avocado, cucumber, spicy mayo, crispy onion.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Rainbow Roll",
+          "description": "Assorted vegetable, avocado, mango, rice, nori.",
+          "price": 20,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Spicy 'Tuna' Roll",
+          "description": "Marinated tomato, spicy cashew mayo, cucumber, avocado.",
+          "price": 19,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Mushroom Nigiri",
+          "description": "Assorted marinated mushroom nigiri, truffle soy.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Mains",
+      "items": [
+        {
+          "name": "Pad Thai",
+          "description": "Rice noodles, tamarind sauce, tofu, bean sprouts, peanuts, lime.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Green Curry",
+          "description": "Thai green curry, seasonal vegetables, jasmine rice, Thai basil.",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Dan Dan Noodles",
+          "description": "Spicy Szechuan peanut noodles, crispy mushrooms, bok choy, chili oil.",
+          "price": 21,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Kung Pao Cauliflower",
+          "description": "Crispy cauliflower, peanuts, chili, Szechuan peppercorn, steamed rice.",
+          "price": 23,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Teriyaki Bowl",
+          "description": "Grilled king oyster mushroom, teriyaki glaze, sesame, broccolini, sushi rice.",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Laksa",
+          "description": "Coconut curry broth, rice noodles, tofu, mushrooms, bean sprouts.",
+          "price": 23,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Matcha Cheesecake",
+          "description": "Plant-based matcha cheesecake, berry compote.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chocolate Lava Cake",
+          "description": "Warm dark chocolate cake, coconut cream, berries.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Mango Sticky Rice",
+          "description": "Coconut sticky rice, fresh mango, toasted coconut.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

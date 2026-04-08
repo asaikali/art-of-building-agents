@@ -1,0 +1,214 @@
+{
+  "restaurantId": "baro",
+  "menuSections": [
+    {
+      "name": "Para Picar (Snacks)",
+      "items": [
+        {
+          "name": "Yuca Fries",
+          "description": "Crispy cassava fries, chipotle aioli, lime.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Elote",
+          "description": "Grilled corn, cotija cheese, chipotle mayo, tajin, cilantro.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Tostones",
+          "description": "Twice-fried green plantains, guacamole, pico de gallo.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Empanadas",
+          "description": "Beef picadillo empanadas, chimichurri, crema.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Ceviches & Raw",
+      "items": [
+        {
+          "name": "Tuna Ceviche",
+          "description": "Ahi tuna, leche de tigre, avocado, crispy shallots, plantain chips.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Shrimp Aguachile",
+          "description": "Wild shrimp, serrano chile, cucumber, red onion, lime.",
+          "price": 21,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Hamachi Tiradito",
+          "description": "Sliced yellowtail, aji amarillo, ponzu, micro cilantro.",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Para Compartir (Shareable)",
+      "items": [
+        {
+          "name": "Chicken al Pastor Tacos",
+          "description": "Achiote-marinated chicken, grilled pineapple, onion, cilantro. Three tacos.",
+          "price": 19,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Short Rib Tacos",
+          "description": "Braised short rib, pickled onion, salsa verde, queso fresco. Three tacos.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Baja Fish Tacos",
+          "description": "Beer-battered cod, chipotle slaw, avocado crema. Three tacos.",
+          "price": 20,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Grilled Octopus",
+          "description": "Charred octopus, romesco sauce, chorizo, fingerling potatoes.",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Braised Pork Belly",
+          "description": "Slow-cooked pork belly, mole negro, pickled vegetables, micro greens.",
+          "price": 26,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Platos Fuertes (Mains)",
+      "items": [
+        {
+          "name": "Grilled Branzino",
+          "description": "Whole grilled branzino, salsa verde, roasted vegetables, lime.",
+          "price": 38,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Skirt Steak",
+          "description": "10oz grilled skirt steak, chimichurri, roasted potatoes, grilled broccolini.",
+          "price": 42,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chicken Mole",
+          "description": "Half roasted chicken, traditional oaxacan mole, Mexican rice, black beans.",
+          "price": 32,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Arroz con Mariscos",
+          "description": "Seafood rice with shrimp, mussels, calamari, saffron, sofrito.",
+          "price": 36,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Postres (Desserts)",
+      "items": [
+        {
+          "name": "Churros",
+          "description": "Cinnamon sugar churros, cajeta caramel, chocolate ganache.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Tres Leches",
+          "description": "Classic three-milk cake, whipped cream, fresh berries.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Coconut Flan",
+          "description": "Coconut cr\u00e8me caramel, toasted coconut, mango coulis.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

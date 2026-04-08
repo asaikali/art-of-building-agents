@@ -71,6 +71,30 @@
         "rol-san": {
             "menuUrl": "https://rolsanrestaurant.com/menu/",
             "menuPdfUrl": null
+        },
+        "hys-steakhouse": {
+            "menuUrl": "https://www.hyssteakhouse.com/locations/toronto/#menus",
+            "menuPdfUrl": null
+        },
+        "scaramouche": {
+            "menuUrl": "https://www.scaramoucherestaurant.com/",
+            "menuPdfUrl": null
+        },
+        "cafe-boulud": {
+            "menuUrl": "https://www.fourseasons.com/toronto/dining/restaurants/cafe-boulud/",
+            "menuPdfUrl": null
+        },
+        "petros-82": {
+            "menuUrl": "https://www.petros82.com/",
+            "menuPdfUrl": null
+        },
+        "richmond-station": {
+            "menuUrl": "https://richmondstation.ca/",
+            "menuPdfUrl": null
+        },
+        "chartroom-westin": {
+            "menuUrl": "https://www.marriott.com/en-us/hotels/yyzwi-the-westin-harbour-castle-toronto/dining/",
+            "menuPdfUrl": null
         }
     }
 }

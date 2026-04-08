@@ -1,0 +1,226 @@
+{
+  "restaurantId": "canoe",
+  "menuSections": [
+    {
+      "name": "First Course",
+      "items": [
+        {
+          "name": "Canadian Bison Tartare",
+          "description": "Alberta bison, cured egg yolk, juniper, rye crumble.",
+          "price": 26,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "PEI Oysters",
+          "description": "Half dozen, prosecco mignonette, horseradish.",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Beet Salad",
+          "description": "Ontario beets, whipped ch\u00e8vre, candied hazelnuts, mustard vinaigrette.",
+          "price": 20,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Wild Mushroom Velout\u00e9",
+          "description": "Ontario wild mushroom soup, truffle cream, chive oil.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seared Foie Gras",
+          "description": "Quebec foie gras, spiced apple compote, brioche.",
+          "price": 34,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lobster Bisque",
+          "description": "Nova Scotia lobster bisque, lobster cream, chive oil.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Main Course",
+      "items": [
+        {
+          "name": "Pacific Halibut",
+          "description": "Pan-roasted BC halibut, spring peas, dill velout\u00e9, fingerling potatoes.",
+          "price": 52,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Elk Striploin",
+          "description": "Ontario elk, root vegetable gratin, juniper jus, wild berry compote.",
+          "price": 58,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Duck Breast",
+          "description": "Quebec duck breast, confit leg croquette, sour cherry, bok choy.",
+          "price": 48,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "AAA Beef Tenderloin",
+          "description": "8oz Alberta beef tenderloin, bone marrow crust, potato pur\u00e9e, red wine jus.",
+          "price": 64,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Pan-Seared Scallops",
+          "description": "Digby scallops, cauliflower pur\u00e9e, brown butter, capers.",
+          "price": 46,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Ontario Lamb Rack",
+          "description": "Herb-crusted lamb rack, ratatouille, rosemary jus.",
+          "price": 56,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Wild Mushroom Risotto",
+          "description": "Ontario wild mushrooms, aged Parmesan, truffle oil.",
+          "price": 34,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Roasted Seasonal Vegetables",
+          "description": "Chef's selection of Ontario vegetables.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Truffle Mac & Cheese",
+          "description": "Aged cheddar, truffle, panko crust.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Potato Pur\u00e9e",
+          "description": "Butter whipped Yukon Gold potatoes.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Maple Cr\u00e8me Br\u00fbl\u00e9e",
+          "description": "Quebec maple cr\u00e8me br\u00fbl\u00e9e, shortbread.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Dark Chocolate Fondant",
+          "description": "Valrhona chocolate, vanilla bean ice cream.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seasonal Fruit Tart",
+          "description": "Pastry cream, seasonal Ontario fruit, vanilla chantilly.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Canadian Cheese Selection",
+          "description": "Three Ontario and Quebec artisanal cheeses, fruit, crackers.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

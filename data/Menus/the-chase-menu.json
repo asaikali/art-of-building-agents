@@ -1,0 +1,251 @@
+{
+  "restaurantId": "the-chase",
+  "menuSections": [
+    {
+      "name": "Raw Bar",
+      "items": [
+        {
+          "name": "East Coast Oysters",
+          "description": "Half dozen oysters, mignonette, cocktail sauce, lemon.",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "Half Dozen",
+              "price": 28
+            },
+            {
+              "label": "Dozen",
+              "price": 52
+            }
+          ]
+        },
+        {
+          "name": "Tuna Tartare",
+          "description": "Yellowfin tuna, avocado, sesame, wonton crisps, citrus soy.",
+          "price": 26,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Lobster Cocktail",
+          "description": "Chilled Nova Scotia lobster, cocktail sauce, lemon.",
+          "price": 32,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seafood Tower",
+          "description": "Oysters, shrimp, lobster, crab, tuna tartare, mignonette, cocktail sauce.",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "Small",
+              "price": 85
+            },
+            {
+              "label": "Large",
+              "price": 145
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Starters",
+      "items": [
+        {
+          "name": "Caesar Salad",
+          "description": "Romaine hearts, house-made dressing, focaccia croutons, Parmigiano.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Beef Carpaccio",
+          "description": "Thinly sliced AAA beef, truffle aioli, arugula, capers, Parmigiano.",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Burrata",
+          "description": "Fresh burrata, heirloom tomatoes, basil, aged balsamic.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Beet Salad",
+          "description": "Ontario beets, whipped goat cheese, candied pecans, citrus vinaigrette.",
+          "price": 19,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Mains",
+      "items": [
+        {
+          "name": "Pan-Seared Halibut",
+          "description": "Pacific halibut, brown butter, seasonal vegetables, potato pur\u00e9e.",
+          "price": 48,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Whole Grilled Branzino",
+          "description": "Mediterranean sea bass, salsa verde, roasted lemon, fennel salad.",
+          "price": 44,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Filet Mignon",
+          "description": "8oz centre-cut filet, red wine jus, truffle mashed potatoes, grilled asparagus.",
+          "price": 62,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Duck Breast",
+          "description": "Seared duck breast, cherry gastrique, sweet potato pur\u00e9e, wilted greens.",
+          "price": 46,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lobster Linguine",
+          "description": "Fresh linguine, Nova Scotia lobster, cherry tomatoes, white wine, basil.",
+          "price": 44,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Wild Mushroom Risotto",
+          "description": "Ontario wild mushrooms, truffle oil, Parmigiano, fresh herbs.",
+          "price": 32,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Truffle Fries",
+          "description": "Hand-cut fries, truffle oil, Parmesan.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Grilled Asparagus",
+          "description": "Charred asparagus, lemon, olive oil.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Creamed Spinach",
+          "description": "Classic creamed spinach, nutmeg.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Cr\u00e8me Br\u00fbl\u00e9e",
+          "description": "Madagascar vanilla bean cr\u00e8me br\u00fbl\u00e9e, fresh berries.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chocolate Souffl\u00e9",
+          "description": "Dark chocolate souffl\u00e9, cr\u00e8me anglaise. Allow 15 minutes.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seasonal Sorbet Trio",
+          "description": "Three rotating sorbets, fresh fruit.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

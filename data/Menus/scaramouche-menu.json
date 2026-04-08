@@ -1,0 +1,226 @@
+{
+  "restaurantId": "scaramouche",
+  "menuSections": [
+    {
+      "name": "Appetizers",
+      "items": [
+        {
+          "name": "Bread and Hummus for Two",
+          "description": "Prairie Boy organic country white, house made hummus with paprika and tahini",
+          "price": 7.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Romaine Hearts",
+          "description": "Caesar dressing, chopped egg, Parmesan and toasted bread crumbs",
+          "price": 19.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Foie Gras Terrine",
+          "description": "Sea salt brioche, pickled grapes, riesling jelly, Triple crunch mustard, toasted hazelnuts and sour cherry reduction",
+          "price": 31.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "30g Northern Divine Caviar",
+          "description": "Sustainably harvested Canadian caviar, creme fraiche, shallots, chives and buckwheat blini",
+          "price": 120.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Yellowfin Tuna Tartare",
+          "description": "Sashimi grade tuna in a soy lime marinade, avocado, coriander, sesame tempura and chili lime sauce",
+          "price": 25.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Beet Salad",
+          "description": "Italian hazelnuts, Belgian endive, shaved fennel, radicchio and citrus whipped Manchego crema. Chardonnay vinaigrette",
+          "price": 22.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Grilled Octopus",
+          "description": "Navy beans, black olives, roasted peppers and chorizo sausage in a smoked tomato broth. Romesco and fine olive oil",
+          "price": 27.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Caramelized Shallot Gnocchi",
+          "description": "Shredded duck confit, parsnip crema, Brussels sprouts and wild mushrooms. Duck jus and balsamic brown butter",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": [
+            {
+              "label": "appetizer",
+              "price": 25.0
+            },
+            {
+              "label": "main",
+              "price": 38.0
+            }
+          ]
+        },
+        {
+          "name": "Oysters",
+          "description": "Fresh oysters on the half shell. Lemon, horseradish and red wine mignonette",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        }
+      ]
+    },
+    {
+      "name": "Main Courses",
+      "items": [
+        {
+          "name": "Scallops",
+          "description": "Spiced Ontario cauliflower tempura, beech mushrooms, sauteed spinach, white wine poached apples, lemon and chili. Saffron tomato vinaigrette and vadouvan oil",
+          "price": 44.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Peppercorn Fettucine",
+          "description": "Beef tenderloin, oyster mushrooms, Madeira cream, pine nuts and gruyere bread crumb crust",
+          "price": 34.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Lobster",
+          "description": "Butter poached half lobster. Saffron seafood risotto, oven dried cherry tomatoes. Pesto and fine olive oil",
+          "price": 55.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Halibut",
+          "description": "Pan roasted. Pickled celeriac, Brussels sprouts leaves, Triple crunch mustard, maitake mushrooms. Truffled beurre fondue",
+          "price": 46.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Rack of Lamb",
+          "description": "Salsa verde crusted. Sauteed rapini, marinated cherry tomatoes, whipped chick pea puree and Sicilian green olives. Natural jus and goat cheese fondue",
+          "price": 53.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Quebec Chicken",
+          "description": "Harissa roasted carrots, preserved lemon, globe artichokes, Swiss chard, cippolini onions, lentils, Greek yoghurt and crispy onions. Dark chicken jus",
+          "price": 34.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Filet Mignon",
+          "description": "Grilled Ontario AAA. Crispy potato tossed in lemon parsley butter. Green beans, mushrooms, blue cheese butter and red wine jus",
+          "price": 52.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Duck",
+          "description": "Smoked and roasted breast. Butternut squash, grilled treviso, toasted walnuts, golden raisins, escarole and seasonal wild mushrooms. Natural jus",
+          "price": 41.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Parmesan Fries",
+          "description": "Fries with parmesan",
+          "price": 9.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Whipped Potatoes",
+          "description": "Whipped potatoes",
+          "price": 9.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sauteed Greens",
+          "description": "Sauteed seasonal greens",
+          "price": 10.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

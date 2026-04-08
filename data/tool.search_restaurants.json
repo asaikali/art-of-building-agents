@@ -125,6 +125,48 @@
             "address": "323 Spadina Ave, Toronto, ON M5T 2E9",
             "neighborhood": "Chinatown",
             "url": "https://rolsanrestaurant.com/"
+        },
+        {
+            "id": "hys-steakhouse",
+            "name": "Hy's Steakhouse",
+            "address": "365 Bay St, Toronto, ON M5H 2V1",
+            "neighborhood": "Financial District",
+            "url": "https://www.hyssteakhouse.com/locations/toronto/"
+        },
+        {
+            "id": "scaramouche",
+            "name": "Scaramouche Restaurant",
+            "address": "1 Benvenuto Pl, Toronto, ON M4V 2L1",
+            "neighborhood": "Midtown",
+            "url": "https://www.scaramoucherestaurant.com/"
+        },
+        {
+            "id": "cafe-boulud",
+            "name": "Café Boulud (Four Seasons)",
+            "address": "60 Yorkville Ave, Toronto, ON M4W 0A4",
+            "neighborhood": "Yorkville",
+            "url": "https://www.fourseasons.com/toronto/dining/restaurants/cafe-boulud/"
+        },
+        {
+            "id": "petros-82",
+            "name": "Pétros 82",
+            "address": "82 Peter St, Toronto, ON M5V 2G5",
+            "neighborhood": "Entertainment District",
+            "url": "https://www.petros82.com/"
+        },
+        {
+            "id": "richmond-station",
+            "name": "Richmond Station",
+            "address": "1 Richmond St W, Toronto, ON M5H 3W4",
+            "neighborhood": "Downtown",
+            "url": "https://richmondstation.ca/"
+        },
+        {
+            "id": "chartroom-westin",
+            "name": "Chartroom Bar & Lounge (Westin Harbour Castle)",
+            "address": "1 Harbour Square, Toronto, ON M5J 1A6",
+            "neighborhood": "Harbourfront",
+            "url": "https://www.marriott.com/en-us/hotels/yyzwi-the-westin-harbour-castle-toronto/dining/"
         }
     ]
 }

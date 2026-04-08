@@ -1,0 +1,455 @@
+{
+  "restaurantId": "reign",
+  "menuSections": [
+    {
+      "name": "Starters",
+      "items": [
+        {
+          "name": "Parsnip & Apple Soup",
+          "description": "Roasted parsnip, walnut, fried shallots",
+          "price": 21.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Ontario Burrata",
+          "description": "Roasted pears, watercress, hazelnut crumb, cider vinaigrette, sourdough",
+          "price": 36.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Radicchio Salad",
+          "description": "New Farm greens, roasted squash, Kruger blue cheese, pistachios, port vinaigrette",
+          "price": 24.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Reign Caesar",
+          "description": "Baby gem, Ontario boar bacon, pangrattato, Gunn's Hill Handeck comte",
+          "price": 26.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Poached Shrimp Cocktail",
+          "description": "Brandy Marie Rose sauce, espelette, furikake, lemon",
+          "price": 28.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "East Coast Oysters",
+          "description": "Cucumber mignonette, fresh horseradish, hot sauce, lemon",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "half dozen",
+              "price": 32.0
+            },
+            {
+              "label": "dozen",
+              "price": 58.0
+            }
+          ]
+        },
+        {
+          "name": "Reign Steak Tartare",
+          "description": "Creekside Farms beef, hazelnut, chives, preserved egg yolk, house preserves, truffle, crostini",
+          "price": 29.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Seared Quebec Foie Gras",
+          "description": "Spiced quince, mulled wine reduction, cocoa tuile, spiced pain perdu",
+          "price": 38.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Tasting Boards",
+      "items": [
+        {
+          "name": "Canadian Cheese Board",
+          "description": "Selection of Canadian cheese, pickled vegetables",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "small",
+              "price": 33.0
+            },
+            {
+              "label": "large",
+              "price": 52.0
+            }
+          ]
+        },
+        {
+          "name": "Charcuterie Board",
+          "description": "Selection of locally cured meats, pickled vegetables",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "small",
+              "price": 28.0
+            },
+            {
+              "label": "large",
+              "price": 47.0
+            }
+          ]
+        },
+        {
+          "name": "Chef's Selection",
+          "description": "Selection of locally cured meats, cheese, pickled vegetables",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "small",
+              "price": 42.0
+            },
+            {
+              "label": "large",
+              "price": 59.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "From the Grill",
+      "items": [
+        {
+          "name": "12oz Striploin",
+          "description": "Creekside Farms beef",
+          "price": 72.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "8oz Tenderloin",
+          "description": "Creekside Farms beef",
+          "price": 82.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "20oz Bison Ribeye",
+          "description": "Creekside Farms",
+          "price": 165.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "20oz Martin's Dry Aged Ribeye",
+          "description": "Martin's dry aged beef",
+          "price": 145.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "32oz Porterhouse",
+          "description": "Creekside Farms beef",
+          "price": 165.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "45oz Tomahawk",
+          "description": "Creekside Farms beef",
+          "price": 275.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Rack of Lamb",
+          "description": "Full rack of lamb",
+          "price": 225.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Half Rack of Lamb",
+          "description": "Half rack of lamb",
+          "price": 120.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Steak Enhancements",
+      "items": [
+        {
+          "name": "Warm Crab & Lobster Salad, Bearnaise",
+          "description": "Crab and lobster salad with bearnaise sauce",
+          "price": 38.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seared Foie Gras",
+          "description": "Seared foie gras topping",
+          "price": 28.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Brandy Peppercorn Jus",
+          "description": "Brandy peppercorn sauce",
+          "price": 7.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Ontario Red Wine Jus",
+          "description": "Ontario red wine jus",
+          "price": 8.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free",
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Salsa Verde",
+          "description": "Fresh herb salsa verde",
+          "price": 5.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free",
+            "vegan"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Mains",
+      "items": [
+        {
+          "name": "Cape D'Or Salmon",
+          "description": "Potato gnocchi, roasted winter vegetables, squash puree, pickled shallots, sage",
+          "price": 46.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Roasted Seabass",
+          "description": "Artichoke hearts, wilted spinach, sunchoke puree, prosciutto chips, red wine jus",
+          "price": 65.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lobster Linguine",
+          "description": "PEI lobster, sofrito, basil oil, lobster bisque",
+          "price": 68.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mushroom Risotto",
+          "description": "Roasted mushroom, hazelnut crumb, truffle, moscato rosso, fried parsley",
+          "price": 38.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seared Duck Breast",
+          "description": "Caramelized carrot puree, charred radicchio, glazed heirloom carrots, pickled blackberries, duck jus",
+          "price": 46.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seared Guinea Fowl Breast",
+          "description": "Parsnip puree, sauteed kale, roasted parsnips and chestnuts, pickled red grapes, jus",
+          "price": 42.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Juniper Rubbed Venison Loin",
+          "description": "Wild blueberry gastrique, truffle mashed potatoes, wild mushrooms, madeira jus",
+          "price": 62.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Wild Mushrooms",
+          "description": "Ponzu glaze, parsley",
+          "price": 21.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Hand Cut Fries",
+          "description": "Garlic aioli, ketchup",
+          "price": 16.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Truffle Fries",
+          "description": "Parmesan, chives",
+          "price": 19.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Roasted Heirloom Carrots",
+          "description": "Whipped yoghurt, fennel pollen, citrus, spiced sunflower seeds",
+          "price": 17.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Pomme Puree",
+          "description": "Cultured butter, black truffle",
+          "price": 19.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Crispy Brussels Sprouts",
+          "description": "Rosemary gastrique, parmesan, chives",
+          "price": 18.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sauteed Field Spinach",
+          "description": "Wild mushrooms, garlic confit",
+          "price": 16.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

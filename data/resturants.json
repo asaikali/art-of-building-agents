@@ -215,6 +215,78 @@
       "noiseLevel": "lively",
       "priceRangePerPerson": "$ (20–35 CAD)",
       "description": "Large, bustling Cantonese restaurant offering budget-friendly dishes ideal for groups, located farther from the downtown business core."
+    },
+    {
+      "id": "hys-steakhouse",
+      "name": "Hy's Steakhouse",
+      "address": "365 Bay St, Toronto, ON M5H 2V1",
+      "neighborhood": "Financial District",
+      "url": "https://www.hyssteakhouse.com/locations/toronto/",
+      "menuUrl": "https://www.hyssteakhouse.com/locations/toronto/#menus",
+      "menuPdfUrl": null,
+      "noiseLevel": "moderate",
+      "priceRangePerPerson": "$$$$ (100–200 CAD)",
+      "description": "Iconic Canadian steakhouse known for Prime Grade beef, tableside service, and a refined atmosphere ideal for business dinners."
+    },
+    {
+      "id": "scaramouche",
+      "name": "Scaramouche Restaurant",
+      "address": "1 Benvenuto Pl, Toronto, ON M4V 2L1",
+      "neighborhood": "Midtown",
+      "url": "https://www.scaramoucherestaurant.com/",
+      "menuUrl": "https://www.scaramoucherestaurant.com/",
+      "menuPdfUrl": null,
+      "noiseLevel": "quiet",
+      "priceRangePerPerson": "$$$$ (80–140 CAD)",
+      "description": "Celebrated fine dining destination with panoramic city views, offering contemporary French-inspired cuisine and an acclaimed pasta bar."
+    },
+    {
+      "id": "cafe-boulud",
+      "name": "Café Boulud (Four Seasons)",
+      "address": "60 Yorkville Ave, Toronto, ON M4W 0A4",
+      "neighborhood": "Yorkville",
+      "url": "https://www.fourseasons.com/toronto/dining/restaurants/cafe-boulud/",
+      "menuUrl": "https://www.fourseasons.com/toronto/dining/restaurants/cafe-boulud/",
+      "menuPdfUrl": null,
+      "noiseLevel": "quiet",
+      "priceRangePerPerson": "$$$$ (80–150 CAD)",
+      "description": "Daniel Boulud's elegant French bistro inside the Four Seasons, offering refined seasonal cuisine in a sophisticated Yorkville setting."
+    },
+    {
+      "id": "petros-82",
+      "name": "Pétros 82",
+      "address": "82 Peter St, Toronto, ON M5V 2G5",
+      "neighborhood": "Entertainment District",
+      "url": "https://www.petros82.com/",
+      "menuUrl": "https://www.petros82.com/",
+      "menuPdfUrl": null,
+      "noiseLevel": "lively",
+      "priceRangePerPerson": "$$$ (50–90 CAD)",
+      "description": "Contemporary Greek restaurant with a vibrant atmosphere, fresh seafood market, shareable plates, and an authentic Mediterranean experience."
+    },
+    {
+      "id": "richmond-station",
+      "name": "Richmond Station",
+      "address": "1 Richmond St W, Toronto, ON M5H 3W4",
+      "neighborhood": "Downtown",
+      "url": "https://richmondstation.ca/",
+      "menuUrl": "https://richmondstation.ca/",
+      "menuPdfUrl": null,
+      "noiseLevel": "moderate",
+      "priceRangePerPerson": "$$$ (60–100 CAD)",
+      "description": "Farm-to-table Canadian restaurant with a hospitality-included model, focusing on seasonal Ontario ingredients and a warm, professional atmosphere."
+    },
+    {
+      "id": "chartroom-westin",
+      "name": "Chartroom Bar & Lounge (Westin Harbour Castle)",
+      "address": "1 Harbour Square, Toronto, ON M5J 1A6",
+      "neighborhood": "Harbourfront",
+      "url": "https://www.marriott.com/en-us/hotels/yyzwi-the-westin-harbour-castle-toronto/dining/",
+      "menuUrl": "https://www.marriott.com/en-us/hotels/yyzwi-the-westin-harbour-castle-toronto/dining/",
+      "menuPdfUrl": null,
+      "noiseLevel": "moderate",
+      "priceRangePerPerson": "$$ (30–60 CAD)",
+      "description": "Casual hotel restaurant and bar at the Westin Harbour Castle, offering comfort food, personal pizzas, and waterfront views."
     }
   ]
 }

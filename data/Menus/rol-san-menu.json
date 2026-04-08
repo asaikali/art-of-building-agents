@@ -1,0 +1,331 @@
+{
+  "restaurantId": "rol-san",
+  "menuSections": [
+    {
+      "name": "Dim Sum",
+      "items": [
+        {
+          "name": "Har Gow",
+          "description": "Steamed shrimp dumplings.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [
+            "dairy-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Siu Mai",
+          "description": "Steamed pork and shrimp dumplings.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [
+            "dairy-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Char Siu Bao",
+          "description": "Steamed BBQ pork buns.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [
+            "dairy-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Cheung Fun",
+          "description": "Steamed rice noodle rolls with shrimp, soy sauce.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [
+            "dairy-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lo Bak Go",
+          "description": "Pan-fried turnip cake, XO sauce.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Egg Tarts",
+          "description": "Flaky pastry, sweet egg custard.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sticky Rice in Lotus Leaf",
+          "description": "Glutinous rice, chicken, Chinese sausage, wrapped in lotus leaf.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Spinach Dumplings",
+          "description": "Steamed spinach and shrimp dumplings.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Appetizers",
+      "items": [
+        {
+          "name": "Salt & Pepper Squid",
+          "description": "Deep-fried squid, salt and pepper seasoning, chili.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Crispy Spring Rolls",
+          "description": "Pork and vegetable spring rolls, plum sauce.",
+          "price": 8,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Wonton Soup",
+          "description": "Shrimp and pork wontons, clear broth, bok choy.",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Hot & Sour Soup",
+          "description": "Classic Szechuan hot and sour soup.",
+          "price": 9,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Noodles & Rice",
+      "items": [
+        {
+          "name": "Beef Chow Fun",
+          "description": "Flat rice noodles, sliced beef, bean sprouts, wok-fried.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Singapore Vermicelli",
+          "description": "Curry rice vermicelli, shrimp, pork, vegetables.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Yang Chow Fried Rice",
+          "description": "Egg fried rice, shrimp, char siu, peas.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Wonton Noodle Soup",
+          "description": "Egg noodles, shrimp wontons, bok choy, clear broth.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Pad Thai Style Noodles",
+          "description": "Stir-fried rice noodles, shrimp, peanuts, bean sprouts.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Poultry",
+      "items": [
+        {
+          "name": "Lemon Chicken",
+          "description": "Crispy battered chicken, lemon sauce.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "General Tao Chicken",
+          "description": "Crispy chicken, sweet and spicy sauce, broccoli.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Kung Pao Chicken",
+          "description": "Diced chicken, peanuts, dried chili, Szechuan pepper.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Roasted Duck",
+          "description": "Half roasted duck, plum sauce.",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "Half",
+              "price": 22
+            },
+            {
+              "label": "Whole",
+              "price": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Beef & Pork",
+      "items": [
+        {
+          "name": "Beef with Broccoli",
+          "description": "Sliced beef, broccoli, oyster sauce.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mongolian Beef",
+          "description": "Sliced beef, onions, scallions, sweet soy sauce.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Sweet & Sour Pork",
+          "description": "Battered pork, pineapple, peppers, sweet and sour sauce.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mapo Tofu",
+          "description": "Silken tofu, ground pork, Szechuan peppercorn, chili bean sauce.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Seafood",
+      "items": [
+        {
+          "name": "Salt & Pepper Shrimp",
+          "description": "Crispy whole shrimp, salt, pepper, garlic, chili.",
+          "price": 20,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Steamed Whole Fish",
+          "description": "Fresh whole fish, ginger, scallion, soy sauce.",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        },
+        {
+          "name": "Lobster with Ginger & Scallion",
+          "description": "Fresh lobster, wok-fried with ginger and scallion.",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        },
+        {
+          "name": "Black Bean Clams",
+          "description": "Clams, fermented black bean sauce, chili, garlic.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Vegetables & Tofu",
+      "items": [
+        {
+          "name": "Stir-Fried Gai Lan",
+          "description": "Chinese broccoli, oyster sauce.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Buddha's Delight",
+          "description": "Mixed vegetables, tofu, mushrooms, in vegetarian sauce.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Eggplant in Garlic Sauce",
+          "description": "Chinese eggplant, garlic sauce, basil.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}
