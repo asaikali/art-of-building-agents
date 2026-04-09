@@ -17,6 +17,7 @@
     <module>basic-chatbot</module>
     <module>02-tool-calling</module>
     <module>03-guardrails</module>
+    <module>03b-hooks</module>
     <module>04-turn-limits</module>
     <module>05-journal</module>
     <module>06-mcp-server</module>

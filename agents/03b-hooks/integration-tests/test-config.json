@@ -1,0 +1,6 @@
+{
+  "description": "Step 03b: Hooks — programmatic tool-call interception (expense policy enforced by hook)",
+  "testMessage": "I need a restaurant in Eixample for 4 people, budget is 30 euros per person, one guest is vegetarian",
+  "timeoutSec": 120,
+  "successPatterns": ["Teresa Carles"]
+}

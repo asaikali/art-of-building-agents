@@ -209,6 +209,7 @@ layout: default
 | 01 | Bare ChatClient | Minimum working agent |
 | 02 | System prompt + `@Tool` + `ToolCallAdvisor` | First real agent loop |
 | 03 | Full tool set + constraint-aware prompt | Guardrails via prompt engineering |
+| 03b | Hook providers (observe, steer, track) | Programmatic enforcement via hooks |
 | 04 | `AgentLoopAdvisor` (max turns, stuck detection) | Governed loops |
 | 05 | Journal recording to JSONL | The seam between build and measure |
 | 06 | MCP server + client | Tools live outside the agent |
@@ -221,14 +222,77 @@ layout: default
 <v-click>
 
 <div class="mt-4 p-3 bg-green-50 dark:bg-green-900 rounded-lg text-sm">
-<strong>Dependency boundary</strong>: Steps 01-03 are pure Spring AI. Step 04 introduces the first AgentWorks library.
+<strong>Dependency boundary</strong>: Steps 01-03 are pure Spring AI. Step 03b introduces agent-hooks. Step 04 introduces AgentWorks.
 </div>
 
 </v-click>
 
 <!--
 SPEAKER (≈60s):
-"Nine steps. Each one adds exactly one concept. Step 1 is a bare ChatClient — you type, the LLM responds. Step 2 adds a tool and a loop. Step 3 adds guardrails via prompt engineering. Step 4 introduces turn limits so the agent can't loop forever. Step 5 starts recording — this is where measurement begins. Then we go multi-process with MCP, add memory, human-in-the-loop, and sub-agents. By Step 9 you have a serious agent."
+"Nine steps plus a bonus. Each adds one concept. Step 1 is a bare ChatClient. Step 2 adds tools and a loop. Step 3 adds guardrails via prompt — but prompts can be ignored. Step 3b fixes that with hooks: programmatic interception that blocks tool calls the agent shouldn't make. Step 4 introduces turn limits. Step 5 starts recording. Then MCP, memory, human-in-the-loop, and sub-agents. By Step 9 you have a serious agent."
+-->
+
+---
+layout: default
+---
+
+# Step 03b: Hooks — Prompt Suggests, Hook Enforces
+
+<div class="mt-4 text-sm">
+
+In Step 03, we told the agent: *"Check expense policy before booking."* The agent **might ignore** that.
+
+In Step 03b, we **enforce it with a hook**. The tool call is blocked before it executes.
+
+</div>
+
+<v-click>
+
+<div class="mt-4">
+
+### Three Hook Providers — Observe → Control → Track
+
+<div class="mt-3 grid grid-cols-3 gap-4 text-sm">
+  <div class="pipeline-step pipeline-deterministic">
+    <div class="font-bold">Observe</div>
+    <div class="text-xs mt-1 opacity-75">ToolCallLoggingProvider<br/>Logs every call + timing</div>
+  </div>
+  <div class="pipeline-step pipeline-llm">
+    <div class="font-bold">Control</div>
+    <div class="text-xs mt-1 opacity-75">ExpensePolicyProvider<br/>Blocks bookTable if policy unchecked</div>
+  </div>
+  <div class="pipeline-step pipeline-deterministic">
+    <div class="font-bold">Track</div>
+    <div class="text-xs mt-1 opacity-75">CostGuardProvider<br/>Per-tool call counts + durations</div>
+  </div>
+</div>
+
+</div>
+
+</v-click>
+
+<v-click>
+
+```java
+// Fresh context per invocation — registry is singleton, context is per-turn
+HookContext hookContext = new HookContext();
+ToolCallbackProvider hookedTools = HookedTools.wrap(registry, hookContext, restaurantTools);
+chatClient.prompt().messages(history).toolCallbacks(hookedTools).call();
+```
+
+</v-click>
+
+<v-click>
+
+<div class="mt-3 ted-emphasis text-sm">
+Hooks are the safety net under prompt engineering. No amount of prompt jailbreaking can bypass a <code>Block</code> decision.
+</div>
+
+</v-click>
+
+<!--
+SPEAKER (≈45s):
+"Step 3b introduces hooks — programmatic tool-call interception. Three providers show the progression. First, observe: log every tool call. Second, control: if the agent tries to book a table without checking expense policy, the hook blocks the call — the tool never executes. Third, track: accumulate per-tool timing for the Inspector. The key insight: the registry is a singleton, but the context is fresh per invocation. Same pattern as Strands, Claude SDK, and Spring AI itself."
 -->
 
 ---
@@ -547,7 +611,7 @@ layout: default
 | Part | Steps | What You Learn |
 |------|-------|---------------|
 | Part 1: Feel the Loop | Hand-cranked | What happens inside an agent, turn by turn |
-| Part 2: Build | 01-09 | ChatClient → tools → loops → journal → memory → sub-agents |
+| Part 2: Build | 01-09 | ChatClient → tools → hooks → loops → journal → memory → sub-agents |
 | Part 3: Compose | 10-13 | A2A, ACP, CLI wrapping, Workflow DSL |
 | Part 4: Measure | 14-15 | CascadedJury eval + trajectory analysis |
 | Part 5: Improve | 16 | Self-correction via quality gates |
@@ -580,6 +644,7 @@ layout: default
 | Library | Steps | What It Does |
 |---------|-------|-------------|
 | **Spring AI** | 01-03 | ChatClient, `@Tool`, ToolCallAdvisor |
+| **agent-hooks** | 03b | Hook registry, HookedTools, per-invocation context |
 | **workflow-core** | 04+ | AgentLoopAdvisor (turn limits, stuck detection) |
 | **journal-core** | 05 | Structured recording to JSONL |
 | **memory-core** | 07 | Persistent memory with LLM compaction |
