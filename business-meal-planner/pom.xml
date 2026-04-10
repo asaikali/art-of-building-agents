@@ -10,36 +10,14 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>business-meal-planner</artifactId>
-  <packaging>jar</packaging>
-  <description>Business meal planner agent scaffold</description>
+  <packaging>pom</packaging>
+  <description>Business meal planner teaching modules</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>agent-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-starter-model-openai</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+  <modules>
+    <module>01-intent-alignment</module>
+    <module>02-constraint-checking</module>
+    <module>03-restaurant-planning</module>
+    <module>04-decision-support</module>
+    <module>05-booking</module>
+  </modules>
 </project>

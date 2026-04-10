@@ -1,6 +1,6 @@
 # Business Meal Planner
 
-Standalone business meal planning agent scaffold.
+Parent module for the business meal planner teaching samples.
 
 ## Specification
 
@@ -8,8 +8,7 @@ See [SPEC.md](SPEC.md) for the phased product and architecture spec.
 
 ## Planned Module Layout
 
-This scaffold is intended to become a parent Maven module with one child module per
-teaching phase:
+This parent module contains one child module per teaching phase:
 
 - `01-intent-alignment`
 - `02-constraint-checking`
@@ -17,29 +16,30 @@ teaching phase:
 - `04-decision-support`
 - `05-booking`
 
-## What's here
+## Modules
 
-| File | Purpose |
-|------|---------|
-| `BusinessMealPlannerApplication.java` | Spring Boot entry point |
-| `BusinessMealPlannerHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
-| `application.yml` | Local app and model configuration |
+| Module | Purpose |
+|--------|---------|
+| `01-intent-alignment` | Confirm the user's intent and summarize constraints |
+| `02-constraint-checking` | Demonstrate deterministic, hybrid, and LLM-backed checks |
+| `03-restaurant-planning` | Search and check restaurant candidates in a bounded loop |
+| `04-decision-support` | Help the user inspect, compare, and choose options |
+| `05-booking` | Commit to a selected option and complete booking steps |
 
-## Run it
+## Run A Phase
 
 ```bash
-cd business-meal-planner
-../mvnw spring-boot:run
+cd business-meal-planner/01-intent-alignment
+../../mvnw spring-boot:run
 # Open http://localhost:8080
 ```
 
 ## Current state
 
-This is only the starting scaffold:
+Each child module is currently a minimal standalone Spring Boot agent scaffold based on
+the original `business-meal-planner` sample:
 
 - no system prompt
 - no tools
 - no explicit agent loop
-- no dinner-planning domain logic yet
-
-It is intended to evolve into the end-to-end dinner planning agent.
+- no business-meal domain logic yet

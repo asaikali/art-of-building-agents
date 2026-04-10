@@ -1,6 +1,6 @@
 spring:
   application:
-    name: business-meal-planner
+    name: intent-alignment
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}

@@ -1,12 +1,12 @@
-package com.example.businessmealplanner;
+package com.example.businessmealplanner.restaurantplanning;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BusinessMealPlannerApplication {
+public class RestaurantPlanningApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(BusinessMealPlannerApplication.class, args);
+    SpringApplication.run(RestaurantPlanningApplication.class, args);
   }
 }
