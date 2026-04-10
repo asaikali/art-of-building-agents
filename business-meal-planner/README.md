@@ -2,6 +2,21 @@
 
 Standalone business meal planning agent scaffold.
 
+## Specification
+
+See [SPEC.md](SPEC.md) for the phased product and architecture spec.
+
+## Planned Module Layout
+
+This scaffold is intended to become a parent Maven module with one child module per
+teaching phase:
+
+- `01-intent-alignment`
+- `02-constraint-checking`
+- `03-restaurant-planning`
+- `04-decision-support`
+- `05-booking`
+
 ## What's here
 
 | File | Purpose |
