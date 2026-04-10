@@ -1,0 +1,783 @@
+{
+  "restaurantId": "black-blue-steakhouse",
+  "menuSections": [
+    {
+      "name": "Starters",
+      "items": [
+        {
+          "name": "B+B House Brioche",
+          "description": "Gruyere, butter basted house brioche, served with seasonal butter and maldon salt",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Beef Carpaccio",
+          "description": "Horseradish crema, pickled shimeji mushrooms, crispy shallot, fried capers, shaved parmigiano reggiano",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Crispy Calamari",
+          "description": "Humboldt squid, lemon, Italian parsley, charred jalapeno aioli",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Crab Cake",
+          "description": "Dungeness and rock crab, celery, charred lemon and dill aioli, celeriac and apple slaw, honey mustard vinaigrette",
+          "price": 30,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Tableside Steak Tartare",
+          "description": "Hand cut beef tenderloin, pickled shallot, egg yolk, cornichon, charred jalapeno, spiced tomato ketchup",
+          "price": 32,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Raw Bar",
+      "items": [
+        {
+          "name": "Seafood Tower",
+          "description": "Half dozen east coast oysters, colossal shrimp, half dungeness crab, half atlantic lobster, king crab, marinated mussels, salmon tartare",
+          "price": 250.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Deluxe Seafood Tower",
+          "description": "Dozen east coast oysters, colossal shrimp, dungeness crab, atlantic lobster, king crab, marinated mussels, salmon tartare",
+          "price": 450.0,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Fresh Oysters",
+          "description": "Choice of premium east coast oysters, tarragon mignonette, lemon, fresh horseradish",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "half dozen",
+              "price": 30.0
+            },
+            {
+              "label": "dozen",
+              "price": 55.0
+            }
+          ]
+        },
+        {
+          "name": "Atlantic Lobster",
+          "description": "Cocktail sauce, marie rose sauce, lemon",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        },
+        {
+          "name": "King Crab",
+          "description": "Cocktail sauce, marie rose sauce, lemon",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        },
+        {
+          "name": "Colossal Shrimp Cocktail",
+          "description": "Cocktail sauce, marie rose sauce, lemon",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Royal Osetra Caviar",
+          "description": "30 gram, blini, traditional accompaniments",
+          "price": 168.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Imperial Osetra Caviar",
+          "description": "30 gram, blini, traditional accompaniments",
+          "price": 174.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Beluga Caviar",
+          "description": "30 gram, blini, traditional accompaniments",
+          "price": 450.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Soup & Salad",
+      "items": [
+        {
+          "name": "French Onion Soup",
+          "description": "Glazed onions, beef stock, gruyere, mozzarella, crouton",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Lobster Bisque",
+          "description": "Lobster salad, truffle foam, cognac creme fraiche, toast point crouton, poured tableside",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Tableside Caesar Salad",
+          "description": "Crisp romaine, parmigiano-reggiano, lemon and anchovy dressing, gruyere brioche croutons. 19 per person",
+          "price": 19.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Burrata Salad",
+          "description": "Caramelized citrus, pistachio dukkah, pomegranate, sumac, mint",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Boston Bibb Salad",
+          "description": "Endive, lollo rosso lettuce, candied pecans, pickled shallots, radish, house made boursin cheese, honey mustard vinaigrette",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Beets",
+          "description": "Whipped goat's cheese, everything spice, red onion, watercress, fresh horseradish",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Signature Entrees",
+      "items": [
+        {
+          "name": "Wild Mushroom Risotto",
+          "description": "Parmigiano reggiano, wild seasonal mushrooms, fried sage",
+          "price": 36,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Miso Roasted Sablefish",
+          "description": "Squash agrodolce, pickled mustard seeds, puffed forbidden rice",
+          "price": 52,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "King Salmon",
+          "description": "Smoked eggplant puree, sweet and sour onions, caramelized lemon garlic emulsion",
+          "price": 48,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Seared Scallops",
+          "description": "Corn puree, gremolata, pancetta, vin cotto, brioche croutons",
+          "price": 54,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Roasted Chicken",
+          "description": "Black truffle, asparagus, herb and creme fraiche, potato puree, chicken bordelaise",
+          "price": 42,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Canadian Prime Steaks",
+      "items": [
+        {
+          "name": "New York Striploin",
+          "description": "Canadian Prime Grade beef",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "14oz",
+              "price": 89.0
+            }
+          ]
+        },
+        {
+          "name": "Tenderloin",
+          "description": "Canadian Prime Grade beef",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "8oz",
+              "price": 89.0
+            }
+          ]
+        },
+        {
+          "name": "Rib Eye",
+          "description": "Canadian Prime Grade beef",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "14oz",
+              "price": 109.0
+            }
+          ]
+        },
+        {
+          "name": "Cowboy Rib-Eye",
+          "description": "Canadian Prime Grade beef, bone-in",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "36oz",
+              "price": 235.0
+            }
+          ]
+        },
+        {
+          "name": "Beef Wellington for Two",
+          "description": "Mushroom duxelles, crepe, puff pastry, truffle jus, seasonal vegetables, pommes puree",
+          "price": 169.0,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Chateaubriand for Two",
+          "description": "Beef tenderloin center cut, red wine jus, bearnaise, seasonal vegetables, pommes puree",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "16oz",
+              "price": 179.0
+            }
+          ]
+        },
+        {
+          "name": "Prime Rib",
+          "description": "Slow-roasted, yorkshire pudding, pommes puree, seasonal vegetables, red wine jus",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": [
+            {
+              "label": "14oz",
+              "price": 78.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Japanese A5 Wagyu",
+      "items": [
+        {
+          "name": "A5 Wagyu Rib Eye",
+          "description": "Japanese A5 Wagyu, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 28.0
+            }
+          ]
+        },
+        {
+          "name": "A5 Wagyu Striploin",
+          "description": "Japanese A5 Wagyu, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 31.0
+            }
+          ]
+        },
+        {
+          "name": "A5 Wagyu Tenderloin",
+          "description": "Japanese A5 Wagyu, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 39.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Japanese Kobe Beef",
+      "items": [
+        {
+          "name": "Kobe Rib Eye",
+          "description": "Certified Kobe Beef, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 52.0
+            }
+          ]
+        },
+        {
+          "name": "Kobe Striploin",
+          "description": "Certified Kobe Beef, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 56.0
+            }
+          ]
+        },
+        {
+          "name": "Kobe Tenderloin",
+          "description": "Certified Kobe Beef, limited availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "per oz",
+              "price": 69.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Australian Wagyu",
+      "items": [
+        {
+          "name": "Australian Wagyu Striploin",
+          "description": "Australian Wagyu beef",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "10oz",
+              "price": 110.0
+            }
+          ]
+        },
+        {
+          "name": "Australian Wagyu Rib-Eye",
+          "description": "Australian Wagyu beef",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": [
+            {
+              "label": "10oz",
+              "price": 134.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Butcher Cuts",
+      "items": [
+        {
+          "name": "Prime Tomahawk / Porterhouse",
+          "description": "Ask server for daily availability",
+          "price": null,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null,
+          "marketPrice": true
+        }
+      ]
+    },
+    {
+      "name": "Steak Add-Ons",
+      "items": [
+        {
+          "name": "1/2 lb Alaskan King Crab",
+          "description": "King crab add-on for steak",
+          "price": 65,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sauteed Tiger Prawns",
+          "description": "Tiger prawns add-on for steak",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "1/2 Atlantic Lobster",
+          "description": "Lobster add-on for steak",
+          "price": 55,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Trio of Sauces",
+          "description": "Selection of three house sauces",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Bearnaise",
+          "description": "Classic bearnaise sauce",
+          "price": 8,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Truffle Jus",
+          "description": "Truffle-infused jus",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Red Wine Jus",
+          "description": "Red wine reduction",
+          "price": 8,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free",
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Peppercorn Sauce",
+          "description": "Classic peppercorn sauce",
+          "price": 8,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Crispy Brussels Sprouts",
+          "description": "Lemon, capers, parmesan, chilies",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Fries",
+          "description": "Parmesan, thyme, truffle aioli",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Creamed Corn",
+          "description": "Jalapeno, espelette",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Broccolini",
+          "description": "Yuzu hollandaise, toasted sesame seeds",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lobster Mashed Potatoes",
+          "description": "Butter poached atlantic lobster",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Wagyu Fried Rice",
+          "description": "Sesame, eggs, garlic scallions, chilli oil, watercress",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Mac & Cheese Sticks",
+          "description": "Truffle cheese dip",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Creamed Spinach",
+          "description": "White wine veloute, crispy pancetta",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Mushrooms",
+          "description": "Sauteed wild mushrooms, cafe de paris butter",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Tableside Crepe Suzette for Two",
+          "description": "Cointreau flambeed strawberries, balsamic ice cream, fresh cracked black pepper",
+          "price": 32,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Black + Blue Buttercake",
+          "description": "Salted caramel sauce, white chocolate cream, fresh berries",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Panna Cotta",
+          "description": "Orange blossom honey panna cotta, blood orange sorbet, honey tuile",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Basque Cheesecake",
+          "description": "Chantilly cream, berry compote",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Black Forest Cake",
+          "description": "Brandied cherries, chocolate, whipped cream",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Spiced Pear Trifle",
+          "description": "Eggnog, brown butter cake, cranberries, candied hazelnuts, rum sabayon",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sticky Toffee Pudding",
+          "description": "Toffee sauce, vanilla ice cream",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "restaurantId": "wvrst-king-west",
+  "menuSections": [
+    {
+      "name": "Sausages",
+      "items": [
+        {
+          "name": "Bratwurst",
+          "description": "Classic Bavarian-style pork bratwurst, served on a fresh roll with sauerkraut.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Smoked Kielbasa",
+          "description": "Traditional Polish smoked sausage, mustard, pickled vegetables.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Currywurst",
+          "description": "Pork bratwurst sliced and topped with house curry ketchup, curry powder.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Wild Boar Sausage",
+          "description": "Wild boar and apple sausage, caramelized onions, grainy mustard.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Duck Sausage",
+          "description": "Duck and fig sausage, arugula, balsamic reduction.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Vegan Sausage",
+          "description": "Plant-based sausage, sauerkraut, vegan mustard aioli.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Lamb Merguez",
+          "description": "North African spiced lamb sausage, harissa, tzatziki.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Venison Sausage",
+          "description": "Ontario venison sausage, juniper berry mustard, pickled beets.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Sides & Snacks",
+      "items": [
+        {
+          "name": "Duck Fat Fries",
+          "description": "Hand-cut fries cooked in duck fat, garlic aioli.",
+          "price": 9,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Poutine",
+          "description": "Duck fat fries, cheese curds, house gravy.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Soft Pretzel",
+          "description": "Bavarian soft pretzel, beer cheese sauce, grainy mustard.",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Fried Pickles",
+          "description": "Beer-battered dill pickles, ranch dipping sauce.",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sauerkraut",
+          "description": "House-made fermented sauerkraut.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Mains",
+      "items": [
+        {
+          "name": "Sausage Platter",
+          "description": "Three sausages of your choice, sauerkraut, mustards, fresh roll.",
+          "price": 28,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Schnitzel",
+          "description": "Breaded and pan-fried pork schnitzel, lemon, potato salad, lingonberry.",
+          "price": 22,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Beer Can Chicken",
+          "description": "Half chicken slow-roasted with craft beer, coleslaw, fries.",
+          "price": 24,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Apple Strudel",
+          "description": "Warm apple strudel, vanilla ice cream, caramel sauce.",
+          "price": 10,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chocolate Pretzel Cake",
+          "description": "Rich chocolate cake with pretzel crust, salted caramel.",
+          "price": 11,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

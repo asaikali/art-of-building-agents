@@ -1,0 +1,243 @@
+{
+  "restaurantId": "kintori-yakitori",
+  "menuSections": [
+    {
+      "name": "Yakitori (Skewers)",
+      "items": [
+        {
+          "name": "Momo (Chicken Thigh)",
+          "description": "Juicy chicken thigh, tare or shio.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Negima",
+          "description": "Chicken and scallion skewer, tare.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Tsukune",
+          "description": "Chicken meatball, tare glaze, egg yolk dip.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Kawa (Chicken Skin)",
+          "description": "Crispy folded chicken skin, salt.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Sunagimo (Gizzard)",
+          "description": "Chicken gizzard, salt, lemon.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Hatsu (Heart)",
+          "description": "Chicken heart, salt.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Butabara (Pork Belly)",
+          "description": "Grilled pork belly, tare.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Asparagus Bacon",
+          "description": "Asparagus wrapped in pork belly.",
+          "price": 6,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Shiitake Mushroom",
+          "description": "Grilled shiitake, soy butter.",
+          "price": 5,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Yakitori Omakase Set",
+          "description": "Chef's selection of 8 skewers.",
+          "price": 38,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Small Plates",
+      "items": [
+        {
+          "name": "Karaage",
+          "description": "Japanese fried chicken, kewpie mayo, lemon.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Takoyaki",
+          "description": "Octopus balls, takoyaki sauce, bonito flakes, kewpie mayo.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Agedashi Tofu",
+          "description": "Deep-fried silken tofu, dashi broth, grated daikon, ginger.",
+          "price": 11,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Edamame",
+          "description": "Steamed edamame, sea salt.",
+          "price": 7,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegan",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Gyoza",
+          "description": "Pan-fried pork and cabbage dumplings, ponzu.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Ebi Tempura",
+          "description": "Lightly battered shrimp tempura, tentsuyu dipping sauce.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Tuna Tataki",
+          "description": "Seared tuna, ponzu, garlic chips, scallion.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Rice & Noodles",
+      "items": [
+        {
+          "name": "Chicken Katsu Don",
+          "description": "Breaded chicken cutlet over rice, egg, dashi sauce.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Yakisoba",
+          "description": "Stir-fried noodles, pork, cabbage, yakisoba sauce.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Yaki Onigiri",
+          "description": "Grilled rice balls with soy glaze, pickles.",
+          "price": 9,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Mochi Ice Cream",
+          "description": "Three pieces, rotating flavours.",
+          "price": 9,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Matcha Tiramisu",
+          "description": "Green tea tiramisu, white chocolate.",
+          "price": 12,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Black Sesame Cr\u00e8me Br\u00fbl\u00e9e",
+          "description": "Black sesame custard, caramelized sugar.",
+          "price": 11,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian",
+            "gluten-free"
+          ],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

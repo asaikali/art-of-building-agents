@@ -1,0 +1,189 @@
+{
+  "restaurantId": "gabbys-danforth",
+  "menuSections": [
+    {
+      "name": "Starters",
+      "items": [
+        {
+          "name": "Loaded Nachos",
+          "description": "Tortilla chips, cheddar, jalape\u00f1os, pico de gallo, sour cream, guacamole.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chicken Wings",
+          "description": "One pound of wings, choice of Buffalo, BBQ, honey garlic, or salt & pepper.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mozzarella Sticks",
+          "description": "Breaded mozzarella, marinara sauce.",
+          "price": 13,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Calamari",
+          "description": "Lightly battered calamari, tzatziki, lemon.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Spinach Dip",
+          "description": "Creamy spinach and artichoke dip, tortilla chips, pita.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Burgers",
+      "items": [
+        {
+          "name": "Classic Burger",
+          "description": "6oz beef patty, lettuce, tomato, pickles, onion, fries.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Bacon Cheddar Burger",
+          "description": "6oz beef patty, crispy bacon, aged cheddar, lettuce, tomato, fries.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mushroom Swiss Burger",
+          "description": "6oz beef patty, saut\u00e9ed mushrooms, Swiss cheese, garlic aioli, fries.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Veggie Burger",
+          "description": "Plant-based patty, lettuce, tomato, pickles, chipotle mayo, fries.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Chicken Burger",
+          "description": "Grilled or crispy chicken breast, lettuce, tomato, mayo, fries.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Pub Favourites",
+      "items": [
+        {
+          "name": "Fish & Chips",
+          "description": "Beer-battered cod, fries, coleslaw, tartar sauce.",
+          "price": 19,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Chicken Fingers",
+          "description": "Breaded chicken strips, fries, plum sauce, honey mustard.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Mac & Cheese",
+          "description": "Creamy three-cheese mac and cheese, bread crumbs.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "Quesadilla",
+          "description": "Grilled chicken or veggie, cheese, peppers, onions, salsa, sour cream.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Caesar Salad",
+          "description": "Romaine, croutons, Parmesan, bacon bits, Caesar dressing.",
+          "price": 14,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    },
+    {
+      "name": "Pizza",
+      "items": [
+        {
+          "name": "Pepperoni Pizza",
+          "description": "Classic pepperoni, mozzarella, tomato sauce.",
+          "price": 16,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Margherita Pizza",
+          "description": "Fresh mozzarella, tomato, basil.",
+          "price": 15,
+          "currency": "CAD",
+          "dietaryTags": [
+            "vegetarian"
+          ],
+          "variants": null
+        },
+        {
+          "name": "BBQ Chicken Pizza",
+          "description": "Grilled chicken, BBQ sauce, red onion, mozzarella, cilantro.",
+          "price": 17,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        },
+        {
+          "name": "Meat Lovers Pizza",
+          "description": "Pepperoni, sausage, bacon, ham, mozzarella.",
+          "price": 18,
+          "currency": "CAD",
+          "dietaryTags": [],
+          "variants": null
+        }
+      ]
+    }
+  ]
+}

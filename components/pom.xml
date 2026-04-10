@@ -15,5 +15,6 @@
 
   <modules>
     <module>agent-core</module>
+    <module>restaurant-data</module>
   </modules>
 </project>
