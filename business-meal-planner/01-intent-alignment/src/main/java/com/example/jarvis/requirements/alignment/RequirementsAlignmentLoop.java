@@ -29,38 +29,73 @@ public class RequirementsAlignmentLoop {
   }
 
   public TurnResult handleTurn(JarvisAgentContext state, String userMessage) {
-    UserRequirements userRequirements = state.getUserRequirements();
-    boolean hasExistingContext = !userRequirements.isEmpty();
+    boolean hasExistingRequirements = hasExistingRequirements(state);
 
-    if (!hasExistingContext && turnClassifier.isOpener(userMessage)) {
-      initializeStateForClarification(state);
-      return new TurnResult(
-          state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+    if (isFirstTurnOpener(state, userMessage)) {
+      return startClarification(state);
     }
 
-    if (hasExistingContext && turnClassifier.isAffirmative(userMessage)) {
-      state.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
-      return new TurnResult(
-          state, requirementsReplyBuilder.buildReply(state), "requirements-confirmed");
+    if (isConfirmationTurn(state, userMessage)) {
+      return confirmRequirements(state);
     }
 
-    if (hasExistingContext && turnClassifier.isUncertain(userMessage)) {
-      state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
-      return new TurnResult(
-          state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+    if (isUncertainTurn(state, userMessage)) {
+      return requestClarification(state);
     }
 
-    UserRequirements extracted =
-        requirementsExtractor.extract(hasExistingContext ? state : null, userMessage);
-    state.setUserRequirements(extracted);
-    state.setMissingInformation(
-        requirementsCompletionPolicy.missingCriticalFields(extracted.getMeal()));
-    state.setStatus(requirementsCompletionPolicy.decideStatus(state));
+    UserRequirements updatedRequirements = updateRequirements(state, userMessage);
+    updateWorkflowState(state, updatedRequirements);
 
     return new TurnResult(
         state,
         requirementsReplyBuilder.buildReply(state),
-        chooseAction(hasExistingContext, state.getStatus()));
+        chooseAction(hasExistingRequirements, state.getStatus()));
+  }
+
+  private boolean hasExistingRequirements(JarvisAgentContext state) {
+    return !state.getUserRequirements().isEmpty();
+  }
+
+  private boolean isFirstTurnOpener(JarvisAgentContext state, String userMessage) {
+    return !hasExistingRequirements(state) && turnClassifier.isOpener(userMessage);
+  }
+
+  private boolean isConfirmationTurn(JarvisAgentContext state, String userMessage) {
+    return hasExistingRequirements(state) && turnClassifier.isAffirmative(userMessage);
+  }
+
+  private boolean isUncertainTurn(JarvisAgentContext state, String userMessage) {
+    return hasExistingRequirements(state) && turnClassifier.isUncertain(userMessage);
+  }
+
+  private TurnResult startClarification(JarvisAgentContext state) {
+    initializeStateForClarification(state);
+    return new TurnResult(
+        state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+  }
+
+  private TurnResult confirmRequirements(JarvisAgentContext state) {
+    state.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
+    return new TurnResult(
+        state, requirementsReplyBuilder.buildReply(state), "requirements-confirmed");
+  }
+
+  private TurnResult requestClarification(JarvisAgentContext state) {
+    state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    return new TurnResult(
+        state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+  }
+
+  private UserRequirements updateRequirements(JarvisAgentContext state, String userMessage) {
+    return requirementsExtractor.extract(
+        hasExistingRequirements(state) ? state : null, userMessage);
+  }
+
+  private void updateWorkflowState(JarvisAgentContext state, UserRequirements updatedRequirements) {
+    state.setUserRequirements(updatedRequirements);
+    state.setMissingInformation(
+        requirementsCompletionPolicy.missingCriticalFields(updatedRequirements.getMeal()));
+    state.setStatus(requirementsCompletionPolicy.decideStatus(state));
   }
 
   private void initializeStateForClarification(JarvisAgentContext state) {
