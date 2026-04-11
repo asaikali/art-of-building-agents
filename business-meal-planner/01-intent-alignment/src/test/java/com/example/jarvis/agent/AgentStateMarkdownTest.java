@@ -1,9 +1,7 @@
-package com.example.jarvis.requirements.alignment;
+package com.example.jarvis.agent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.jarvis.agent.AgentState;
-import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
 import com.example.jarvis.requirements.EventRequirements;
@@ -16,9 +14,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class IntentAlignmentMarkdownRendererTest {
-
-  private final IntentAlignmentMarkdownRenderer renderer = new IntentAlignmentMarkdownRenderer();
+class AgentStateMarkdownTest {
 
   @Test
   void rendersRequiredSectionsAndStatusLabel() {
@@ -38,7 +34,7 @@ class IntentAlignmentMarkdownRendererTest {
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
-    String markdown = renderer.render(state);
+    String markdown = state.toMarkdown();
 
     assertThat(markdown).contains("## Event Requirements");
     assertThat(markdown).contains("Date: 2026-04-11");
@@ -59,7 +55,7 @@ class IntentAlignmentMarkdownRendererTest {
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
 
-    String markdown = renderer.render(state);
+    String markdown = state.toMarkdown();
 
     assertThat(markdown).contains("Date: Missing");
     assertThat(markdown).contains("## Additional Requirements\n- None");

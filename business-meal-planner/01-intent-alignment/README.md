@@ -21,7 +21,6 @@ This module now demonstrates:
 | `JarvisHandler.java` | Single agent handler wired into `agent-core` |
 | `IntentAlignmentConversationService.java` | Main harness: opener handling, one model call, deterministic status, deterministic reply |
 | `IntentAlignmentExtractor.java` | Single `ChatClient` call that extracts or updates the planning context JSON |
-| `IntentAlignmentMarkdownRenderer.java` | Renders the required phase-one Markdown artifact |
 | `AgentState.java` | The agent's working state for this module |
 | `EventRequirements.java` | Event-level facts captured during intent alignment |
 | `Attendee.java` | Per-person constraints captured during intent alignment |

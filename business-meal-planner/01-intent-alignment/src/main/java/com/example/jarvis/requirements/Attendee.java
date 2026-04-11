@@ -2,6 +2,7 @@ package com.example.jarvis.requirements;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Captures requirements that belong to one specific person attending the meal.
@@ -79,7 +80,38 @@ public class Attendee {
         dietaryConstraints == null ? List.of() : List.copyOf(dietaryConstraints);
   }
 
+  public String toMarkdown() {
+    String dietarySummary =
+        dietaryConstraints.isEmpty()
+            ? "none"
+            : dietaryConstraints.stream()
+                .map(Enum::name)
+                .map(value -> value.toLowerCase(Locale.ROOT).replace('_', ' '))
+                .collect(java.util.stream.Collectors.joining(", "));
+
+    return "- Name: %s | Origin: %s | Departure Time: %s | Travel Mode: %s | Max Travel Time: %s | Max Distance: %s | Dietary Constraints: %s"
+        .formatted(
+            renderValue(name),
+            renderValue(origin),
+            renderValue(departureTime),
+            renderEnum(travelMode),
+            renderValue(maxTravelTimeMinutes),
+            renderValue(maxDistanceKm),
+            dietarySummary);
+  }
+
   private static String normalizeText(String value) {
     return value == null || value.isBlank() ? null : value.trim();
+  }
+
+  private static String renderValue(Object value) {
+    return value == null ? "Missing" : value.toString();
+  }
+
+  private static String renderEnum(Enum<?> value) {
+    if (value == null) {
+      return "Missing";
+    }
+    return value.name().toLowerCase(Locale.ROOT).replace('_', ' ');
   }
 }

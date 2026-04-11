@@ -5,7 +5,6 @@ import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
 import com.example.jarvis.requirements.alignment.IntentAlignmentConversationService;
-import com.example.jarvis.requirements.alignment.IntentAlignmentMarkdownRenderer;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +12,9 @@ import org.springframework.stereotype.Component;
 public class JarvisHandler implements AgentHandler {
 
   private final IntentAlignmentConversationService conversationService;
-  private final IntentAlignmentMarkdownRenderer markdownRenderer;
 
-  public JarvisHandler(
-      IntentAlignmentConversationService conversationService,
-      IntentAlignmentMarkdownRenderer markdownRenderer) {
+  public JarvisHandler(IntentAlignmentConversationService conversationService) {
     this.conversationService = conversationService;
-    this.markdownRenderer = markdownRenderer;
   }
 
   @Override
@@ -52,7 +47,7 @@ public class JarvisHandler implements AgentHandler {
             "turn", turn,
             "status", state.getStatus().label(),
             "missingInformationCount", state.getMissingInformation().size()));
-    session.updateState(markdownRenderer.render(state));
+    session.updateState(state.toMarkdown());
     session.appendMessage(Role.ASSISTANT, result.assistantReply());
     session.logEvent(
         "assistant-reply-sent", Map.of("turn", turn, "reply", result.assistantReply()));

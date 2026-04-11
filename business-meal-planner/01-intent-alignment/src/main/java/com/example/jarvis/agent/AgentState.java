@@ -43,4 +43,44 @@ public class AgentState {
   public void setStatus(RequirementStatus status) {
     this.status = status;
   }
+
+  public String toMarkdown() {
+    EventRequirements requirements =
+        eventRequirements == null ? new EventRequirements() : eventRequirements;
+    return """
+        %s
+
+        ## Attendees
+        %s
+
+        ## Missing Information
+        %s
+
+        ## Status
+        %s
+        """
+        .formatted(
+            requirements.toMarkdown(),
+            renderAttendees(attendees),
+            renderList(missingInformation),
+            status.label());
+  }
+
+  private static String renderAttendees(List<Attendee> attendees) {
+    if (attendees.isEmpty()) {
+      return "- None";
+    }
+    return attendees.stream()
+        .map(Attendee::toMarkdown)
+        .collect(java.util.stream.Collectors.joining("\n"));
+  }
+
+  private static String renderList(List<String> items) {
+    if (items.isEmpty()) {
+      return "- None";
+    }
+    return items.stream()
+        .map(item -> "- " + item)
+        .collect(java.util.stream.Collectors.joining("\n"));
+  }
 }

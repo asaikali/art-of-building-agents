@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Captures the requirements that apply to the meal as a whole.
@@ -99,6 +100,35 @@ public class EventRequirements {
     this.cuisinePreferences = sanitize(cuisinePreferences);
   }
 
+  public String toMarkdown() {
+    return """
+        ## Event Requirements
+        - Date: %s
+        - Time: %s
+        - Party Size: %s
+        - Meal Type: %s
+        - Purpose: %s
+        - Budget Per Person: %s
+        - Noise Level: %s
+
+        ## Additional Requirements
+        %s
+
+        ## Cuisine Preferences
+        %s
+        """
+        .formatted(
+            renderValue(date),
+            renderValue(time),
+            renderValue(partySize),
+            renderEnum(mealType),
+            renderValue(purpose),
+            renderValue(budgetPerPerson),
+            renderEnum(noiseLevel),
+            renderList(additionalRequirements),
+            renderList(cuisinePreferences));
+  }
+
   private static String normalizeText(String value) {
     return value == null || value.isBlank() ? null : value.trim();
   }
@@ -111,5 +141,25 @@ public class EventRequirements {
         .filter(value -> value != null && !value.isBlank())
         .map(String::trim)
         .toList();
+  }
+
+  private static String renderValue(Object value) {
+    return value == null ? "Missing" : value.toString();
+  }
+
+  private static String renderEnum(Enum<?> value) {
+    if (value == null) {
+      return "Missing";
+    }
+    return value.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+  }
+
+  private static String renderList(List<String> items) {
+    if (items.isEmpty()) {
+      return "- None";
+    }
+    return items.stream()
+        .map(item -> "- " + item)
+        .collect(java.util.stream.Collectors.joining("\n"));
   }
 }

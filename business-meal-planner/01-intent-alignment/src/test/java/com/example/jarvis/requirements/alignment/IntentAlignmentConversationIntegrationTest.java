@@ -25,8 +25,6 @@ class IntentAlignmentConversationIntegrationTest {
 
   @Autowired private IntentAlignmentConversationService service;
 
-  @Autowired private IntentAlignmentMarkdownRenderer renderer;
-
   @Test
   void supportsLongBackAndForthTranscriptAgainstConfiguredModel() {
     TranscriptScenario scenario = scenario(10_001);
@@ -181,7 +179,7 @@ class IntentAlignmentConversationIntegrationTest {
     }
 
     private TranscriptTurn markdownHasRequiredSections() {
-      String markdown = renderer.render(result.state());
+      String markdown = result.state().toMarkdown();
       assertThat(markdown).contains("## Event Requirements");
       assertThat(markdown).contains("## Additional Requirements");
       assertThat(markdown).contains("## Cuisine Preferences");
