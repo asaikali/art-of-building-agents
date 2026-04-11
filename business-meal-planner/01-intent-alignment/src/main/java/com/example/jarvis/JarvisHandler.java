@@ -4,12 +4,10 @@ import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
-import com.example.jarvis.alignment.BusinessMealRequirements;
 import com.example.jarvis.alignment.IntentAlignmentConversationService;
 import com.example.jarvis.alignment.IntentAlignmentMarkdownRenderer;
-import com.example.jarvis.alignment.IntentAlignmentTurnResult;
+import com.example.jarvis.state.AgentState;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +15,6 @@ public class JarvisHandler implements AgentHandler {
 
   private final IntentAlignmentConversationService conversationService;
   private final IntentAlignmentMarkdownRenderer markdownRenderer;
-  private final AtomicInteger turnCounter = new AtomicInteger(0);
 
   public JarvisHandler(
       IntentAlignmentConversationService conversationService,
@@ -43,19 +40,20 @@ public class JarvisHandler implements AgentHandler {
 
   @Override
   public void onMessage(Session session, AgentMessage message) {
-    int turn = turnCounter.incrementAndGet();
+    long turn = session.getMessages().stream().filter(m -> m.role() == Role.USER).count();
     session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));
 
-    IntentAlignmentTurnResult result = conversationService.handleTurn(session.id(), message.text());
-    BusinessMealRequirements requirements = result.requirements();
+    IntentAlignmentConversationService.TurnResult result =
+        conversationService.handleTurn(session.id(), message.text());
+    AgentState state = result.state();
 
     session.logEvent(
-        result.action().eventName(),
+        result.eventName(),
         Map.of(
             "turn", turn,
-            "status", requirements.status().label(),
-            "missingInformationCount", requirements.missingInformation().size()));
-    session.updateState(markdownRenderer.render(requirements));
+            "status", state.status().label(),
+            "missingInformationCount", state.missingInformation().size()));
+    session.updateState(markdownRenderer.render(state));
     session.appendMessage(Role.ASSISTANT, result.assistantReply());
     session.logEvent(
         "assistant-reply-sent", Map.of("turn", turn, "reply", result.assistantReply()));

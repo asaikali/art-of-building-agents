@@ -7,10 +7,10 @@ confirmed planning artifact before any restaurant search or booking happens.
 
 This module now demonstrates:
 
-- extracting intent and explicit constraints
-- inferring reasonable business-meal defaults
-- surfacing missing information and assumptions
-- summarizing understanding back to the user
+- turning a messy request into a structured requirements artifact
+- storing that artifact in session state
+- using deterministic rules to decide whether to clarify or confirm
+- rendering the artifact into markdown for the inspector
 - looping on confirmation, correction, or clarification
 
 ## What's here
@@ -19,11 +19,11 @@ This module now demonstrates:
 |------|---------|
 | `IntentAlignmentApplication.java` | Spring Boot entry point in `com.example.jarvis` |
 | `JarvisHandler.java` | Single agent handler wired into `agent-core` |
-| `IntentAlignmentConversationService.java` | Turn orchestration for initial, confirm, correct, and clarify flows |
-| `ChatClientIntentAlignmentModelClient.java` | Two `ChatClient` calls: plan extraction and user-facing summary |
+| `IntentAlignmentConversationService.java` | Main harness: opener handling, one model call, deterministic status, deterministic reply |
+| `IntentAlignmentExtractor.java` | Single `ChatClient` call that extracts or updates the requirements JSON |
 | `IntentAlignmentMarkdownRenderer.java` | Renders the required phase-one Markdown artifact |
-| `BusinessMealRequirements.java` | Alignment-owned requirements object |
-| `IntentAlignmentSessionStore.java` | Module-local per-session plan memory |
+| `AgentState.java` | The agent's working state for this module |
+| `UserGoals.java` | The structured representation of what the user wants |
 | `application.yml` | Local app and model configuration |
 
 ## Run it

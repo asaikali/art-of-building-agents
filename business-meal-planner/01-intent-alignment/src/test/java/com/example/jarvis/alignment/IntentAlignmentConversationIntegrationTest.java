@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.session.SessionId;
 import com.example.jarvis.IntentAlignmentApplication;
+import com.example.jarvis.state.AgentState;
+import com.example.jarvis.state.UserGoals;
 import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
@@ -44,36 +46,36 @@ class IntentAlignmentConversationIntegrationTest {
             I have a client dinner tomorrow at 7 pm for 4 people. One guest is vegetarian.
             I want somewhere professional and quiet enough to talk.
             """)
-        .hasAction(IntentAlignmentAction.PLAN_GENERATED)
+        .hasEventName("plan-generated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .requirementsMention("dinner", "vegetarian", "professional")
+        .goalsMention("dinner", "vegetarian", "professional")
         .assistantMentionsAnyOf("confirm", "correct")
         .markdownHasRequiredSections();
 
     scenario
-        .user("Don't book yet. Keep it under 120 CAD per person and near Union Station.")
-        .hasAction(IntentAlignmentAction.PLAN_UPDATED)
+        .user("Don't book yet. I'm leaving from Union Station. Keep it under 120 CAD per person.")
+        .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .requirementsMention("120")
-        .requirementsMentionAnyOf("union", "station")
+        .goalsMention("120")
+        .goalsMentionAnyOf("union", "station")
         .assistantMentionsAnyOf("confirm", "correct");
 
     scenario
         .user("not sure")
-        .hasAction(IntentAlignmentAction.CLARIFICATION_REQUESTED)
+        .hasEventName("clarification-requested")
         .hasStatus(RequirementStatus.WAITING_FOR_CLARIFICATION)
         .assistantLooksLikeQuestion();
 
     scenario
         .user("Let's optimize for low noise and easy conversation with a client.")
-        .hasAction(IntentAlignmentAction.PLAN_UPDATED)
+        .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .requirementsMentionAnyOf("quiet", "low noise", "conversation", "client")
+        .goalsMentionAnyOf("quiet", "low noise", "conversation", "client")
         .assistantMentionsAnyOf("confirm", "correct");
 
     scenario
         .user("yes")
-        .hasAction(IntentAlignmentAction.REQUIREMENTS_CONFIRMED)
+        .hasEventName("requirements-confirmed")
         .hasStatus(RequirementStatus.REQUIREMENTS_CONFIRMED)
         .assistantMentionsAnyOf("confirmed", "requirements are confirmed");
   }
@@ -84,9 +86,9 @@ class IntentAlignmentConversationIntegrationTest {
 
     scenario
         .user("Help me plan a business meal.")
-        .hasAction(IntentAlignmentAction.CLARIFICATION_REQUESTED)
+        .hasEventName("clarification-requested")
         .hasStatus(RequirementStatus.WAITING_FOR_CLARIFICATION)
-        .assistantLooksLikeQuestion()
+        .assistantMentionsAnyOf("date", "time", "party size")
         .markdownHasRequiredSections();
 
     scenario
@@ -95,15 +97,15 @@ class IntentAlignmentConversationIntegrationTest {
             It's an internal team lunch next Tuesday for 6 people, one gluten-free,
             and I only want recommendations.
             """)
-        .hasAction(IntentAlignmentAction.PLAN_UPDATED)
+        .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .requirementsMention("lunch", "6", "gluten")
-        .turnMentionsAnyOf("recommend", "recommendations", "do not book", "don't book")
+        .goalsMention("lunch", "6", "gluten")
+        .turnMentionsAnyOf("recommend", "recommendations")
         .assistantMentionsAnyOf("confirm", "correct");
 
     scenario
         .user("exactly")
-        .hasAction(IntentAlignmentAction.REQUIREMENTS_CONFIRMED)
+        .hasEventName("requirements-confirmed")
         .hasStatus(RequirementStatus.REQUIREMENTS_CONFIRMED)
         .assistantMentionsAnyOf("confirmed", "requirements are confirmed");
   }
@@ -127,32 +129,32 @@ class IntentAlignmentConversationIntegrationTest {
 
   private final class TranscriptTurn {
 
-    private final IntentAlignmentTurnResult result;
+    private final IntentAlignmentConversationService.TurnResult result;
 
-    private TranscriptTurn(IntentAlignmentTurnResult result) {
+    private TranscriptTurn(IntentAlignmentConversationService.TurnResult result) {
       this.result = result;
     }
 
-    private TranscriptTurn hasAction(IntentAlignmentAction expected) {
-      assertThat(result.action()).isEqualTo(expected);
+    private TranscriptTurn hasEventName(String expected) {
+      assertThat(result.eventName()).isEqualTo(expected);
       return this;
     }
 
     private TranscriptTurn hasStatus(RequirementStatus expected) {
-      assertThat(result.requirements().status()).isEqualTo(expected);
+      assertThat(result.state().status()).isEqualTo(expected);
       return this;
     }
 
-    private TranscriptTurn requirementsMention(String... terms) {
-      String haystack = flattenedRequirements();
+    private TranscriptTurn goalsMention(String... terms) {
+      String haystack = flattenedGoals();
       for (String term : terms) {
         assertThat(haystack).contains(term.toLowerCase(Locale.ROOT));
       }
       return this;
     }
 
-    private TranscriptTurn requirementsMentionAnyOf(String... terms) {
-      String haystack = flattenedRequirements();
+    private TranscriptTurn goalsMentionAnyOf(String... terms) {
+      String haystack = flattenedGoals();
       assertThat(
               Arrays.stream(terms)
                   .map(term -> term.toLowerCase(Locale.ROOT))
@@ -173,7 +175,7 @@ class IntentAlignmentConversationIntegrationTest {
 
     private TranscriptTurn turnMentionsAnyOf(String... terms) {
       String haystack =
-          (flattenedRequirements() + "\n" + result.assistantReply()).toLowerCase(Locale.ROOT);
+          (flattenedGoals() + "\n" + result.assistantReply()).toLowerCase(Locale.ROOT);
       assertThat(
               Arrays.stream(terms)
                   .map(term -> term.toLowerCase(Locale.ROOT))
@@ -183,31 +185,33 @@ class IntentAlignmentConversationIntegrationTest {
     }
 
     private TranscriptTurn assistantLooksLikeQuestion() {
-      String reply = result.assistantReply();
-      assertThat(reply).contains("?");
+      assertThat(result.assistantReply()).contains("?");
       return this;
     }
 
     private TranscriptTurn markdownHasRequiredSections() {
-      String markdown = renderer.render(result.requirements());
+      String markdown = renderer.render(result.state());
       assertThat(markdown).contains("## Intent");
-      assertThat(markdown).contains("## Explicit Constraints");
-      assertThat(markdown).contains("## Inferred Constraints");
+      assertThat(markdown).contains("## Minimum Requirements");
+      assertThat(markdown).contains("## Constraints");
       assertThat(markdown).contains("## Missing Information");
       assertThat(markdown).contains("## Assumptions");
       assertThat(markdown).contains("## Status");
       return this;
     }
 
-    private String flattenedRequirements() {
-      BusinessMealRequirements requirements = result.requirements();
+    private String flattenedGoals() {
+      AgentState state = result.state();
+      UserGoals userGoals = state.userGoals().orElseThrow();
       return String.join(
               "\n",
-              requirements.intent(),
-              String.join("\n", requirements.explicitConstraints()),
-              String.join("\n", requirements.inferredConstraints()),
-              String.join("\n", requirements.missingInformation()),
-              String.join("\n", requirements.assumptions()))
+              userGoals.getIntent(),
+              String.valueOf(userGoals.getDate()),
+              String.valueOf(userGoals.getTime()),
+              String.valueOf(userGoals.getPartySize()),
+              String.join("\n", userGoals.getConstraints()),
+              String.join("\n", state.missingInformation()),
+              String.join("\n", state.assumptions()))
           .toLowerCase(Locale.ROOT);
     }
   }
