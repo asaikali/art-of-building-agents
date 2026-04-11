@@ -9,7 +9,7 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IntentAlignmentExtractor {
+public class RequirementsExtractor {
 
   private static final String EXTRACTION_SYSTEM_PROMPT =
       """
@@ -34,11 +34,11 @@ public class IntentAlignmentExtractor {
 
   private final ChatClient extractionClient;
 
-  public IntentAlignmentExtractor(ChatClient.Builder chatClientBuilder) {
+  public RequirementsExtractor(ChatClient.Builder chatClientBuilder) {
     this.extractionClient = chatClientBuilder.defaultSystem(EXTRACTION_SYSTEM_PROMPT).build();
   }
 
-  protected IntentAlignmentExtractor() {
+  protected RequirementsExtractor() {
     this.extractionClient = null;
   }
 

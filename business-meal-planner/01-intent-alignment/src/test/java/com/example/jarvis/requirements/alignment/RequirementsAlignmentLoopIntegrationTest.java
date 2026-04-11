@@ -21,9 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 @EnabledIfSystemProperty(named = "jarvis.openai.integration", matches = "true")
-class IntentAlignmentConversationIntegrationTest {
+class RequirementsAlignmentLoopIntegrationTest {
 
-  @Autowired private IntentAlignmentConversationService service;
+  @Autowired private RequirementsAlignmentLoop alignmentLoop;
 
   @Test
   void supportsLongBackAndForthTranscriptAgainstConfiguredModel() {
@@ -112,15 +112,15 @@ class IntentAlignmentConversationIntegrationTest {
     }
 
     private TranscriptTurn user(String text) {
-      return new TranscriptTurn(service.handleTurn(sessionId, text));
+      return new TranscriptTurn(alignmentLoop.handleTurn(sessionId, text));
     }
   }
 
   private final class TranscriptTurn {
 
-    private final IntentAlignmentConversationService.TurnResult result;
+    private final RequirementsAlignmentLoop.TurnResult result;
 
-    private TranscriptTurn(IntentAlignmentConversationService.TurnResult result) {
+    private TranscriptTurn(RequirementsAlignmentLoop.TurnResult result) {
       this.result = result;
     }
 

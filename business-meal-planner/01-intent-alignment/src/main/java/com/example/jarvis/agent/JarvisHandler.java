@@ -4,17 +4,17 @@ import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
-import com.example.jarvis.requirements.alignment.IntentAlignmentConversationService;
+import com.example.jarvis.requirements.alignment.RequirementsAlignmentLoop;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JarvisHandler implements AgentHandler {
 
-  private final IntentAlignmentConversationService conversationService;
+  private final RequirementsAlignmentLoop requirementsAlignmentLoop;
 
-  public JarvisHandler(IntentAlignmentConversationService conversationService) {
-    this.conversationService = conversationService;
+  public JarvisHandler(RequirementsAlignmentLoop requirementsAlignmentLoop) {
+    this.requirementsAlignmentLoop = requirementsAlignmentLoop;
   }
 
   @Override
@@ -37,8 +37,8 @@ public class JarvisHandler implements AgentHandler {
     long turn = session.getMessages().stream().filter(m -> m.role() == Role.USER).count();
     session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));
 
-    IntentAlignmentConversationService.TurnResult result =
-        conversationService.handleTurn(session.id(), message.text());
+    RequirementsAlignmentLoop.TurnResult result =
+        requirementsAlignmentLoop.handleTurn(session.id(), message.text());
     AgentState state = result.state();
 
     session.logEvent(

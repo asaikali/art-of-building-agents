@@ -19,8 +19,8 @@ This module now demonstrates:
 |------|---------|
 | `IntentAlignmentApplication.java` | Spring Boot entry point in `com.example.jarvis` |
 | `JarvisHandler.java` | Single agent handler wired into `agent-core` |
-| `IntentAlignmentConversationService.java` | Main harness: opener handling, one model call, deterministic status, deterministic reply |
-| `IntentAlignmentExtractor.java` | Single `ChatClient` call that extracts or updates the planning context JSON |
+| `RequirementsAlignmentLoop.java` | Main phase-one loop: opener handling, one model call, deterministic status, deterministic reply |
+| `RequirementsExtractor.java` | Single `ChatClient` call that extracts or updates the planning context JSON |
 | `AgentState.java` | The agent's working state for this module |
 | `EventRequirements.java` | Event-level facts captured during intent alignment |
 | `Attendee.java` | Per-person constraints captured during intent alignment |

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 @Service
-public class IntentAlignmentConversationService {
+public class RequirementsAlignmentLoop {
 
   private static final java.util.Set<String> AFFIRMATIVE_REPLIES =
       java.util.Set.of(
@@ -47,12 +47,12 @@ public class IntentAlignmentConversationService {
 
   private static final List<String> REQUIRED_FIELDS = List.of("Date", "Time", "Party Size");
 
-  private final IntentAlignmentExtractor extractor;
+  private final RequirementsExtractor requirementsExtractor;
   private final ConcurrentHashMap<SessionId, AgentState> statesBySession =
       new ConcurrentHashMap<>();
 
-  public IntentAlignmentConversationService(IntentAlignmentExtractor extractor) {
-    this.extractor = extractor;
+  public RequirementsAlignmentLoop(RequirementsExtractor requirementsExtractor) {
+    this.requirementsExtractor = requirementsExtractor;
   }
 
   public TurnResult handleTurn(SessionId sessionId, String userMessage) {
@@ -75,8 +75,8 @@ public class IntentAlignmentConversationService {
       return new TurnResult(state, buildReply(state), "clarification-requested");
     }
 
-    IntentAlignmentExtractor.ExtractedPlanningContext extracted =
-        extractor.extract(hasExistingContext ? state : null, userMessage);
+    RequirementsExtractor.ExtractedPlanningContext extracted =
+        requirementsExtractor.extract(hasExistingContext ? state : null, userMessage);
     state.setEventRequirements(extracted.getEventRequirements());
     state.setAttendees(extracted.getAttendees());
     state.setMissingInformation(missingCriticalFields(extracted.getEventRequirements()));
