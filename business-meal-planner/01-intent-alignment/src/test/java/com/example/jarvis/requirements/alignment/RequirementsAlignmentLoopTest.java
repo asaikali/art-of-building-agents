@@ -25,7 +25,12 @@ class RequirementsAlignmentLoopTest {
   @BeforeEach
   void setUp() {
     requirementsExtractor = new FakeRequirementsExtractor();
-    alignmentLoop = new RequirementsAlignmentLoop(requirementsExtractor);
+    alignmentLoop =
+        new RequirementsAlignmentLoop(
+            new TurnClassifier(),
+            requirementsExtractor,
+            new RequirementsCompletionPolicy(),
+            new RequirementsReplyBuilder());
   }
 
   @Test
