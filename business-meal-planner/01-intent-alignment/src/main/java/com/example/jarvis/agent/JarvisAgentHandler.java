@@ -9,11 +9,11 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JarvisHandler implements AgentHandler {
+public class JarvisAgentHandler implements AgentHandler {
 
   private final RequirementsAlignmentLoop requirementsAlignmentLoop;
 
-  public JarvisHandler(RequirementsAlignmentLoop requirementsAlignmentLoop) {
+  public JarvisAgentHandler(RequirementsAlignmentLoop requirementsAlignmentLoop) {
     this.requirementsAlignmentLoop = requirementsAlignmentLoop;
   }
 

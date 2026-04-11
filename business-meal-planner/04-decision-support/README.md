@@ -15,7 +15,7 @@ This sample app will evolve into the decision-support phase that:
 | File | Purpose |
 |------|---------|
 | `DecisionSupportApplication.java` | Spring Boot entry point |
-| `DecisionSupportHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
+| `DecisionSupportAgentHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
 | `application.yml` | Local app and model configuration |
 
 ## Run it

@@ -15,7 +15,7 @@ This sample app will evolve into the restaurant-planning phase that:
 | File | Purpose |
 |------|---------|
 | `RestaurantPlanningApplication.java` | Spring Boot entry point |
-| `RestaurantPlanningHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
+| `RestaurantPlanningAgentHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
 | `application.yml` | Local app and model configuration |
 
 ## Run it

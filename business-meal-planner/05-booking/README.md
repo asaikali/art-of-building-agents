@@ -15,7 +15,7 @@ This sample app will evolve into the booking phase that:
 | File | Purpose |
 |------|---------|
 | `BookingApplication.java` | Spring Boot entry point |
-| `BookingHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
+| `BookingAgentHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
 | `application.yml` | Local app and model configuration |
 
 ## Run it

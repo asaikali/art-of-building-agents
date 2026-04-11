@@ -15,7 +15,7 @@ This sample app will evolve into the constraint-checking phase that:
 | File | Purpose |
 |------|---------|
 | `ConstraintCheckingApplication.java` | Spring Boot entry point |
-| `ConstraintCheckingHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
+| `ConstraintCheckingAgentHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
 | `application.yml` | Local app and model configuration |
 
 ## Run it

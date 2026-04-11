@@ -14,12 +14,12 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DecisionSupportHandler implements AgentHandler {
+public class DecisionSupportAgentHandler implements AgentHandler {
 
   private final ChatClient chatClient;
   private final AtomicInteger turnCounter = new AtomicInteger(0);
 
-  public DecisionSupportHandler(ChatClient.Builder chatClientBuilder) {
+  public DecisionSupportAgentHandler(ChatClient.Builder chatClientBuilder) {
     this.chatClient = chatClientBuilder.build();
   }
 

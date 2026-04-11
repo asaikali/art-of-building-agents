@@ -1,4 +1,4 @@
-package com.example.jarvis.restaurantplanning.agent;
+package com.example.jarvis.constraintchecking.agent;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
@@ -14,18 +14,18 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RestaurantPlanningHandler implements AgentHandler {
+public class ConstraintCheckingAgentHandler implements AgentHandler {
 
   private final ChatClient chatClient;
   private final AtomicInteger turnCounter = new AtomicInteger(0);
 
-  public RestaurantPlanningHandler(ChatClient.Builder chatClientBuilder) {
+  public ConstraintCheckingAgentHandler(ChatClient.Builder chatClientBuilder) {
     this.chatClient = chatClientBuilder.build();
   }
 
   @Override
   public String getName() {
-    return "03 - Restaurant Planning";
+    return "02 - Constraint Checking";
   }
 
   @Override
@@ -53,10 +53,10 @@ public class RestaurantPlanningHandler implements AgentHandler {
   }
 
   private String buildState(int turn, String status) {
-    return "## Restaurant Planning\n\n| Field | Value |\n|-------|-------|\n| Turn | "
+    return "## Constraint Checking\n\n| Field | Value |\n|-------|-------|\n| Turn | "
         + turn
         + " |\n| Status | "
         + status
-        + " |\n| Phase | 03-restaurant-planning |\n";
+        + " |\n| Phase | 02-constraint-checking |\n";
   }
 }
