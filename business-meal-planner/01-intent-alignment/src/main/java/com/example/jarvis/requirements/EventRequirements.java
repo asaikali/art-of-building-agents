@@ -5,6 +5,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Captures the requirements that apply to the meal as a whole.
+ *
+ * <p>{@code EventRequirements} is the shared description of the event itself: when the meal
+ * happens, what kind of meal it is, and what the overall experience should support. It stays
+ * focused on captured input so later phases can build planning and decision logic on top of a
+ * stable representation of what the user wants.
+ */
 public class EventRequirements {
 
   private LocalDate date;

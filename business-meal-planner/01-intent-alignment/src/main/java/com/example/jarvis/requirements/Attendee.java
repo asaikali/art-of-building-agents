@@ -3,6 +3,13 @@ package com.example.jarvis.requirements;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Captures requirements that belong to one specific person attending the meal.
+ *
+ * <p>Use {@code Attendee} for anything that can differ from person to person, such as origin,
+ * travel preferences, or dietary needs. Keeping those details here prevents event-level
+ * requirements from turning into a mixed bag of unrelated constraints.
+ */
 public class Attendee {
 
   private String name;
