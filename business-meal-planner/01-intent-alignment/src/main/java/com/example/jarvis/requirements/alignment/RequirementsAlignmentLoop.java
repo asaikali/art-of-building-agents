@@ -28,83 +28,84 @@ public class RequirementsAlignmentLoop {
     this.requirementsReplyBuilder = requirementsReplyBuilder;
   }
 
-  public TurnResult handleTurn(JarvisAgentContext state, String userMessage) {
-    boolean hasExistingRequirements = hasExistingRequirements(state);
+  public TurnResult handleTurn(JarvisAgentContext context, String userMessage) {
+    boolean hasExistingRequirements = hasExistingRequirements(context);
 
-    if (isFirstTurnOpener(state, userMessage)) {
-      return startClarification(state);
+    if (isFirstTurnOpener(context, userMessage)) {
+      return startClarification(context);
     }
 
-    if (isConfirmationTurn(state, userMessage)) {
-      return confirmRequirements(state);
+    if (isConfirmationTurn(context, userMessage)) {
+      return confirmRequirements(context);
     }
 
-    if (isUncertainTurn(state, userMessage)) {
-      return requestClarification(state);
+    if (isUncertainTurn(context, userMessage)) {
+      return requestClarification(context);
     }
 
-    UserRequirements updatedRequirements = updateRequirements(state, userMessage);
-    updateWorkflowState(state, updatedRequirements);
+    UserRequirements updatedRequirements = updateRequirements(context, userMessage);
+    updateWorkflowState(context, updatedRequirements);
 
     return new TurnResult(
-        state,
-        requirementsReplyBuilder.buildReply(state),
-        chooseAction(hasExistingRequirements, state.getStatus()));
+        context,
+        requirementsReplyBuilder.buildReply(context),
+        chooseAction(hasExistingRequirements, context.getStatus()));
   }
 
-  private boolean hasExistingRequirements(JarvisAgentContext state) {
-    return !state.getUserRequirements().isEmpty();
+  private boolean hasExistingRequirements(JarvisAgentContext context) {
+    return !context.getUserRequirements().isEmpty();
   }
 
-  private boolean isFirstTurnOpener(JarvisAgentContext state, String userMessage) {
-    return !hasExistingRequirements(state) && turnClassifier.isOpener(userMessage);
+  private boolean isFirstTurnOpener(JarvisAgentContext context, String userMessage) {
+    return !hasExistingRequirements(context) && turnClassifier.isOpener(userMessage);
   }
 
-  private boolean isConfirmationTurn(JarvisAgentContext state, String userMessage) {
-    return hasExistingRequirements(state) && turnClassifier.isAffirmative(userMessage);
+  private boolean isConfirmationTurn(JarvisAgentContext context, String userMessage) {
+    return hasExistingRequirements(context) && turnClassifier.isAffirmative(userMessage);
   }
 
-  private boolean isUncertainTurn(JarvisAgentContext state, String userMessage) {
-    return hasExistingRequirements(state) && turnClassifier.isUncertain(userMessage);
+  private boolean isUncertainTurn(JarvisAgentContext context, String userMessage) {
+    return hasExistingRequirements(context) && turnClassifier.isUncertain(userMessage);
   }
 
-  private TurnResult startClarification(JarvisAgentContext state) {
-    initializeStateForClarification(state);
+  private TurnResult startClarification(JarvisAgentContext context) {
+    initializeStateForClarification(context);
     return new TurnResult(
-        state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+        context, requirementsReplyBuilder.buildReply(context), "clarification-requested");
   }
 
-  private TurnResult confirmRequirements(JarvisAgentContext state) {
-    state.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
+  private TurnResult confirmRequirements(JarvisAgentContext context) {
+    context.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
     return new TurnResult(
-        state, requirementsReplyBuilder.buildReply(state), "requirements-confirmed");
+        context, requirementsReplyBuilder.buildReply(context), "requirements-confirmed");
   }
 
-  private TurnResult requestClarification(JarvisAgentContext state) {
-    state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
+  private TurnResult requestClarification(JarvisAgentContext context) {
+    context.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
     return new TurnResult(
-        state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
+        context, requirementsReplyBuilder.buildReply(context), "clarification-requested");
   }
 
-  private UserRequirements updateRequirements(JarvisAgentContext state, String userMessage) {
+  private UserRequirements updateRequirements(JarvisAgentContext context, String userMessage) {
     return requirementsExtractor.extract(
-        hasExistingRequirements(state) ? state : null, userMessage);
+        hasExistingRequirements(context) ? context : null, userMessage);
   }
 
-  private void updateWorkflowState(JarvisAgentContext state, UserRequirements updatedRequirements) {
-    state.setUserRequirements(updatedRequirements);
-    state.setMissingInformation(
+  private void updateWorkflowState(
+      JarvisAgentContext context, UserRequirements updatedRequirements) {
+    context.setUserRequirements(updatedRequirements);
+    context.setMissingInformation(
         requirementsCompletionPolicy.missingCriticalFields(updatedRequirements.getMeal()));
-    state.setStatus(requirementsCompletionPolicy.decideStatus(state));
+    context.setStatus(requirementsCompletionPolicy.decideStatus(context));
   }
 
-  private void initializeStateForClarification(JarvisAgentContext state) {
+  private void initializeStateForClarification(JarvisAgentContext context) {
     UserRequirements userRequirements = new UserRequirements();
     userRequirements.setMeal(new Meal());
     userRequirements.setAttendees(List.of());
-    state.setUserRequirements(userRequirements);
-    state.setMissingInformation(REQUIRED_FIELDS);
-    state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    context.setUserRequirements(userRequirements);
+    context.setMissingInformation(REQUIRED_FIELDS);
+    context.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
   private String chooseAction(boolean hasExistingPlan, RequirementStatus status) {
