@@ -136,6 +136,7 @@ constraints before any restaurant search or booking happens.
 - identify explicit constraints
 - infer reasonable business-meal defaults
 - identify missing information
+- determine whether the request is search-ready
 - summarize understanding back to the user
 - ask for confirmation or correction
 - repeat until requirements are confirmed or clarification is needed
@@ -168,15 +169,63 @@ The `Status` section must end with one of:
 - `Waiting for clarification`
 - `Requirements confirmed`
 
+### Greeting And Session-Start Behavior
+
+The agent should not start with a blank chat.
+
+Each sample agent should be able to publish an initial assistant message when a session is
+created so the UI can immediately show:
+
+- what the agent does
+- what kind of input it expects
+- what the user should provide first
+
+For the business meal planner, the initial message should introduce Jarvis and explain that
+the planner first aligns on the meal requirements before searching or booking.
+
+If the user sends only a greeting or opener such as:
+
+- hi
+- hello
+- can you help
+
+then the agent should respond with a short orientation message instead of a generic
+clarification request.
+
+### Required Search-Ready Constraints
+
+Phase 1 should distinguish between:
+
+- requirements captured
+- requirements confirmed
+- requirements ready for restaurant search
+
+For this sample, the minimum required constraints to leave intent alignment are:
+
+- when
+  - date and time
+- where from
+  - origin address
+- how many
+  - party size
+
+The planner may confirm other constraints before these are complete, but it should not be
+considered search-ready until all three are present.
+
+For this teaching sample, `where` means a concrete origin address, not only a neighborhood.
+
 ### Mini Agentic Loop
 
 1. The user sends a free-form request.
 2. A model call maps the request into the known constraint categories.
-3. A second model call summarizes the constraint set into a user-facing response.
-4. The agent asks the user to confirm or correct its understanding.
-5. If the user confirms, Phase 1 completes.
-6. If the user corrects or adds constraints, the loop repeats.
-7. If the user response is too vague, the agent asks targeted clarification questions.
+3. Deterministic checks decide whether the minimum required search-ready fields are present.
+4. A second model call summarizes the constraint set into a user-facing response.
+5. The agent asks the user to confirm or correct its understanding.
+6. If the user confirms and the required search-ready constraints are present, Phase 1 completes.
+7. If the user confirms but required search-ready constraints are still missing, the agent asks
+   for the next missing required field.
+8. If the user corrects or adds constraints, the loop repeats.
+9. If the user response is too vague, the agent asks targeted clarification questions.
 
 ### Confirmation Behavior
 
@@ -200,6 +249,44 @@ then the constraints are merged and the loop repeats.
 
 If the user reply is not actionable, the agent should ask a targeted follow-up question
 instead of proceeding.
+
+### Clarification Priority
+
+When Phase 1 is missing search-ready fields, the agent should ask one targeted question at a
+time in this order:
+
+1. date and time
+2. origin address
+3. party size
+
+The agent should avoid broad follow-ups such as "please clarify the details" when a more
+specific question is possible.
+
+### Deterministic Checks Inside Phase 1
+
+Although Phase 2 is the main constraint-checking module, Phase 1 should already perform a
+small deterministic completeness check for the required search-ready fields:
+
+- has date and time
+- has origin address
+- has party size
+- is search-ready
+
+These are requirement-completeness checks, not restaurant-candidate validators.
+
+### Near-Term Implementation Plan
+
+The next implementation work should proceed in this order:
+
+1. `agent-core`: add a session-start hook so an agent can publish an initial assistant message
+   and optional initial state when a session is created
+2. `01-intent-alignment`: use that hook so Jarvis introduces itself and explains the minimum
+   information it needs
+3. `01-intent-alignment`: add deterministic greeting and opener detection
+4. `01-intent-alignment`: add required-slot tracking for date/time, origin address, and party size
+5. `01-intent-alignment`: ask targeted clarification questions in required-slot priority order
+6. `01-intent-alignment`: keep the Markdown artifact, but do not treat the phase as complete
+   until the request is search-ready
 
 ### Example Phase 1 Output
 
@@ -551,6 +638,7 @@ Fallback transitions:
 ### Phase 1
 
 - use `ChatClient` to map the user request into a Markdown constraint plan
+- use deterministic Java checks to determine whether the request is search-ready
 - use `ChatClient` again to produce a user-facing confirmation summary
 
 ### Phase 2
@@ -580,7 +668,11 @@ Fallback transitions:
 - the user intent is captured
 - explicit and inferred constraints are separated
 - missing information is surfaced
+- the user sees an initial orientation message when the session starts
+- greeting-only messages are handled with orientation rather than generic clarification
+- the minimum required search-ready constraints are checked deterministically
 - the user confirms the plan
+- the request is not allowed to leave Phase 1 until the required search-ready constraints are present
 
 ### Phase 2 succeeds when
 
