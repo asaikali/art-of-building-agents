@@ -132,11 +132,10 @@ constraints before any restaurant search or booking happens.
 
 ### Responsibilities
 
-- extract the user's intent
-- identify explicit constraints
-- infer reasonable business-meal defaults
-- identify missing information
-- determine whether the request is search-ready
+- capture the shared meal information
+- capture attendee-specific requirements
+- identify missing information needed to continue
+- determine whether the request should move to clarification or confirmation
 - summarize understanding back to the user
 - ask for confirmation or correction
 - repeat until requirements are confirmed or clarification is needed
@@ -150,16 +149,28 @@ constraints before any restaurant search or booking happens.
 
 ### Output
 
-Phase 1 uses a Markdown string as the planning artifact.
+Phase 1 uses a Markdown string as the inspector artifact, but the underlying captured input is now
+structured as:
+
+- `UserRequirements`
+  - `Meal`
+  - `List<Attendee>`
+
+Phase 1 workflow state is kept separately in agent context:
+
+- `JarvisAgentContext`
+  - `UserRequirements`
+  - `missingInformation`
+  - `RequirementStatus`
 
 The Markdown must contain these sections:
 
 ```md
-## Intent
-## Explicit Constraints
-## Inferred Constraints
+## Meal
+## Additional Requirements
+## Cuisine Preferences
+## Attendees
 ## Missing Information
-## Assumptions
 ## Status
 ```
 
@@ -168,6 +179,9 @@ The `Status` section must end with one of:
 - `Waiting for confirmation`
 - `Waiting for clarification`
 - `Requirements confirmed`
+
+This phase should not store inferred defaults, assumptions, validation output, or search/planning
+results inside the captured requirements model.
 
 ### Greeting And Session-Start Behavior
 
@@ -214,18 +228,41 @@ considered search-ready until all three are present.
 
 For this teaching sample, `where` means a concrete origin address, not only a neighborhood.
 
+### Open Product Decision: Origin As A Required Phase 1 Field
+
+This part of the specification is currently incomplete and must be confirmed before future
+sessions change the implementation.
+
+Current code behavior in `01-intent-alignment` treats these as the required completeness fields:
+
+- date
+- time
+- party size
+
+The current code does **not** require origin address before Phase 1 can move to
+`Waiting for confirmation`.
+
+The written product intent above still says Phase 1 search-ready requirements should include:
+
+- date and time
+- origin address
+- party size
+
+Until this is resolved, the current code behavior wins for implementation continuity. Future
+sessions should not silently reintroduce origin as a required Phase 1 field or rewrite the
+specification around the current implementation. They should stop and confirm the intended rule
+with the user first.
+
 ### Mini Agentic Loop
 
 1. The user sends a free-form request.
-2. A model call maps the request into the known constraint categories.
-3. Deterministic checks decide whether the minimum required search-ready fields are present.
-4. A second model call summarizes the constraint set into a user-facing response.
-5. The agent asks the user to confirm or correct its understanding.
-6. If the user confirms and the required search-ready constraints are present, Phase 1 completes.
-7. If the user confirms but required search-ready constraints are still missing, the agent asks
-   for the next missing required field.
-8. If the user corrects or adds constraints, the loop repeats.
-9. If the user response is too vague, the agent asks targeted clarification questions.
+2. A single model call maps the request into `UserRequirements`.
+3. Deterministic checks decide whether required fields are missing.
+4. Deterministic reply construction summarizes the current understanding and asks either for
+   confirmation or for the next missing field.
+5. If the user confirms, the requirements are marked confirmed.
+6. If the user corrects or adds information, the requirements are updated and the loop repeats.
+7. If the user response is too vague, the agent asks a targeted clarification question.
 
 ### Confirmation Behavior
 
@@ -268,51 +305,55 @@ Although Phase 2 is the main constraint-checking module, Phase 1 should already 
 small deterministic completeness check for the required search-ready fields:
 
 - has date and time
-- has origin address
 - has party size
-- is search-ready
+- can move to confirmation
+
+`Origin address` is intentionally omitted from the current implementation note above because the
+requirement is still under discussion. See `Open Product Decision: Origin As A Required Phase 1
+Field`.
 
 These are requirement-completeness checks, not restaurant-candidate validators.
 
 ### Near-Term Implementation Plan
 
-The next implementation work should proceed in this order:
+The current implementation direction should follow these conventions:
 
-1. `agent-core`: add a session-start hook so an agent can publish an initial assistant message
-   and optional initial state when a session is created
-2. `01-intent-alignment`: use that hook so Jarvis introduces itself and explains the minimum
-   information it needs
-3. `01-intent-alignment`: add deterministic greeting and opener detection
-4. `01-intent-alignment`: add required-slot tracking for date/time, origin address, and party size
-5. `01-intent-alignment`: ask targeted clarification questions in required-slot priority order
-6. `01-intent-alignment`: keep the Markdown artifact, but do not treat the phase as complete
-   until the request is search-ready
+1. `agent-core` owns shared session runtime concerns: chat, events, rendered state, and a
+   session-backed `AgentContext`.
+2. Each planner phase should keep the root package focused on application/bootstrap classes.
+3. Each planner phase should use an `.agent` package for the `AgentHandler` and agent-owned
+   workflow state.
+4. Stable captured user input should live in `.requirements`.
+5. Phase-specific logic around filling or checking those requirements should live in a nested
+   package such as `.requirements.alignment`.
+6. Phase 1 should keep the captured requirements model separate from workflow status and other
+   agent-runtime concerns.
 
 ### Example Phase 1 Output
 
 ```md
-## Intent
-Plan and book a business dinner.
+## Meal
+- Date: 2026-04-11
+- Time: 18:00
+- Party Size: 4
+- Meal Type: dinner
+- Purpose: Client dinner
+- Budget Per Person: 120
+- Noise Level: quiet
 
-## Explicit Constraints
-- Dinner tonight at 6:00 PM
-- 4 people
-- 1 vegetarian guest
-- Leaving the office at 5:30 PM
-- Booking is requested
+## Additional Requirements
+- Professional setting
 
-## Inferred Constraints
-- Venue should be suitable for business conversation
-- Noise level should be low to moderate
-- Travel time should allow arrival by 6:00 PM
+## Cuisine Preferences
+- Italian
+
+## Attendees
+- Name: Alex | Origin: Union Station | Departure Time: 17:30 | Travel Mode: transit | Max Travel Time: Missing | Max Distance: Missing | Dietary Constraints: vegetarian
 
 ## Missing Information
-- Office location
-- Budget or expense policy
-- Preferred travel mode
-
-## Assumptions
-- Business appropriateness matters unless the user says otherwise
+- Date
+- Time
+- Party Size
 
 ## Status
 Waiting for confirmation
