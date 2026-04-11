@@ -1,8 +1,8 @@
 package com.example.jarvis.requirements.alignment;
 
+import com.example.jarvis.agent.AgentState;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
-import com.example.jarvis.state.AgentState;
 import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;

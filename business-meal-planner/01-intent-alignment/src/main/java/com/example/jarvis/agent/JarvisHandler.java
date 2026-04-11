@@ -1,4 +1,4 @@
-package com.example.jarvis;
+package com.example.jarvis.agent;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
@@ -6,7 +6,6 @@ import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
 import com.example.jarvis.requirements.alignment.IntentAlignmentConversationService;
 import com.example.jarvis.requirements.alignment.IntentAlignmentMarkdownRenderer;
-import com.example.jarvis.state.AgentState;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 

@@ -2,14 +2,14 @@ package com.example.jarvis.requirements.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.jarvis.agent.AgentState;
+import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
 import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.NoiseLevel;
 import com.example.jarvis.requirements.TravelMode;
-import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.RequirementStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;

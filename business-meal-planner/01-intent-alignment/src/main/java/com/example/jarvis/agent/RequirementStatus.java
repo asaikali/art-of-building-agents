@@ -1,4 +1,4 @@
-package com.example.jarvis.state;
+package com.example.jarvis.agent;
 
 public enum RequirementStatus {
   WAITING_FOR_CONFIRMATION("Waiting for confirmation"),

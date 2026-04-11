@@ -1,8 +1,8 @@
 package com.example.jarvis.requirements.alignment;
 
+import com.example.jarvis.agent.AgentState;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
-import com.example.jarvis.state.AgentState;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.stereotype.Component;

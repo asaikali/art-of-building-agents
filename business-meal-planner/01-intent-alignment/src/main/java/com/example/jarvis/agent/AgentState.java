@@ -1,4 +1,4 @@
-package com.example.jarvis.state;
+package com.example.jarvis.agent;
 
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;

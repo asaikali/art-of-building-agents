@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.session.SessionId;
 import com.example.jarvis.IntentAlignmentApplication;
+import com.example.jarvis.agent.AgentState;
+import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
-import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.RequirementStatus;
 import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
