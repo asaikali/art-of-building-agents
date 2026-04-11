@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.NoiseLevel;
 import com.example.jarvis.requirements.TravelMode;
@@ -21,8 +21,8 @@ class JarvisAgentContextMarkdownTest {
   void rendersRequiredSectionsAndStatusLabel() {
     JarvisAgentContext state = new JarvisAgentContext();
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(
-        eventRequirements(
+    userRequirements.setMeal(
+        meal(
             LocalDate.of(2026, 4, 11),
             LocalTime.of(18, 0),
             4,
@@ -39,7 +39,7 @@ class JarvisAgentContextMarkdownTest {
 
     String markdown = state.toMarkdown();
 
-    assertThat(markdown).contains("## Event Requirements");
+    assertThat(markdown).contains("## Meal");
     assertThat(markdown).contains("Date: 2026-04-11");
     assertThat(markdown).contains("## Additional Requirements");
     assertThat(markdown).contains("## Cuisine Preferences");
@@ -54,7 +54,7 @@ class JarvisAgentContextMarkdownTest {
   void rendersNoneForEmptyLists() {
     JarvisAgentContext state = new JarvisAgentContext();
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(new EventRequirements());
+    userRequirements.setMeal(new Meal());
     userRequirements.setAttendees(List.of());
     state.setUserRequirements(userRequirements);
     state.setMissingInformation(List.of());
@@ -70,7 +70,7 @@ class JarvisAgentContextMarkdownTest {
     assertThat(markdown).contains("Waiting for clarification");
   }
 
-  private EventRequirements eventRequirements(
+  private Meal meal(
       LocalDate date,
       LocalTime time,
       Integer partySize,
@@ -80,17 +80,17 @@ class JarvisAgentContextMarkdownTest {
       NoiseLevel noiseLevel,
       List<String> additionalRequirements,
       List<String> cuisinePreferences) {
-    EventRequirements eventRequirements = new EventRequirements();
-    eventRequirements.setDate(date);
-    eventRequirements.setTime(time);
-    eventRequirements.setPartySize(partySize);
-    eventRequirements.setMealType(mealType);
-    eventRequirements.setPurpose(purpose);
-    eventRequirements.setBudgetPerPerson(budgetPerPerson);
-    eventRequirements.setNoiseLevel(noiseLevel);
-    eventRequirements.setAdditionalRequirements(additionalRequirements);
-    eventRequirements.setCuisinePreferences(cuisinePreferences);
-    return eventRequirements;
+    Meal meal = new Meal();
+    meal.setDate(date);
+    meal.setTime(time);
+    meal.setPartySize(partySize);
+    meal.setMealType(mealType);
+    meal.setPurpose(purpose);
+    meal.setBudgetPerPerson(budgetPerPerson);
+    meal.setNoiseLevel(noiseLevel);
+    meal.setAdditionalRequirements(additionalRequirements);
+    meal.setCuisinePreferences(cuisinePreferences);
+    return meal;
   }
 
   private Attendee attendee(String name, String origin, TravelMode travelMode) {

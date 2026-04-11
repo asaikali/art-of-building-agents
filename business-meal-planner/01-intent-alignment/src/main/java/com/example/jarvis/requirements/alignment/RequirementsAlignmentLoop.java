@@ -2,7 +2,7 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,7 @@ public class RequirementsAlignmentLoop {
         requirementsExtractor.extract(hasExistingContext ? state : null, userMessage);
     state.setUserRequirements(extracted);
     state.setMissingInformation(
-        requirementsCompletionPolicy.missingCriticalFields(extracted.getEventRequirements()));
+        requirementsCompletionPolicy.missingCriticalFields(extracted.getMeal()));
     state.setStatus(requirementsCompletionPolicy.decideStatus(state));
 
     return new TurnResult(
@@ -65,7 +65,7 @@ public class RequirementsAlignmentLoop {
 
   private void initializeStateForClarification(JarvisAgentContext state) {
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(new EventRequirements());
+    userRequirements.setMeal(new Meal());
     userRequirements.setAttendees(List.of());
     state.setUserRequirements(userRequirements);
     state.setMissingInformation(REQUIRED_FIELDS);

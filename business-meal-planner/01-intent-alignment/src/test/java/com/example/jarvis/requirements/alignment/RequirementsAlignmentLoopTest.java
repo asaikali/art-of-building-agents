@@ -6,7 +6,7 @@ import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.TravelMode;
 import com.example.jarvis.requirements.UserRequirements;
@@ -39,7 +39,7 @@ class RequirementsAlignmentLoopTest {
     JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
-            eventRequirements(
+            meal(
                 LocalDate.of(2026, 4, 11),
                 LocalTime.of(19, 0),
                 4,
@@ -54,8 +54,8 @@ class RequirementsAlignmentLoopTest {
     assertThat(result.eventName()).isEqualTo("plan-generated");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(result.assistantReply()).contains("Please confirm or correct");
-    assertThat(state.getUserRequirements().getEventRequirements())
-        .isSameAs(result.state().getUserRequirements().getEventRequirements());
+    assertThat(state.getUserRequirements().getMeal())
+        .isSameAs(result.state().getUserRequirements().getMeal());
   }
 
   @Test
@@ -63,8 +63,7 @@ class RequirementsAlignmentLoopTest {
     JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
-            eventRequirements(
-                LocalDate.of(2026, 4, 12), LocalTime.of(12, 0), 6, MealType.LUNCH, "Team lunch"),
+            meal(LocalDate.of(2026, 4, 12), LocalTime.of(12, 0), 6, MealType.LUNCH, "Team lunch"),
             List.of()));
     alignmentLoop.handleTurn(state, "I need a team lunch tomorrow for 6 people.");
 
@@ -80,7 +79,7 @@ class RequirementsAlignmentLoopTest {
     JarvisAgentContext state = new JarvisAgentContext();
     UserRequirements initialContext =
         planningContext(
-            eventRequirements(
+            meal(
                 LocalDate.of(2026, 4, 11),
                 LocalTime.of(19, 0),
                 4,
@@ -94,8 +93,7 @@ class RequirementsAlignmentLoopTest {
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
-    assertThat(result.state().getUserRequirements().getEventRequirements())
-        .isSameAs(initialContext.getEventRequirements());
+    assertThat(result.state().getUserRequirements().getMeal()).isSameAs(initialContext.getMeal());
     assertThat(result.assistantReply()).contains("next detail");
     assertThat(requirementsExtractor.extractCalls).isEqualTo(1);
   }
@@ -105,7 +103,7 @@ class RequirementsAlignmentLoopTest {
     JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
-            eventRequirements(
+            meal(
                 LocalDate.of(2026, 4, 11),
                 LocalTime.of(19, 0),
                 4,
@@ -116,7 +114,7 @@ class RequirementsAlignmentLoopTest {
 
     requirementsExtractor.extractedContexts.add(
         planningContext(
-            eventRequirements(
+            meal(
                 LocalDate.of(2026, 4, 12),
                 LocalTime.of(12, 0),
                 4,
@@ -128,7 +126,7 @@ class RequirementsAlignmentLoopTest {
         alignmentLoop.handleTurn(state, "Not dinner, it's lunch tomorrow.");
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
-    assertThat(result.state().getUserRequirements().getEventRequirements().getMealType())
+    assertThat(result.state().getUserRequirements().getMeal().getMealType())
         .isEqualTo(MealType.LUNCH);
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(requirementsExtractor.extractCalls).isEqualTo(2);
@@ -138,7 +136,7 @@ class RequirementsAlignmentLoopTest {
   void initialVagueRequestMovesDirectlyToClarification() {
     JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
-        planningContext(eventRequirements(null, null, null, null, "Business meal"), List.of()));
+        planningContext(meal(null, null, null, null, "Business meal"), List.of()));
 
     RequirementsAlignmentLoop.TurnResult result =
         alignmentLoop.handleTurn(state, "Help me plan something.");
@@ -160,15 +158,15 @@ class RequirementsAlignmentLoopTest {
     assertThat(requirementsExtractor.extractCalls).isZero();
   }
 
-  private EventRequirements eventRequirements(
+  private Meal meal(
       LocalDate date, LocalTime time, Integer partySize, MealType mealType, String purpose) {
-    EventRequirements eventRequirements = new EventRequirements();
-    eventRequirements.setDate(date);
-    eventRequirements.setTime(time);
-    eventRequirements.setPartySize(partySize);
-    eventRequirements.setMealType(mealType);
-    eventRequirements.setPurpose(purpose);
-    return eventRequirements;
+    Meal meal = new Meal();
+    meal.setDate(date);
+    meal.setTime(time);
+    meal.setPartySize(partySize);
+    meal.setMealType(mealType);
+    meal.setPurpose(purpose);
+    return meal;
   }
 
   private Attendee attendee(String name, String origin) {
@@ -180,10 +178,9 @@ class RequirementsAlignmentLoopTest {
     return attendee;
   }
 
-  private UserRequirements planningContext(
-      EventRequirements eventRequirements, List<Attendee> attendees) {
+  private UserRequirements planningContext(Meal meal, List<Attendee> attendees) {
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(eventRequirements);
+    userRequirements.setMeal(meal);
     userRequirements.setAttendees(attendees);
     return userRequirements;
   }

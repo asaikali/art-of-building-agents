@@ -6,7 +6,7 @@ import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.Arrays;
 import java.util.Locale;
@@ -175,7 +175,7 @@ class RequirementsAlignmentLoopIntegrationTest {
 
     private TranscriptTurn markdownHasRequiredSections() {
       String markdown = result.state().toMarkdown();
-      assertThat(markdown).contains("## Event Requirements");
+      assertThat(markdown).contains("## Meal");
       assertThat(markdown).contains("## Additional Requirements");
       assertThat(markdown).contains("## Cuisine Preferences");
       assertThat(markdown).contains("## Attendees");
@@ -187,27 +187,22 @@ class RequirementsAlignmentLoopIntegrationTest {
     private String flattenedState() {
       JarvisAgentContext state = result.state();
       UserRequirements userRequirements = state.getUserRequirements();
-      EventRequirements eventRequirements = userRequirements.getEventRequirements();
+      Meal meal = userRequirements.getMeal();
       String attendees =
           userRequirements.getAttendees().stream()
               .map(this::flattenAttendee)
               .collect(java.util.stream.Collectors.joining("\n"));
       return String.join(
               "\n",
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getDate()),
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getTime()),
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getPartySize()),
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getMealType()),
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getPurpose()),
-              String.valueOf(
-                  eventRequirements == null ? null : eventRequirements.getBudgetPerPerson()),
-              String.valueOf(eventRequirements == null ? null : eventRequirements.getNoiseLevel()),
-              eventRequirements == null
-                  ? ""
-                  : String.join("\n", eventRequirements.getAdditionalRequirements()),
-              eventRequirements == null
-                  ? ""
-                  : String.join("\n", eventRequirements.getCuisinePreferences()),
+              String.valueOf(meal == null ? null : meal.getDate()),
+              String.valueOf(meal == null ? null : meal.getTime()),
+              String.valueOf(meal == null ? null : meal.getPartySize()),
+              String.valueOf(meal == null ? null : meal.getMealType()),
+              String.valueOf(meal == null ? null : meal.getPurpose()),
+              String.valueOf(meal == null ? null : meal.getBudgetPerPerson()),
+              String.valueOf(meal == null ? null : meal.getNoiseLevel()),
+              meal == null ? "" : String.join("\n", meal.getAdditionalRequirements()),
+              meal == null ? "" : String.join("\n", meal.getCuisinePreferences()),
               attendees,
               String.join("\n", state.getMissingInformation()))
           .toLowerCase(Locale.ROOT);

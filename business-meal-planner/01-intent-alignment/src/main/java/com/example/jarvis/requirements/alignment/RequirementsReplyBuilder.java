@@ -2,7 +2,7 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,34 +31,34 @@ public class RequirementsReplyBuilder {
 
   private String buildConfirmationReply(JarvisAgentContext context) {
     UserRequirements userRequirements = context.getUserRequirements();
-    EventRequirements eventRequirements = userRequirements.getEventRequirements();
+    Meal meal = userRequirements.getMeal();
     List<String> summaryLines = new ArrayList<>();
     summaryLines.add("Here's my understanding so far:");
-    if (eventRequirements.getDate() != null) {
-      summaryLines.add("- Date: " + eventRequirements.getDate());
+    if (meal.getDate() != null) {
+      summaryLines.add("- Date: " + meal.getDate());
     }
-    if (eventRequirements.getTime() != null) {
-      summaryLines.add("- Time: " + eventRequirements.getTime());
+    if (meal.getTime() != null) {
+      summaryLines.add("- Time: " + meal.getTime());
     }
-    if (eventRequirements.getPartySize() != null) {
-      summaryLines.add("- Party Size: " + eventRequirements.getPartySize());
+    if (meal.getPartySize() != null) {
+      summaryLines.add("- Party Size: " + meal.getPartySize());
     }
-    if (eventRequirements.getMealType() != null) {
-      summaryLines.add("- Meal Type: " + humanize(eventRequirements.getMealType().name()));
+    if (meal.getMealType() != null) {
+      summaryLines.add("- Meal Type: " + humanize(meal.getMealType().name()));
     }
-    if (eventRequirements.getPurpose() != null) {
-      summaryLines.add("- Purpose: " + eventRequirements.getPurpose());
+    if (meal.getPurpose() != null) {
+      summaryLines.add("- Purpose: " + meal.getPurpose());
     }
-    if (eventRequirements.getBudgetPerPerson() != null) {
-      summaryLines.add("- Budget Per Person: " + eventRequirements.getBudgetPerPerson());
+    if (meal.getBudgetPerPerson() != null) {
+      summaryLines.add("- Budget Per Person: " + meal.getBudgetPerPerson());
     }
-    if (eventRequirements.getNoiseLevel() != null) {
-      summaryLines.add("- Noise Level: " + humanize(eventRequirements.getNoiseLevel().name()));
+    if (meal.getNoiseLevel() != null) {
+      summaryLines.add("- Noise Level: " + humanize(meal.getNoiseLevel().name()));
     }
-    for (String cuisinePreference : eventRequirements.getCuisinePreferences()) {
+    for (String cuisinePreference : meal.getCuisinePreferences()) {
       summaryLines.add("- Cuisine Preference: " + cuisinePreference);
     }
-    for (String requirement : eventRequirements.getAdditionalRequirements()) {
+    for (String requirement : meal.getAdditionalRequirements()) {
       summaryLines.add("- Requirement: " + requirement);
     }
     for (Attendee attendee : userRequirements.getAttendees()) {

@@ -6,8 +6,8 @@
  * aggregate is {@link com.example.jarvis.requirements.UserRequirements}, which groups:
  *
  * <ul>
- *   <li>{@link com.example.jarvis.requirements.EventRequirements} for requirements that apply to
- *       the meal as a whole
+ *   <li>{@link com.example.jarvis.requirements.Meal} for information that applies to the meal as a
+ *       whole
  *   <li>{@link com.example.jarvis.requirements.Attendee} for requirements that vary by person
  * </ul>
  *

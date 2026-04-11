@@ -2,7 +2,7 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
@@ -20,10 +20,10 @@ public class RequirementsExtractor {
       Do not infer search areas, validation results, readiness flags, or planning logic.
 
       Modeling rules:
-      - Event requirements describe the meal as a whole.
+      - Meal describes the shared facts about the meal as a whole.
       - Attendees describe person-specific needs.
       - If something varies by person, put it on an attendee.
-      - If something applies to the whole meal, put it on eventRequirements.
+      - If something applies to the whole meal, put it on meal.
       - Preserve valid existing information unless the new message corrects it.
       - Keep additionalRequirements and cuisinePreferences short and concrete.
       - Do not recommend restaurants.
@@ -72,10 +72,10 @@ public class RequirementsExtractor {
 
   private String toJson(JarvisAgentContext state) {
     UserRequirements userRequirements = state.getUserRequirements();
-    EventRequirements eventRequirements = userRequirements.getEventRequirements();
+    Meal meal = userRequirements.getMeal();
     return """
         {
-          "eventRequirements": {
+          "meal": {
             "date": %s,
             "time": %s,
             "partySize": %s,
@@ -90,19 +90,15 @@ public class RequirementsExtractor {
         }
         """
         .formatted(
-            toJsonValue(eventRequirements.getDate()),
-            toJsonValue(eventRequirements.getTime()),
-            eventRequirements.getPartySize() == null
-                ? "null"
-                : eventRequirements.getPartySize().toString(),
-            toJsonValue(eventRequirements.getMealType()),
-            toJsonValue(eventRequirements.getPurpose()),
-            eventRequirements.getBudgetPerPerson() == null
-                ? "null"
-                : eventRequirements.getBudgetPerPerson().toPlainString(),
-            toJsonValue(eventRequirements.getNoiseLevel()),
-            toJsonArray(eventRequirements.getAdditionalRequirements()),
-            toJsonArray(eventRequirements.getCuisinePreferences()),
+            toJsonValue(meal.getDate()),
+            toJsonValue(meal.getTime()),
+            meal.getPartySize() == null ? "null" : meal.getPartySize().toString(),
+            toJsonValue(meal.getMealType()),
+            toJsonValue(meal.getPurpose()),
+            meal.getBudgetPerPerson() == null ? "null" : meal.getBudgetPerPerson().toPlainString(),
+            toJsonValue(meal.getNoiseLevel()),
+            toJsonArray(meal.getAdditionalRequirements()),
+            toJsonArray(meal.getCuisinePreferences()),
             toAttendeeJsonArray(userRequirements.getAttendees()));
   }
 

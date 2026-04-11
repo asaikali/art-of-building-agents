@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,11 +16,10 @@ class RequirementsCompletionPolicyTest {
 
   @Test
   void returnsMissingCriticalFields() {
-    EventRequirements requirements = new EventRequirements();
-    requirements.setDate(LocalDate.of(2026, 4, 11));
+    Meal meal = new Meal();
+    meal.setDate(LocalDate.of(2026, 4, 11));
 
-    assertThat(completionPolicy.missingCriticalFields(requirements))
-        .containsExactly("Time", "Party Size");
+    assertThat(completionPolicy.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
   }
 
   @Test
@@ -35,17 +34,17 @@ class RequirementsCompletionPolicyTest {
 
   @Test
   void waitsForConfirmationWhenCriticalFieldsArePresent() {
-    EventRequirements requirements = new EventRequirements();
-    requirements.setDate(LocalDate.of(2026, 4, 11));
-    requirements.setTime(LocalTime.of(19, 0));
-    requirements.setPartySize(4);
+    Meal meal = new Meal();
+    meal.setDate(LocalDate.of(2026, 4, 11));
+    meal.setTime(LocalTime.of(19, 0));
+    meal.setPartySize(4);
 
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(requirements);
+    userRequirements.setMeal(meal);
 
     JarvisAgentContext context = new JarvisAgentContext();
     context.setUserRequirements(userRequirements);
-    context.setMissingInformation(completionPolicy.missingCriticalFields(requirements));
+    context.setMissingInformation(completionPolicy.missingCriticalFields(meal));
 
     assertThat(completionPolicy.decideStatus(context))
         .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);

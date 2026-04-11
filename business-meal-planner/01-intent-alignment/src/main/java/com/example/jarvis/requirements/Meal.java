@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Captures the requirements that apply to the meal as a whole.
+ * Captures the shared information about the meal being planned.
  *
- * <p>{@code EventRequirements} is the shared description of the event itself: when the meal
- * happens, what kind of meal it is, and what the overall experience should support. It stays
- * focused on captured input so later phases can build planning and decision logic on top of a
- * stable representation of what the user wants.
+ * <p>{@code Meal} is the shared description of the meal itself: when it happens, what kind of meal
+ * it is, and what the overall experience should support. It stays focused on captured input so
+ * later phases can build planning and decision logic on top of a stable representation of what the
+ * user wants.
  */
-public class EventRequirements {
+public class Meal {
 
   private LocalDate date;
   private LocalTime time;
@@ -26,7 +26,7 @@ public class EventRequirements {
   private List<String> additionalRequirements = List.of();
   private List<String> cuisinePreferences = List.of();
 
-  public EventRequirements() {}
+  public Meal() {}
 
   public LocalDate getDate() {
     return date;
@@ -102,7 +102,7 @@ public class EventRequirements {
 
   public String toMarkdown() {
     return """
-        ## Event Requirements
+        ## Meal
         - Date: %s
         - Time: %s
         - Party Size: %s

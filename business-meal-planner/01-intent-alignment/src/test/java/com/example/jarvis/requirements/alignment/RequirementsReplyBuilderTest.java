@@ -6,7 +6,7 @@ import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.TravelMode;
 import com.example.jarvis.requirements.UserRequirements;
@@ -31,12 +31,12 @@ class RequirementsReplyBuilderTest {
 
   @Test
   void buildsConfirmationReplyFromCapturedContext() {
-    EventRequirements requirements = new EventRequirements();
-    requirements.setDate(LocalDate.of(2026, 4, 11));
-    requirements.setTime(LocalTime.of(19, 0));
-    requirements.setPartySize(4);
-    requirements.setMealType(MealType.DINNER);
-    requirements.setPurpose("Client dinner");
+    Meal meal = new Meal();
+    meal.setDate(LocalDate.of(2026, 4, 11));
+    meal.setTime(LocalTime.of(19, 0));
+    meal.setPartySize(4);
+    meal.setMealType(MealType.DINNER);
+    meal.setPurpose("Client dinner");
 
     Attendee attendee = new Attendee();
     attendee.setName("Alex");
@@ -46,7 +46,7 @@ class RequirementsReplyBuilderTest {
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
 
     UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setEventRequirements(requirements);
+    userRequirements.setMeal(meal);
     userRequirements.setAttendees(List.of(attendee));
 
     JarvisAgentContext context = new JarvisAgentContext();
