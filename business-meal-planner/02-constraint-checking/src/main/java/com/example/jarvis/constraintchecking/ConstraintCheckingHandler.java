@@ -1,4 +1,4 @@
-package com.example.businessmealplanner.decisionsupport;
+package com.example.jarvis.constraintchecking;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
@@ -14,18 +14,18 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DecisionSupportHandler implements AgentHandler {
+public class ConstraintCheckingHandler implements AgentHandler {
 
   private final ChatClient chatClient;
   private final AtomicInteger turnCounter = new AtomicInteger(0);
 
-  public DecisionSupportHandler(ChatClient.Builder chatClientBuilder) {
+  public ConstraintCheckingHandler(ChatClient.Builder chatClientBuilder) {
     this.chatClient = chatClientBuilder.build();
   }
 
   @Override
   public String getName() {
-    return "04 - Decision Support";
+    return "02 - Constraint Checking";
   }
 
   @Override
@@ -53,10 +53,10 @@ public class DecisionSupportHandler implements AgentHandler {
   }
 
   private String buildState(int turn, String status) {
-    return "## Decision Support\n\n| Field | Value |\n|-------|-------|\n| Turn | "
+    return "## Constraint Checking\n\n| Field | Value |\n|-------|-------|\n| Turn | "
         + turn
         + " |\n| Status | "
         + status
-        + " |\n| Phase | 04-decision-support |\n";
+        + " |\n| Phase | 02-constraint-checking |\n";
   }
 }

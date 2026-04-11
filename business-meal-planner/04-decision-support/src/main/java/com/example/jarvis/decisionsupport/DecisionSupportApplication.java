@@ -1,12 +1,12 @@
-package com.example.businessmealplanner.constraintchecking;
+package com.example.jarvis.decisionsupport;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ConstraintCheckingApplication {
+public class DecisionSupportApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(ConstraintCheckingApplication.class, args);
+    SpringApplication.run(DecisionSupportApplication.class, args);
   }
 }

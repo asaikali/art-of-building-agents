@@ -1,12 +1,12 @@
-package com.example.businessmealplanner.restaurantplanning;
+package com.example.jarvis.constraintchecking;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RestaurantPlanningApplication {
+public class ConstraintCheckingApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(RestaurantPlanningApplication.class, args);
+    SpringApplication.run(ConstraintCheckingApplication.class, args);
   }
 }

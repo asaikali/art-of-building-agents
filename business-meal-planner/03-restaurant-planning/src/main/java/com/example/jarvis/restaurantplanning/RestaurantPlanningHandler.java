@@ -1,4 +1,4 @@
-package com.example.businessmealplanner.restaurantplanning;
+package com.example.jarvis.restaurantplanning;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
