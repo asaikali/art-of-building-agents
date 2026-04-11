@@ -1,4 +1,4 @@
-package com.example.businessmealplanner.intentalignment;
+package com.example.jarvis;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

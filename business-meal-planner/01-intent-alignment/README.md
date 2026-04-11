@@ -1,21 +1,29 @@
 # 01 Intent Alignment
 
-Phase 1 scaffold for the business meal planner.
+Phase 1 of the business meal planner. This sample turns a messy user request into a
+confirmed planning artifact before any restaurant search or booking happens.
 
 ## Purpose
 
-This sample app will evolve into the intent-alignment phase that:
+This module now demonstrates:
 
-- extracts user constraints
-- summarizes the user's intent
-- asks for confirmation or corrections
+- extracting intent and explicit constraints
+- inferring reasonable business-meal defaults
+- surfacing missing information and assumptions
+- summarizing understanding back to the user
+- looping on confirmation, correction, or clarification
 
 ## What's here
 
 | File | Purpose |
 |------|---------|
-| `IntentAlignmentApplication.java` | Spring Boot entry point |
-| `IntentAlignmentHandler.java` | Minimal `AgentHandler` backed by a bare `ChatClient` |
+| `IntentAlignmentApplication.java` | Spring Boot entry point in `com.example.jarvis` |
+| `JarvisHandler.java` | Single agent handler wired into `agent-core` |
+| `IntentAlignmentConversationService.java` | Turn orchestration for initial, confirm, correct, and clarify flows |
+| `ChatClientIntentAlignmentModelClient.java` | Two `ChatClient` calls: plan extraction and user-facing summary |
+| `IntentAlignmentMarkdownRenderer.java` | Renders the required phase-one Markdown artifact |
+| `BusinessMealRequirements.java` | Alignment-owned requirements object |
+| `IntentAlignmentSessionStore.java` | Module-local per-session plan memory |
 | `application.yml` | Local app and model configuration |
 
 ## Run it
