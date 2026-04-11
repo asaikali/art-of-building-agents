@@ -1,6 +1,6 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.jarvis.agent.AgentState;
+import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
 import java.util.List;
@@ -42,7 +42,7 @@ public class RequirementsExtractor {
     this.extractionClient = null;
   }
 
-  public ExtractedPlanningContext extract(AgentState existingState, String userMessage) {
+  public ExtractedPlanningContext extract(JarvisAgentContext existingState, String userMessage) {
     String prompt =
         existingState == null || existingState.getEventRequirements() == null
             ? """
@@ -72,7 +72,7 @@ public class RequirementsExtractor {
     return extracted;
   }
 
-  private String toJson(AgentState state) {
+  private String toJson(JarvisAgentContext state) {
     EventRequirements eventRequirements = state.getEventRequirements();
     return """
         {

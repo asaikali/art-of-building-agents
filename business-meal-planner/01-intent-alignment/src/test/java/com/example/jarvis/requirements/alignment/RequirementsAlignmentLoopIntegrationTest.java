@@ -2,9 +2,8 @@ package com.example.jarvis.requirements.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.agent.core.session.SessionId;
 import com.example.jarvis.IntentAlignmentApplication;
-import com.example.jarvis.agent.AgentState;
+import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
@@ -27,7 +26,7 @@ class RequirementsAlignmentLoopIntegrationTest {
 
   @Test
   void supportsLongBackAndForthTranscriptAgainstConfiguredModel() {
-    TranscriptScenario scenario = scenario(10_001);
+    TranscriptScenario scenario = scenario();
 
     scenario
         .user(
@@ -71,7 +70,7 @@ class RequirementsAlignmentLoopIntegrationTest {
 
   @Test
   void supportsClarifyThenConfirmTranscriptAgainstConfiguredModel() {
-    TranscriptScenario scenario = scenario(10_002);
+    TranscriptScenario scenario = scenario();
 
     scenario
         .user("Help me plan a business meal.")
@@ -99,20 +98,15 @@ class RequirementsAlignmentLoopIntegrationTest {
         .assistantMentionsAnyOf("confirmed", "requirements are confirmed");
   }
 
-  private TranscriptScenario scenario(int sessionIdValue) {
-    return new TranscriptScenario(new SessionId(sessionIdValue));
+  private TranscriptScenario scenario() {
+    return new TranscriptScenario();
   }
 
   private final class TranscriptScenario {
-
-    private final SessionId sessionId;
-
-    private TranscriptScenario(SessionId sessionId) {
-      this.sessionId = sessionId;
-    }
+    private final JarvisAgentContext state = new JarvisAgentContext();
 
     private TranscriptTurn user(String text) {
-      return new TranscriptTurn(alignmentLoop.handleTurn(sessionId, text));
+      return new TranscriptTurn(alignmentLoop.handleTurn(state, text));
     }
   }
 
@@ -190,7 +184,7 @@ class RequirementsAlignmentLoopIntegrationTest {
     }
 
     private String flattenedState() {
-      AgentState state = result.state();
+      JarvisAgentContext state = result.state();
       EventRequirements eventRequirements = state.getEventRequirements();
       String attendees =
           state.getAttendees().stream()

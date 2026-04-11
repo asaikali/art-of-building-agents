@@ -10,6 +10,7 @@ import com.example.agent.core.state.StateService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Facade giving an agent a single object to interact with. Created by {@link SessionManager};
@@ -22,6 +23,7 @@ public class Session {
   private final String title;
   private final Instant createdAt;
   private volatile Instant lastUpdatedAt;
+  private volatile AgentContext agentContext;
 
   private final ChatService chatService;
   private final EventService eventService;
@@ -66,6 +68,20 @@ public class Session {
     var revision = stateService.setState(sessionId, markdown);
     touch();
     return revision;
+  }
+
+  public Optional<AgentContext> getAgentContext() {
+    return Optional.ofNullable(agentContext);
+  }
+
+  public void setAgentContext(AgentContext agentContext) {
+    this.agentContext = agentContext;
+    touch();
+  }
+
+  public void clearAgentContext() {
+    this.agentContext = null;
+    touch();
   }
 
   // ── metadata ────────────────────────────────────────────────────────

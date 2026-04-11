@@ -38,8 +38,8 @@ public class JarvisHandler implements AgentHandler {
     session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));
 
     RequirementsAlignmentLoop.TurnResult result =
-        requirementsAlignmentLoop.handleTurn(session.id(), message.text());
-    AgentState state = result.state();
+        requirementsAlignmentLoop.handleTurn(session, message.text());
+    JarvisAgentContext state = result.state();
 
     session.logEvent(
         result.eventName(),

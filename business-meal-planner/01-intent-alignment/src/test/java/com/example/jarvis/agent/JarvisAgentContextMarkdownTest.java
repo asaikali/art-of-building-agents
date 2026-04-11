@@ -14,11 +14,11 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class AgentStateMarkdownTest {
+class JarvisAgentContextMarkdownTest {
 
   @Test
   void rendersRequiredSectionsAndStatusLabel() {
-    AgentState state = new AgentState();
+    JarvisAgentContext state = new JarvisAgentContext();
     state.setEventRequirements(
         eventRequirements(
             LocalDate.of(2026, 4, 11),
@@ -49,7 +49,7 @@ class AgentStateMarkdownTest {
 
   @Test
   void rendersNoneForEmptyLists() {
-    AgentState state = new AgentState();
+    JarvisAgentContext state = new JarvisAgentContext();
     state.setEventRequirements(new EventRequirements());
     state.setAttendees(List.of());
     state.setMissingInformation(List.of());

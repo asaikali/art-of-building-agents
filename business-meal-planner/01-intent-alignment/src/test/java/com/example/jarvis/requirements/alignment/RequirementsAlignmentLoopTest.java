@@ -2,8 +2,7 @@ package com.example.jarvis.requirements.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.agent.core.session.SessionId;
-import com.example.jarvis.agent.AgentState;
+import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
@@ -31,7 +30,7 @@ class RequirementsAlignmentLoopTest {
 
   @Test
   void initialRequestCreatesPlanAndWaitsForConfirmation() {
-    SessionId sessionId = new SessionId(1);
+    JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
             eventRequirements(
@@ -44,26 +43,25 @@ class RequirementsAlignmentLoopTest {
 
     RequirementsAlignmentLoop.TurnResult result =
         alignmentLoop.handleTurn(
-            sessionId, "Book a client dinner tonight at 7 PM for four people from 100 King St W.");
+            state, "Book a client dinner tonight at 7 PM for four people from 100 King St W.");
 
     assertThat(result.eventName()).isEqualTo("plan-generated");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(result.assistantReply()).contains("Please confirm or correct");
-    assertThat(alignmentLoop.getState(sessionId).map(AgentState::getEventRequirements))
-        .hasValue(result.state().getEventRequirements());
+    assertThat(state.getEventRequirements()).isSameAs(result.state().getEventRequirements());
   }
 
   @Test
   void affirmativeReplyConfirmsExistingRequirements() {
-    SessionId sessionId = new SessionId(2);
+    JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
             eventRequirements(
                 LocalDate.of(2026, 4, 12), LocalTime.of(12, 0), 6, MealType.LUNCH, "Team lunch"),
             List.of()));
-    alignmentLoop.handleTurn(sessionId, "I need a team lunch tomorrow for 6 people.");
+    alignmentLoop.handleTurn(state, "I need a team lunch tomorrow for 6 people.");
 
-    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(sessionId, "yes");
+    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(state, "yes");
 
     assertThat(result.eventName()).isEqualTo("requirements-confirmed");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
@@ -72,7 +70,7 @@ class RequirementsAlignmentLoopTest {
 
   @Test
   void nonActionableReplyRequestsClarificationWithoutChangingContext() {
-    SessionId sessionId = new SessionId(3);
+    JarvisAgentContext state = new JarvisAgentContext();
     RequirementsExtractor.ExtractedPlanningContext initialContext =
         planningContext(
             eventRequirements(
@@ -83,9 +81,9 @@ class RequirementsAlignmentLoopTest {
                 "Business dinner"),
             List.of(attendee("Alex", "Union Station")));
     requirementsExtractor.extractedContexts.add(initialContext);
-    alignmentLoop.handleTurn(sessionId, "I need a business dinner tonight for 4 people.");
+    alignmentLoop.handleTurn(state, "I need a business dinner tonight for 4 people.");
 
-    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(sessionId, "not sure");
+    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(state, "not sure");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
@@ -97,7 +95,7 @@ class RequirementsAlignmentLoopTest {
 
   @Test
   void correctiveReplyRevisesPlanAndReturnsToConfirmation() {
-    SessionId sessionId = new SessionId(4);
+    JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(
             eventRequirements(
@@ -107,7 +105,7 @@ class RequirementsAlignmentLoopTest {
                 MealType.DINNER,
                 "Business dinner"),
             List.of()));
-    alignmentLoop.handleTurn(sessionId, "I need a business dinner tonight for 4 people.");
+    alignmentLoop.handleTurn(state, "I need a business dinner tonight for 4 people.");
 
     requirementsExtractor.extractedContexts.add(
         planningContext(
@@ -120,7 +118,7 @@ class RequirementsAlignmentLoopTest {
             List.of(attendee("Alex", "Union Station"))));
 
     RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(sessionId, "Not dinner, it's lunch tomorrow.");
+        alignmentLoop.handleTurn(state, "Not dinner, it's lunch tomorrow.");
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
     assertThat(result.state().getEventRequirements().getMealType()).isEqualTo(MealType.LUNCH);
@@ -130,12 +128,12 @@ class RequirementsAlignmentLoopTest {
 
   @Test
   void initialVagueRequestMovesDirectlyToClarification() {
-    SessionId sessionId = new SessionId(5);
+    JarvisAgentContext state = new JarvisAgentContext();
     requirementsExtractor.extractedContexts.add(
         planningContext(eventRequirements(null, null, null, null, "Business meal"), List.of()));
 
     RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(sessionId, "Help me plan something.");
+        alignmentLoop.handleTurn(state, "Help me plan something.");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
@@ -144,9 +142,9 @@ class RequirementsAlignmentLoopTest {
 
   @Test
   void openerCreatesStarterPlanWithoutCallingModel() {
-    SessionId sessionId = new SessionId(6);
+    JarvisAgentContext state = new JarvisAgentContext();
 
-    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(sessionId, "hello");
+    RequirementsAlignmentLoop.TurnResult result = alignmentLoop.handleTurn(state, "hello");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
@@ -194,7 +192,7 @@ class RequirementsAlignmentLoopTest {
 
     @Override
     public RequirementsExtractor.ExtractedPlanningContext extract(
-        AgentState existingState, String userMessage) {
+        JarvisAgentContext existingState, String userMessage) {
       extractCalls++;
       return extractedContexts.remove();
     }

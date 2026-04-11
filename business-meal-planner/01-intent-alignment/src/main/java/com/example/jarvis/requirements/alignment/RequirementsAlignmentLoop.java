@@ -1,15 +1,13 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.agent.core.session.SessionId;
-import com.example.jarvis.agent.AgentState;
+import com.example.agent.core.session.Session;
+import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,15 +46,27 @@ public class RequirementsAlignmentLoop {
   private static final List<String> REQUIRED_FIELDS = List.of("Date", "Time", "Party Size");
 
   private final RequirementsExtractor requirementsExtractor;
-  private final ConcurrentHashMap<SessionId, AgentState> statesBySession =
-      new ConcurrentHashMap<>();
 
   public RequirementsAlignmentLoop(RequirementsExtractor requirementsExtractor) {
     this.requirementsExtractor = requirementsExtractor;
   }
 
-  public TurnResult handleTurn(SessionId sessionId, String userMessage) {
-    AgentState state = statesBySession.computeIfAbsent(sessionId, id -> new AgentState());
+  public TurnResult handleTurn(Session session, String userMessage) {
+    JarvisAgentContext state =
+        session
+            .getAgentContext()
+            .filter(JarvisAgentContext.class::isInstance)
+            .map(JarvisAgentContext.class::cast)
+            .orElseGet(
+                () -> {
+                  JarvisAgentContext newContext = new JarvisAgentContext();
+                  session.setAgentContext(newContext);
+                  return newContext;
+                });
+    return handleTurn(state, userMessage);
+  }
+
+  TurnResult handleTurn(JarvisAgentContext state, String userMessage) {
     boolean hasExistingContext =
         state.getEventRequirements() != null || !state.getAttendees().isEmpty();
 
@@ -86,18 +96,14 @@ public class RequirementsAlignmentLoop {
         state, buildReply(state), chooseAction(hasExistingContext, state.getStatus()));
   }
 
-  Optional<AgentState> getState(SessionId sessionId) {
-    return Optional.ofNullable(statesBySession.get(sessionId));
-  }
-
-  private void initializeStateForClarification(AgentState state) {
+  private void initializeStateForClarification(JarvisAgentContext state) {
     state.setEventRequirements(new EventRequirements());
     state.setAttendees(List.of());
     state.setMissingInformation(REQUIRED_FIELDS);
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
-  private RequirementStatus decideStatus(AgentState state) {
+  private RequirementStatus decideStatus(JarvisAgentContext state) {
     if (!state.getMissingInformation().isEmpty()) {
       return RequirementStatus.WAITING_FOR_CLARIFICATION;
     }
@@ -111,7 +117,7 @@ public class RequirementsAlignmentLoop {
     return hasExistingPlan ? "plan-updated" : "plan-generated";
   }
 
-  private String buildReply(AgentState state) {
+  private String buildReply(JarvisAgentContext state) {
     return switch (state.getStatus()) {
       case REQUIREMENTS_CONFIRMED -> "Great. I've captured the requirements and they're confirmed.";
       case WAITING_FOR_CLARIFICATION -> buildClarificationReply(state);
@@ -119,7 +125,7 @@ public class RequirementsAlignmentLoop {
     };
   }
 
-  private String buildClarificationReply(AgentState state) {
+  private String buildClarificationReply(JarvisAgentContext state) {
     List<String> missing = state.getMissingInformation();
     String field = missing.isEmpty() ? "next detail" : missing.getFirst();
 
@@ -128,7 +134,7 @@ public class RequirementsAlignmentLoop {
         + "?";
   }
 
-  private String buildConfirmationReply(AgentState state) {
+  private String buildConfirmationReply(JarvisAgentContext state) {
     EventRequirements eventRequirements = state.getEventRequirements();
     List<String> summaryLines = new ArrayList<>();
     summaryLines.add("Here's my understanding so far:");
@@ -211,7 +217,7 @@ public class RequirementsAlignmentLoop {
     return value.toLowerCase(Locale.ROOT).replace('_', ' ');
   }
 
-  public record TurnResult(AgentState state, String assistantReply, String eventName) {}
+  public record TurnResult(JarvisAgentContext state, String assistantReply, String eventName) {}
 
   static boolean isAffirmative(String text) {
     String normalized = normalize(text);

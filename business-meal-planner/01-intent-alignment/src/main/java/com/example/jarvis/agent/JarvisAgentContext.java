@@ -1,10 +1,11 @@
 package com.example.jarvis.agent;
 
+import com.example.agent.core.session.AgentContext;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
 import java.util.List;
 
-public class AgentState {
+public class JarvisAgentContext implements AgentContext {
 
   private EventRequirements eventRequirements;
   private List<Attendee> attendees = List.of();
