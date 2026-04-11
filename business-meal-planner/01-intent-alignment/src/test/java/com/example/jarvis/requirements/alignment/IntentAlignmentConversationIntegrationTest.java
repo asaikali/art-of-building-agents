@@ -1,11 +1,11 @@
-package com.example.jarvis.alignment;
+package com.example.jarvis.requirements.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.session.SessionId;
 import com.example.jarvis.IntentAlignmentApplication;
-import com.example.jarvis.planning.requirements.Attendee;
-import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.requirements.Attendee;
+import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
 import com.example.jarvis.state.RequirementStatus;
 import java.util.Arrays;

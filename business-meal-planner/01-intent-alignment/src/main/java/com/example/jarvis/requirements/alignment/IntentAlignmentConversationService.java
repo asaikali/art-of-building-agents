@@ -1,8 +1,8 @@
-package com.example.jarvis.alignment;
+package com.example.jarvis.requirements.alignment;
 
 import com.example.agent.core.session.SessionId;
-import com.example.jarvis.planning.requirements.Attendee;
-import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.requirements.Attendee;
+import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
 import com.example.jarvis.state.RequirementStatus;
 import java.util.ArrayList;

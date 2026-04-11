@@ -1,4 +1,4 @@
-package com.example.jarvis.planning.requirements;
+package com.example.jarvis.requirements;
 
 public enum NoiseLevel {
   QUIET,

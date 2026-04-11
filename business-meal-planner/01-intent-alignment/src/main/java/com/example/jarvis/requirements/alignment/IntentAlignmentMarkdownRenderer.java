@@ -1,7 +1,7 @@
-package com.example.jarvis.alignment;
+package com.example.jarvis.requirements.alignment;
 
-import com.example.jarvis.planning.requirements.Attendee;
-import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.requirements.Attendee;
+import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
 import java.util.List;
 import java.util.Locale;

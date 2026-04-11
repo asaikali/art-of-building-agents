@@ -1,7 +1,7 @@
 package com.example.jarvis.state;
 
-import com.example.jarvis.planning.requirements.Attendee;
-import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.requirements.Attendee;
+import com.example.jarvis.requirements.EventRequirements;
 import java.util.List;
 
 public class AgentState {
