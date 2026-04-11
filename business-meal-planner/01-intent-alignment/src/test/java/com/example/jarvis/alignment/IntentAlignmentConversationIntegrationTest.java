@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.session.SessionId;
 import com.example.jarvis.IntentAlignmentApplication;
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.UserGoals;
+import com.example.jarvis.state.RequirementStatus;
 import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
@@ -14,17 +16,6 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * Real-model integration test for transcript-style alignment scenarios.
- *
- * <p>Opt-in only:
- *
- * <pre>
- * ./mvnw -pl business-meal-planner/01-intent-alignment \
- *   -Djarvis.openai.integration=true \
- *   -Dtest=IntentAlignmentConversationIntegrationTest test
- * </pre>
- */
 @SpringBootTest(
     classes = IntentAlignmentApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -48,7 +39,7 @@ class IntentAlignmentConversationIntegrationTest {
             """)
         .hasEventName("plan-generated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .goalsMention("dinner", "vegetarian", "professional")
+        .stateMentions("dinner", "vegetarian", "quiet")
         .assistantMentionsAnyOf("confirm", "correct")
         .markdownHasRequiredSections();
 
@@ -56,8 +47,8 @@ class IntentAlignmentConversationIntegrationTest {
         .user("Don't book yet. I'm leaving from Union Station. Keep it under 120 CAD per person.")
         .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .goalsMention("120")
-        .goalsMentionAnyOf("union", "station")
+        .stateMentions("120")
+        .stateMentionsAnyOf("union", "station")
         .assistantMentionsAnyOf("confirm", "correct");
 
     scenario
@@ -70,7 +61,7 @@ class IntentAlignmentConversationIntegrationTest {
         .user("Let's optimize for low noise and easy conversation with a client.")
         .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .goalsMentionAnyOf("quiet", "low noise", "conversation", "client")
+        .stateMentionsAnyOf("quiet", "low noise", "conversation", "client")
         .assistantMentionsAnyOf("confirm", "correct");
 
     scenario
@@ -99,7 +90,7 @@ class IntentAlignmentConversationIntegrationTest {
             """)
         .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
-        .goalsMention("lunch", "6", "gluten")
+        .stateMentions("lunch", "6", "gluten")
         .turnMentionsAnyOf("recommend", "recommendations")
         .assistantMentionsAnyOf("confirm", "correct");
 
@@ -141,20 +132,20 @@ class IntentAlignmentConversationIntegrationTest {
     }
 
     private TranscriptTurn hasStatus(RequirementStatus expected) {
-      assertThat(result.state().status()).isEqualTo(expected);
+      assertThat(result.state().getStatus()).isEqualTo(expected);
       return this;
     }
 
-    private TranscriptTurn goalsMention(String... terms) {
-      String haystack = flattenedGoals();
+    private TranscriptTurn stateMentions(String... terms) {
+      String haystack = flattenedState();
       for (String term : terms) {
         assertThat(haystack).contains(term.toLowerCase(Locale.ROOT));
       }
       return this;
     }
 
-    private TranscriptTurn goalsMentionAnyOf(String... terms) {
-      String haystack = flattenedGoals();
+    private TranscriptTurn stateMentionsAnyOf(String... terms) {
+      String haystack = flattenedState();
       assertThat(
               Arrays.stream(terms)
                   .map(term -> term.toLowerCase(Locale.ROOT))
@@ -175,7 +166,7 @@ class IntentAlignmentConversationIntegrationTest {
 
     private TranscriptTurn turnMentionsAnyOf(String... terms) {
       String haystack =
-          (flattenedGoals() + "\n" + result.assistantReply()).toLowerCase(Locale.ROOT);
+          (flattenedState() + "\n" + result.assistantReply()).toLowerCase(Locale.ROOT);
       assertThat(
               Arrays.stream(terms)
                   .map(term -> term.toLowerCase(Locale.ROOT))
@@ -191,28 +182,55 @@ class IntentAlignmentConversationIntegrationTest {
 
     private TranscriptTurn markdownHasRequiredSections() {
       String markdown = renderer.render(result.state());
-      assertThat(markdown).contains("## Intent");
-      assertThat(markdown).contains("## Minimum Requirements");
-      assertThat(markdown).contains("## Constraints");
+      assertThat(markdown).contains("## Event Requirements");
+      assertThat(markdown).contains("## Additional Requirements");
+      assertThat(markdown).contains("## Cuisine Preferences");
+      assertThat(markdown).contains("## Attendees");
       assertThat(markdown).contains("## Missing Information");
-      assertThat(markdown).contains("## Assumptions");
       assertThat(markdown).contains("## Status");
       return this;
     }
 
-    private String flattenedGoals() {
+    private String flattenedState() {
       AgentState state = result.state();
-      UserGoals userGoals = state.userGoals().orElseThrow();
+      EventRequirements eventRequirements = state.getEventRequirements();
+      String attendees =
+          state.getAttendees().stream()
+              .map(this::flattenAttendee)
+              .collect(java.util.stream.Collectors.joining("\n"));
       return String.join(
               "\n",
-              userGoals.getIntent(),
-              String.valueOf(userGoals.getDate()),
-              String.valueOf(userGoals.getTime()),
-              String.valueOf(userGoals.getPartySize()),
-              String.join("\n", userGoals.getConstraints()),
-              String.join("\n", state.missingInformation()),
-              String.join("\n", state.assumptions()))
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getDate()),
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getTime()),
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getPartySize()),
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getMealType()),
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getPurpose()),
+              String.valueOf(
+                  eventRequirements == null ? null : eventRequirements.getBudgetPerPerson()),
+              String.valueOf(eventRequirements == null ? null : eventRequirements.getNoiseLevel()),
+              eventRequirements == null
+                  ? ""
+                  : String.join("\n", eventRequirements.getAdditionalRequirements()),
+              eventRequirements == null
+                  ? ""
+                  : String.join("\n", eventRequirements.getCuisinePreferences()),
+              attendees,
+              String.join("\n", state.getMissingInformation()))
           .toLowerCase(Locale.ROOT);
+    }
+
+    private String flattenAttendee(Attendee attendee) {
+      return String.join(
+          "\n",
+          String.valueOf(attendee.getName()),
+          String.valueOf(attendee.getOrigin()),
+          String.valueOf(attendee.getDepartureTime()),
+          String.valueOf(attendee.getTravelMode()),
+          String.valueOf(attendee.getMaxTravelTimeMinutes()),
+          String.valueOf(attendee.getMaxDistanceKm()),
+          attendee.getDietaryConstraints().stream()
+              .map(Enum::name)
+              .collect(java.util.stream.Collectors.joining("\n")));
     }
   }
 }

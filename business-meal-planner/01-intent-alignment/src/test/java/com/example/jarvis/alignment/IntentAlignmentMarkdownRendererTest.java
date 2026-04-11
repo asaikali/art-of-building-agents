@@ -2,8 +2,15 @@ package com.example.jarvis.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.DietaryConstraint;
+import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.planning.requirements.MealType;
+import com.example.jarvis.planning.requirements.NoiseLevel;
+import com.example.jarvis.planning.requirements.TravelMode;
 import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.UserGoals;
+import com.example.jarvis.state.RequirementStatus;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -16,44 +23,84 @@ class IntentAlignmentMarkdownRendererTest {
   @Test
   void rendersRequiredSectionsAndStatusLabel() {
     AgentState state = new AgentState();
-    state.setUserGoals(
-        new UserGoals(
-            "Plan and book a business dinner.",
+    state.setEventRequirements(
+        eventRequirements(
             LocalDate.of(2026, 4, 11),
             LocalTime.of(18, 0),
             4,
-            List.of("Vegetarian guest", "Professional and quiet")));
-    state.setAssumptions(List.of("Business appropriateness matters"));
+            MealType.DINNER,
+            "Client dinner",
+            new BigDecimal("120"),
+            NoiseLevel.QUIET,
+            List.of("Professional setting"),
+            List.of("Italian")));
+    state.setAttendees(List.of(attendee("Alex", "Union Station", TravelMode.TRANSIT)));
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
     String markdown = renderer.render(state);
 
-    assertThat(markdown).contains("## Intent");
-    assertThat(markdown).contains("## Minimum Requirements");
+    assertThat(markdown).contains("## Event Requirements");
     assertThat(markdown).contains("Date: 2026-04-11");
-    assertThat(markdown).contains("## Constraints");
-    assertThat(markdown).contains("## Assumptions");
+    assertThat(markdown).contains("## Additional Requirements");
+    assertThat(markdown).contains("## Cuisine Preferences");
+    assertThat(markdown).contains("## Attendees");
+    assertThat(markdown).contains("Alex");
     assertThat(markdown).contains("## Missing Information");
     assertThat(markdown).contains("## Status");
     assertThat(markdown).contains("Waiting for confirmation");
-    assertThat(markdown).contains("- Vegetarian guest");
   }
 
   @Test
   void rendersNoneForEmptyLists() {
     AgentState state = new AgentState();
-    state.setUserGoals(new UserGoals("Clarify the request.", null, null, null, List.of()));
-    state.setAssumptions(List.of());
+    state.setEventRequirements(new EventRequirements());
+    state.setAttendees(List.of());
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
 
     String markdown = renderer.render(state);
 
     assertThat(markdown).contains("Date: Missing");
-    assertThat(markdown).contains("## Constraints\n- None");
-    assertThat(markdown).contains("## Assumptions\n- None");
+    assertThat(markdown).contains("## Additional Requirements\n- None");
+    assertThat(markdown).contains("## Cuisine Preferences\n- None");
+    assertThat(markdown).contains("## Attendees\n- None");
     assertThat(markdown).contains("## Missing Information\n- None");
     assertThat(markdown).contains("Waiting for clarification");
+  }
+
+  private EventRequirements eventRequirements(
+      LocalDate date,
+      LocalTime time,
+      Integer partySize,
+      MealType mealType,
+      String purpose,
+      BigDecimal budgetPerPerson,
+      NoiseLevel noiseLevel,
+      List<String> additionalRequirements,
+      List<String> cuisinePreferences) {
+    EventRequirements eventRequirements = new EventRequirements();
+    eventRequirements.setDate(date);
+    eventRequirements.setTime(time);
+    eventRequirements.setPartySize(partySize);
+    eventRequirements.setMealType(mealType);
+    eventRequirements.setPurpose(purpose);
+    eventRequirements.setBudgetPerPerson(budgetPerPerson);
+    eventRequirements.setNoiseLevel(noiseLevel);
+    eventRequirements.setAdditionalRequirements(additionalRequirements);
+    eventRequirements.setCuisinePreferences(cuisinePreferences);
+    return eventRequirements;
+  }
+
+  private Attendee attendee(String name, String origin, TravelMode travelMode) {
+    Attendee attendee = new Attendee();
+    attendee.setName(name);
+    attendee.setOrigin(origin);
+    attendee.setDepartureTime(LocalTime.of(18, 15));
+    attendee.setTravelMode(travelMode);
+    attendee.setMaxTravelTimeMinutes(30);
+    attendee.setMaxDistanceKm(10.0);
+    attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
+    return attendee;
   }
 }

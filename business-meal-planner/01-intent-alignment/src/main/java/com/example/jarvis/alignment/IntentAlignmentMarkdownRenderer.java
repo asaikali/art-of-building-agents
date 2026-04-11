@@ -1,32 +1,34 @@
 package com.example.jarvis.alignment;
 
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.UserGoals;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IntentAlignmentMarkdownRenderer {
 
   public String render(AgentState state) {
-    UserGoals userGoals =
-        state
-            .userGoals()
-            .orElse(
-                new UserGoals("Clarify the business meal request.", null, null, null, List.of()));
+    EventRequirements eventRequirements = state.getEventRequirements();
     return """
-        ## Intent
-        %s
-
-        ## Minimum Requirements
+        ## Event Requirements
         - Date: %s
         - Time: %s
         - Party Size: %s
+        - Meal Type: %s
+        - Purpose: %s
+        - Budget Per Person: %s
+        - Noise Level: %s
 
-        ## Constraints
+        ## Additional Requirements
         %s
 
-        ## Assumptions
+        ## Cuisine Preferences
+        %s
+
+        ## Attendees
         %s
 
         ## Missing Information
@@ -36,18 +38,33 @@ public class IntentAlignmentMarkdownRenderer {
         %s
         """
         .formatted(
-            userGoals.getIntent(),
-            renderValue(userGoals.getDate()),
-            renderValue(userGoals.getTime()),
-            renderValue(userGoals.getPartySize()),
-            renderList(userGoals.getConstraints()),
-            renderList(state.assumptions()),
-            renderList(state.missingInformation()),
-            state.status().label());
+            renderValue(eventRequirements == null ? null : eventRequirements.getDate()),
+            renderValue(eventRequirements == null ? null : eventRequirements.getTime()),
+            renderValue(eventRequirements == null ? null : eventRequirements.getPartySize()),
+            renderEnum(eventRequirements == null ? null : eventRequirements.getMealType()),
+            renderValue(eventRequirements == null ? null : eventRequirements.getPurpose()),
+            renderValue(eventRequirements == null ? null : eventRequirements.getBudgetPerPerson()),
+            renderEnum(eventRequirements == null ? null : eventRequirements.getNoiseLevel()),
+            renderList(
+                eventRequirements == null
+                    ? List.of()
+                    : eventRequirements.getAdditionalRequirements()),
+            renderList(
+                eventRequirements == null ? List.of() : eventRequirements.getCuisinePreferences()),
+            renderAttendees(state.getAttendees()),
+            renderList(state.getMissingInformation()),
+            state.getStatus().label());
   }
 
   private String renderValue(Object value) {
     return value == null ? "Missing" : value.toString();
+  }
+
+  private String renderEnum(Enum<?> value) {
+    if (value == null) {
+      return "Missing";
+    }
+    return value.name().toLowerCase(Locale.ROOT).replace('_', ' ');
   }
 
   private String renderList(List<String> items) {
@@ -57,5 +74,34 @@ public class IntentAlignmentMarkdownRenderer {
     return items.stream()
         .map(item -> "- " + item)
         .collect(java.util.stream.Collectors.joining("\n"));
+  }
+
+  private String renderAttendees(List<Attendee> attendees) {
+    if (attendees.isEmpty()) {
+      return "- None";
+    }
+    return attendees.stream()
+        .map(this::renderAttendee)
+        .collect(java.util.stream.Collectors.joining("\n"));
+  }
+
+  private String renderAttendee(Attendee attendee) {
+    String dietaryConstraints =
+        attendee.getDietaryConstraints().isEmpty()
+            ? "none"
+            : attendee.getDietaryConstraints().stream()
+                .map(Enum::name)
+                .map(value -> value.toLowerCase(Locale.ROOT).replace('_', ' '))
+                .collect(java.util.stream.Collectors.joining(", "));
+
+    return "- Name: %s | Origin: %s | Departure Time: %s | Travel Mode: %s | Max Travel Time: %s | Max Distance: %s | Dietary Constraints: %s"
+        .formatted(
+            renderValue(attendee.getName()),
+            renderValue(attendee.getOrigin()),
+            renderValue(attendee.getDepartureTime()),
+            renderEnum(attendee.getTravelMode()),
+            renderValue(attendee.getMaxTravelTimeMinutes()),
+            renderValue(attendee.getMaxDistanceKm()),
+            dietaryConstraints);
   }
 }

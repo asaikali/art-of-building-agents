@@ -1,8 +1,9 @@
 package com.example.jarvis.alignment;
 
-import com.example.jarvis.state.UserGoals;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.state.AgentState;
+import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
@@ -12,22 +13,24 @@ public class IntentAlignmentExtractor {
 
   private static final String EXTRACTION_SYSTEM_PROMPT =
       """
-      You convert business meal requests into a structured planning artifact.
+      You convert business meal requests into a structured planning context.
 
-      Rules:
-      - Extract only facts the user actually stated into constraints.
-      - Populate date when the user gives a date.
-      - Populate time when the user gives a time.
-      - Populate partySize when the user gives the number of attendees.
-      - Keep every list item short and concrete.
-      - Capture action intent explicitly when present, such as recommendations only,
-        shortlist only, book now, or do not book yet.
+      Capture only user-provided inputs.
+      Do not infer search areas, validation results, readiness flags, or planning logic.
+
+      Modeling rules:
+      - Event requirements describe the meal as a whole.
+      - Attendees describe person-specific needs.
+      - If something varies by person, put it on an attendee.
+      - If something applies to the whole meal, put it on eventRequirements.
+      - Preserve valid existing information unless the new message corrects it.
+      - Keep additionalRequirements and cuisinePreferences short and concrete.
       - Do not recommend restaurants.
       - Do not rank or book anything.
       """;
 
-  private static final BeanOutputConverter<ExtractedRequirements> OUTPUT_CONVERTER =
-      new BeanOutputConverter<>(ExtractedRequirements.class);
+  private static final BeanOutputConverter<ExtractedPlanningContext> OUTPUT_CONVERTER =
+      new BeanOutputConverter<>(ExtractedPlanningContext.class);
 
   private final ChatClient extractionClient;
 
@@ -39,9 +42,9 @@ public class IntentAlignmentExtractor {
     this.extractionClient = null;
   }
 
-  public UserGoals extractRequirements(UserGoals existingGoals, String userMessage) {
+  public ExtractedPlanningContext extract(AgentState existingState, String userMessage) {
     String prompt =
-        existingGoals == null
+        existingState == null || existingState.getEventRequirements() == null
             ? """
               User request:
               %s
@@ -50,48 +53,96 @@ public class IntentAlignmentExtractor {
               """
                 .formatted(userMessage.trim(), OUTPUT_CONVERTER.getFormat())
             : """
-              Existing user goals JSON:
+              Existing planning context JSON:
               %s
 
               New user message:
               %s
 
-              Update the plan by preserving valid constraints, incorporating corrections and
-              additions, and removing anything the new message contradicts.
+              Update the planning context by preserving valid details, incorporating
+              corrections and additions, and removing anything the new message contradicts.
 
               %s
               """
-                .formatted(toJson(existingGoals), userMessage.trim(), OUTPUT_CONVERTER.getFormat());
+                .formatted(toJson(existingState), userMessage.trim(), OUTPUT_CONVERTER.getFormat());
 
-    ExtractedRequirements draft =
+    ExtractedPlanningContext extracted =
         extractionClient.prompt().user(prompt).call().entity(OUTPUT_CONVERTER);
-    return UserGoals.fromValues(
-        draft.intent(), draft.date(), draft.time(), draft.partySize(), draft.constraints());
+    extracted.setAttendees(extracted.getAttendees());
+    return extracted;
   }
 
-  private String toJson(UserGoals userGoals) {
+  private String toJson(AgentState state) {
+    EventRequirements eventRequirements = state.getEventRequirements();
     return """
         {
-          "intent": "%s",
-          "date": %s,
-          "time": %s,
-          "partySize": %s,
-          "constraints": %s
+          "eventRequirements": {
+            "date": %s,
+            "time": %s,
+            "partySize": %s,
+            "mealType": %s,
+            "purpose": %s,
+            "budgetPerPerson": %s,
+            "noiseLevel": %s,
+            "additionalRequirements": %s,
+            "cuisinePreferences": %s
+          },
+          "attendees": %s
         }
         """
         .formatted(
-            escape(userGoals.getIntent()),
-            toJsonValue(userGoals.getDate()),
-            toJsonValue(userGoals.getTime()),
-            userGoals.getPartySize() == null ? "null" : userGoals.getPartySize().toString(),
-            toJsonArray(userGoals.getConstraints()));
+            toJsonValue(eventRequirements.getDate()),
+            toJsonValue(eventRequirements.getTime()),
+            eventRequirements.getPartySize() == null
+                ? "null"
+                : eventRequirements.getPartySize().toString(),
+            toJsonValue(eventRequirements.getMealType()),
+            toJsonValue(eventRequirements.getPurpose()),
+            eventRequirements.getBudgetPerPerson() == null
+                ? "null"
+                : eventRequirements.getBudgetPerPerson().toPlainString(),
+            toJsonValue(eventRequirements.getNoiseLevel()),
+            toJsonArray(eventRequirements.getAdditionalRequirements()),
+            toJsonArray(eventRequirements.getCuisinePreferences()),
+            toAttendeeJsonArray(state.getAttendees()));
+  }
+
+  private String toAttendeeJsonArray(List<Attendee> attendees) {
+    return attendees.stream()
+        .map(
+            attendee ->
+                """
+                {
+                  "name": %s,
+                  "origin": %s,
+                  "departureTime": %s,
+                  "travelMode": %s,
+                  "maxTravelTimeMinutes": %s,
+                  "maxDistanceKm": %s,
+                  "dietaryConstraints": %s
+                }
+                """
+                    .formatted(
+                        toJsonValue(attendee.getName()),
+                        toJsonValue(attendee.getOrigin()),
+                        toJsonValue(attendee.getDepartureTime()),
+                        toJsonValue(attendee.getTravelMode()),
+                        attendee.getMaxTravelTimeMinutes() == null
+                            ? "null"
+                            : attendee.getMaxTravelTimeMinutes().toString(),
+                        attendee.getMaxDistanceKm() == null
+                            ? "null"
+                            : attendee.getMaxDistanceKm().toString(),
+                        toJsonArray(
+                            attendee.getDietaryConstraints().stream().map(Enum::name).toList())))
+        .collect(java.util.stream.Collectors.joining(", ", "[", "]"));
   }
 
   private String toJsonValue(Object value) {
     return value == null ? "null" : quote(value.toString());
   }
 
-  private String toJsonArray(java.util.List<String> values) {
+  private String toJsonArray(List<String> values) {
     return values.stream()
         .map(this::quote)
         .collect(java.util.stream.Collectors.joining(", ", "[", "]"));
@@ -105,10 +156,28 @@ public class IntentAlignmentExtractor {
     return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
   }
 
-  private record ExtractedRequirements(
-      String intent,
-      LocalDate date,
-      LocalTime time,
-      Integer partySize,
-      java.util.List<String> constraints) {}
+  public static class ExtractedPlanningContext {
+
+    private EventRequirements eventRequirements = new EventRequirements();
+    private List<Attendee> attendees = List.of();
+
+    public ExtractedPlanningContext() {}
+
+    public EventRequirements getEventRequirements() {
+      return eventRequirements;
+    }
+
+    public void setEventRequirements(EventRequirements eventRequirements) {
+      this.eventRequirements =
+          eventRequirements == null ? new EventRequirements() : eventRequirements;
+    }
+
+    public List<Attendee> getAttendees() {
+      return attendees;
+    }
+
+    public void setAttendees(List<Attendee> attendees) {
+      this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
+    }
+  }
 }

@@ -51,8 +51,8 @@ public class JarvisHandler implements AgentHandler {
         result.eventName(),
         Map.of(
             "turn", turn,
-            "status", state.status().label(),
-            "missingInformationCount", state.missingInformation().size()));
+            "status", state.getStatus().label(),
+            "missingInformationCount", state.getMissingInformation().size()));
     session.updateState(markdownRenderer.render(state));
     session.appendMessage(Role.ASSISTANT, result.assistantReply());
     session.logEvent(

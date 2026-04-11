@@ -1,8 +1,10 @@
 package com.example.jarvis.alignment;
 
 import com.example.agent.core.session.SessionId;
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.EventRequirements;
 import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.UserGoals;
+import com.example.jarvis.state.RequirementStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -55,50 +57,48 @@ public class IntentAlignmentConversationService {
 
   public TurnResult handleTurn(SessionId sessionId, String userMessage) {
     AgentState state = statesBySession.computeIfAbsent(sessionId, id -> new AgentState());
-    UserGoals existingGoals = state.userGoals().orElse(null);
+    boolean hasExistingContext =
+        state.getEventRequirements() != null || !state.getAttendees().isEmpty();
 
-    if (existingGoals == null && isOpener(userMessage)) {
-      initializeStateForClarification(state, createStarterUserGoals());
+    if (!hasExistingContext && isOpener(userMessage)) {
+      initializeStateForClarification(state);
       return new TurnResult(state, buildReply(state), "clarification-requested");
     }
 
-    if (existingGoals != null && isAffirmative(userMessage)) {
+    if (hasExistingContext && isAffirmative(userMessage)) {
       state.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
       return new TurnResult(state, buildReply(state), "requirements-confirmed");
     }
 
-    if (existingGoals != null && isUncertain(userMessage)) {
+    if (hasExistingContext && isUncertain(userMessage)) {
       state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
       return new TurnResult(state, buildReply(state), "clarification-requested");
     }
 
-    UserGoals extractedGoals = extractor.extractRequirements(existingGoals, userMessage);
-    state.setUserGoals(extractedGoals);
-    state.setMissingInformation(missingCriticalFields(extractedGoals));
-    state.setAssumptions(inferAssumptions(extractedGoals));
+    IntentAlignmentExtractor.ExtractedPlanningContext extracted =
+        extractor.extract(hasExistingContext ? state : null, userMessage);
+    state.setEventRequirements(extracted.getEventRequirements());
+    state.setAttendees(extracted.getAttendees());
+    state.setMissingInformation(missingCriticalFields(extracted.getEventRequirements()));
     state.setStatus(decideStatus(state));
 
     return new TurnResult(
-        state, buildReply(state), chooseAction(existingGoals != null, state.status()));
+        state, buildReply(state), chooseAction(hasExistingContext, state.getStatus()));
   }
 
   Optional<AgentState> getState(SessionId sessionId) {
     return Optional.ofNullable(statesBySession.get(sessionId));
   }
 
-  private UserGoals createStarterUserGoals() {
-    return new UserGoals("Clarify the business meal request.", null, null, null, List.of());
-  }
-
-  private void initializeStateForClarification(AgentState state, UserGoals userGoals) {
-    state.setUserGoals(userGoals);
+  private void initializeStateForClarification(AgentState state) {
+    state.setEventRequirements(new EventRequirements());
+    state.setAttendees(List.of());
     state.setMissingInformation(REQUIRED_FIELDS);
-    state.setAssumptions(List.of("The dining experience should fit the occasion."));
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
   private RequirementStatus decideStatus(AgentState state) {
-    if (!state.missingInformation().isEmpty()) {
+    if (!state.getMissingInformation().isEmpty()) {
       return RequirementStatus.WAITING_FOR_CLARIFICATION;
     }
     return RequirementStatus.WAITING_FOR_CONFIRMATION;
@@ -112,7 +112,7 @@ public class IntentAlignmentConversationService {
   }
 
   private String buildReply(AgentState state) {
-    return switch (state.status()) {
+    return switch (state.getStatus()) {
       case REQUIREMENTS_CONFIRMED -> "Great. I've captured the requirements and they're confirmed.";
       case WAITING_FOR_CLARIFICATION -> buildClarificationReply(state);
       case WAITING_FOR_CONFIRMATION -> buildConfirmationReply(state);
@@ -120,7 +120,7 @@ public class IntentAlignmentConversationService {
   }
 
   private String buildClarificationReply(AgentState state) {
-    List<String> missing = state.missingInformation();
+    List<String> missing = state.getMissingInformation();
     String field = missing.isEmpty() ? "next detail" : missing.getFirst();
 
     return "I have the start of the plan. Before I go further, what is the "
@@ -129,51 +129,86 @@ public class IntentAlignmentConversationService {
   }
 
   private String buildConfirmationReply(AgentState state) {
-    UserGoals userGoals = state.userGoals().orElseThrow();
+    EventRequirements eventRequirements = state.getEventRequirements();
     List<String> summaryLines = new ArrayList<>();
     summaryLines.add("Here's my understanding so far:");
-    if (userGoals.getDate() != null) {
-      summaryLines.add("- Date: " + userGoals.getDate());
+    if (eventRequirements.getDate() != null) {
+      summaryLines.add("- Date: " + eventRequirements.getDate());
     }
-    if (userGoals.getTime() != null) {
-      summaryLines.add("- Time: " + userGoals.getTime());
+    if (eventRequirements.getTime() != null) {
+      summaryLines.add("- Time: " + eventRequirements.getTime());
     }
-    if (userGoals.getPartySize() != null) {
-      summaryLines.add("- Party Size: " + userGoals.getPartySize());
+    if (eventRequirements.getPartySize() != null) {
+      summaryLines.add("- Party Size: " + eventRequirements.getPartySize());
     }
-    for (String constraint : userGoals.getConstraints()) {
-      summaryLines.add("- " + constraint);
+    if (eventRequirements.getMealType() != null) {
+      summaryLines.add("- Meal Type: " + humanize(eventRequirements.getMealType().name()));
     }
-    if (!state.assumptions().isEmpty()) {
-      summaryLines.add("- Assumption: " + state.assumptions().getFirst());
+    if (eventRequirements.getPurpose() != null) {
+      summaryLines.add("- Purpose: " + eventRequirements.getPurpose());
+    }
+    if (eventRequirements.getBudgetPerPerson() != null) {
+      summaryLines.add("- Budget Per Person: " + eventRequirements.getBudgetPerPerson());
+    }
+    if (eventRequirements.getNoiseLevel() != null) {
+      summaryLines.add("- Noise Level: " + humanize(eventRequirements.getNoiseLevel().name()));
+    }
+    for (String cuisinePreference : eventRequirements.getCuisinePreferences()) {
+      summaryLines.add("- Cuisine Preference: " + cuisinePreference);
+    }
+    for (String requirement : eventRequirements.getAdditionalRequirements()) {
+      summaryLines.add("- Requirement: " + requirement);
+    }
+    for (Attendee attendee : state.getAttendees()) {
+      summaryLines.add("- Attendee: " + summarizeAttendee(attendee));
     }
     summaryLines.add("Please confirm or correct anything I should change.");
     return String.join("\n", summaryLines);
   }
 
-  private List<String> missingCriticalFields(UserGoals userGoals) {
+  private String summarizeAttendee(Attendee attendee) {
+    List<String> parts = new ArrayList<>();
+    if (attendee.getName() != null) {
+      parts.add(attendee.getName());
+    }
+    if (attendee.getOrigin() != null) {
+      parts.add("from " + attendee.getOrigin());
+    }
+    if (attendee.getDepartureTime() != null) {
+      parts.add("leaving at " + attendee.getDepartureTime());
+    }
+    if (attendee.getTravelMode() != null) {
+      parts.add("via " + humanize(attendee.getTravelMode().name()));
+    }
+    if (!attendee.getDietaryConstraints().isEmpty()) {
+      parts.add(
+          "dietary: "
+              + attendee.getDietaryConstraints().stream()
+                  .map(Enum::name)
+                  .map(this::humanize)
+                  .collect(java.util.stream.Collectors.joining(", ")));
+    }
+    return parts.isEmpty() ? "details captured" : String.join(", ", parts);
+  }
+
+  private List<String> missingCriticalFields(EventRequirements eventRequirements) {
     List<String> missing = new ArrayList<>();
-    if (userGoals.getDate() == null) {
+    if (eventRequirements == null || eventRequirements.getDate() == null) {
       missing.add("Date");
     }
-    if (userGoals.getTime() == null) {
+    if (eventRequirements == null || eventRequirements.getTime() == null) {
       missing.add("Time");
     }
-    if (userGoals.getPartySize() == null || userGoals.getPartySize() <= 0) {
+    if (eventRequirements == null
+        || eventRequirements.getPartySize() == null
+        || eventRequirements.getPartySize() <= 0) {
       missing.add("Party Size");
     }
     return missing;
   }
 
-  private List<String> inferAssumptions(UserGoals userGoals) {
-    if (userGoals.getConstraints().stream()
-        .anyMatch(value -> value.toLowerCase(Locale.ROOT).contains("client"))) {
-      return List.of("The venue should support a polished business conversation.");
-    }
-    if (userGoals.getIntent().toLowerCase(Locale.ROOT).contains("business")) {
-      return List.of("The dining experience should fit the occasion.");
-    }
-    return List.of();
+  private String humanize(String value) {
+    return value.toLowerCase(Locale.ROOT).replace('_', ' ');
   }
 
   public record TurnResult(AgentState state, String assistantReply, String eventName) {}

@@ -1,25 +1,33 @@
 package com.example.jarvis.state;
 
-import com.example.jarvis.alignment.RequirementStatus;
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.EventRequirements;
 import java.util.List;
-import java.util.Optional;
 
 public class AgentState {
 
-  private UserGoals userGoals;
+  private EventRequirements eventRequirements;
+  private List<Attendee> attendees = List.of();
   private List<String> missingInformation = List.of();
-  private List<String> assumptions = List.of();
   private RequirementStatus status = RequirementStatus.WAITING_FOR_CLARIFICATION;
 
-  public Optional<UserGoals> userGoals() {
-    return Optional.ofNullable(userGoals);
+  public EventRequirements getEventRequirements() {
+    return eventRequirements;
   }
 
-  public void setUserGoals(UserGoals userGoals) {
-    this.userGoals = userGoals;
+  public void setEventRequirements(EventRequirements eventRequirements) {
+    this.eventRequirements = eventRequirements;
   }
 
-  public List<String> missingInformation() {
+  public List<Attendee> getAttendees() {
+    return attendees;
+  }
+
+  public void setAttendees(List<Attendee> attendees) {
+    this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
+  }
+
+  public List<String> getMissingInformation() {
     return missingInformation;
   }
 
@@ -28,15 +36,7 @@ public class AgentState {
         missingInformation == null ? List.of() : List.copyOf(missingInformation);
   }
 
-  public List<String> assumptions() {
-    return assumptions;
-  }
-
-  public void setAssumptions(List<String> assumptions) {
-    this.assumptions = assumptions == null ? List.of() : List.copyOf(assumptions);
-  }
-
-  public RequirementStatus status() {
+  public RequirementStatus getStatus() {
     return status;
   }
 

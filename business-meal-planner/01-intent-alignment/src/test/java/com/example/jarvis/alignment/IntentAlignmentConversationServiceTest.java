@@ -3,8 +3,13 @@ package com.example.jarvis.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.session.SessionId;
+import com.example.jarvis.planning.requirements.Attendee;
+import com.example.jarvis.planning.requirements.DietaryConstraint;
+import com.example.jarvis.planning.requirements.EventRequirements;
+import com.example.jarvis.planning.requirements.MealType;
+import com.example.jarvis.planning.requirements.TravelMode;
 import com.example.jarvis.state.AgentState;
-import com.example.jarvis.state.UserGoals;
+import com.example.jarvis.state.RequirementStatus;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayDeque;
@@ -27,108 +32,114 @@ class IntentAlignmentConversationServiceTest {
   @Test
   void initialRequestCreatesPlanAndWaitsForConfirmation() {
     SessionId sessionId = new SessionId(1);
-    extractor.extractedGoals.add(
-        goals(
-            "Plan and book a business dinner.",
-            LocalDate.of(2026, 4, 11),
-            LocalTime.of(19, 0),
-            4,
-            List.of("Client dinner", "From 100 King St W")));
+    extractor.extractedContexts.add(
+        planningContext(
+            eventRequirements(
+                LocalDate.of(2026, 4, 11),
+                LocalTime.of(19, 0),
+                4,
+                MealType.DINNER,
+                "Client dinner"),
+            List.of(attendee("Alex", "100 King St W"))));
 
     IntentAlignmentConversationService.TurnResult result =
         service.handleTurn(
             sessionId, "Book a client dinner tonight at 7 PM for four people from 100 King St W.");
 
     assertThat(result.eventName()).isEqualTo("plan-generated");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(result.assistantReply()).contains("Please confirm or correct");
-    assertThat(service.getState(sessionId).flatMap(AgentState::userGoals))
-        .hasValue(result.state().userGoals().orElseThrow());
+    assertThat(service.getState(sessionId).map(AgentState::getEventRequirements))
+        .hasValue(result.state().getEventRequirements());
   }
 
   @Test
   void affirmativeReplyConfirmsExistingRequirements() {
     SessionId sessionId = new SessionId(2);
-    extractor.extractedGoals.add(
-        goals(
-            "Plan a team lunch.",
-            LocalDate.of(2026, 4, 12),
-            LocalTime.of(12, 0),
-            6,
-            List.of("Team lunch", "From 200 Bay St")));
-    service.handleTurn(sessionId, "I need a team lunch tomorrow from 200 Bay St for 6 people.");
+    extractor.extractedContexts.add(
+        planningContext(
+            eventRequirements(
+                LocalDate.of(2026, 4, 12), LocalTime.of(12, 0), 6, MealType.LUNCH, "Team lunch"),
+            List.of()));
+    service.handleTurn(sessionId, "I need a team lunch tomorrow for 6 people.");
 
     IntentAlignmentConversationService.TurnResult result = service.handleTurn(sessionId, "yes");
 
     assertThat(result.eventName()).isEqualTo("requirements-confirmed");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
     assertThat(result.assistantReply()).contains("confirmed");
   }
 
   @Test
-  void nonActionableReplyRequestsClarificationWithoutChangingGoals() {
+  void nonActionableReplyRequestsClarificationWithoutChangingContext() {
     SessionId sessionId = new SessionId(3);
-    UserGoals initialGoals =
-        goals(
-            "Plan a business dinner.",
-            LocalDate.of(2026, 4, 11),
-            LocalTime.of(19, 0),
-            4,
-            List.of("Business dinner"));
-    extractor.extractedGoals.add(initialGoals);
+    IntentAlignmentExtractor.ExtractedPlanningContext initialContext =
+        planningContext(
+            eventRequirements(
+                LocalDate.of(2026, 4, 11),
+                LocalTime.of(19, 0),
+                4,
+                MealType.DINNER,
+                "Business dinner"),
+            List.of(attendee("Alex", "Union Station")));
+    extractor.extractedContexts.add(initialContext);
     service.handleTurn(sessionId, "I need a business dinner tonight for 4 people.");
 
     IntentAlignmentConversationService.TurnResult result =
         service.handleTurn(sessionId, "not sure");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
-    assertThat(result.state().userGoals()).hasValue(initialGoals);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    assertThat(result.state().getEventRequirements())
+        .isSameAs(initialContext.getEventRequirements());
     assertThat(result.assistantReply()).contains("next detail");
     assertThat(extractor.extractCalls).isEqualTo(1);
   }
 
   @Test
-  void correctiveReplyRevisesGoalsAndReturnsToConfirmation() {
+  void correctiveReplyRevisesPlanAndReturnsToConfirmation() {
     SessionId sessionId = new SessionId(4);
-    extractor.extractedGoals.add(
-        goals(
-            "Plan a business dinner.",
-            LocalDate.of(2026, 4, 11),
-            LocalTime.of(19, 0),
-            4,
-            List.of("Business dinner")));
+    extractor.extractedContexts.add(
+        planningContext(
+            eventRequirements(
+                LocalDate.of(2026, 4, 11),
+                LocalTime.of(19, 0),
+                4,
+                MealType.DINNER,
+                "Business dinner"),
+            List.of()));
     service.handleTurn(sessionId, "I need a business dinner tonight for 4 people.");
 
-    extractor.extractedGoals.add(
-        goals(
-            "Plan a business lunch.",
-            LocalDate.of(2026, 4, 12),
-            LocalTime.of(12, 0),
-            4,
-            List.of("Business lunch", "Budget: 80 per person")));
+    extractor.extractedContexts.add(
+        planningContext(
+            eventRequirements(
+                LocalDate.of(2026, 4, 12),
+                LocalTime.of(12, 0),
+                4,
+                MealType.LUNCH,
+                "Business lunch"),
+            List.of(attendee("Alex", "Union Station"))));
 
     IntentAlignmentConversationService.TurnResult result =
-        service.handleTurn(
-            sessionId, "Not dinner, it's lunch tomorrow and budget is 80 per person.");
+        service.handleTurn(sessionId, "Not dinner, it's lunch tomorrow.");
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
-    assertThat(result.state().userGoals().orElseThrow().getIntent()).contains("lunch");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(result.state().getEventRequirements().getMealType()).isEqualTo(MealType.LUNCH);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(extractor.extractCalls).isEqualTo(2);
   }
 
   @Test
   void initialVagueRequestMovesDirectlyToClarification() {
     SessionId sessionId = new SessionId(5);
-    extractor.extractedGoals.add(
-        goals("Clarify the business meal request.", null, null, null, List.of()));
+    extractor.extractedContexts.add(
+        planningContext(eventRequirements(null, null, null, null, "Business meal"), List.of()));
 
     IntentAlignmentConversationService.TurnResult result =
         service.handleTurn(sessionId, "Help me plan something.");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
     assertThat(result.assistantReply()).contains("date");
   }
 
@@ -139,18 +150,43 @@ class IntentAlignmentConversationServiceTest {
     IntentAlignmentConversationService.TurnResult result = service.handleTurn(sessionId, "hello");
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
-    assertThat(result.state().status()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
     assertThat(result.assistantReply()).contains("date");
     assertThat(extractor.extractCalls).isZero();
   }
 
-  private UserGoals goals(
-      String intent, LocalDate date, LocalTime time, Integer partySize, List<String> constraints) {
-    return new UserGoals(intent, date, time, partySize, constraints);
+  private EventRequirements eventRequirements(
+      LocalDate date, LocalTime time, Integer partySize, MealType mealType, String purpose) {
+    EventRequirements eventRequirements = new EventRequirements();
+    eventRequirements.setDate(date);
+    eventRequirements.setTime(time);
+    eventRequirements.setPartySize(partySize);
+    eventRequirements.setMealType(mealType);
+    eventRequirements.setPurpose(purpose);
+    return eventRequirements;
+  }
+
+  private Attendee attendee(String name, String origin) {
+    Attendee attendee = new Attendee();
+    attendee.setName(name);
+    attendee.setOrigin(origin);
+    attendee.setTravelMode(TravelMode.TRANSIT);
+    attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
+    return attendee;
+  }
+
+  private IntentAlignmentExtractor.ExtractedPlanningContext planningContext(
+      EventRequirements eventRequirements, List<Attendee> attendees) {
+    IntentAlignmentExtractor.ExtractedPlanningContext context =
+        new IntentAlignmentExtractor.ExtractedPlanningContext();
+    context.setEventRequirements(eventRequirements);
+    context.setAttendees(attendees);
+    return context;
   }
 
   private static final class FakeIntentAlignmentExtractor extends IntentAlignmentExtractor {
-    private final Queue<UserGoals> extractedGoals = new ArrayDeque<>();
+    private final Queue<IntentAlignmentExtractor.ExtractedPlanningContext> extractedContexts =
+        new ArrayDeque<>();
     private int extractCalls;
 
     private FakeIntentAlignmentExtractor() {
@@ -158,9 +194,10 @@ class IntentAlignmentConversationServiceTest {
     }
 
     @Override
-    public UserGoals extractRequirements(UserGoals existingGoals, String userMessage) {
+    public IntentAlignmentExtractor.ExtractedPlanningContext extract(
+        AgentState existingState, String userMessage) {
       extractCalls++;
-      return extractedGoals.remove();
+      return extractedContexts.remove();
     }
   }
 }
