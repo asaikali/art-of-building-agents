@@ -8,10 +8,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/sessions")
 public class SessionController {
 
+  private final AgentSessionService agentSessionService;
   private final SessionManager sessionManager;
   private final SessionMetaAssembler metaAssembler;
 
-  public SessionController(SessionManager sessionManager, SessionMetaAssembler metaAssembler) {
+  public SessionController(
+      AgentSessionService agentSessionService,
+      SessionManager sessionManager,
+      SessionMetaAssembler metaAssembler) {
+    this.agentSessionService = agentSessionService;
     this.sessionManager = sessionManager;
     this.metaAssembler = metaAssembler;
   }
@@ -19,7 +24,7 @@ public class SessionController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public AgentSessionMeta createSession(@RequestBody CreateSessionRequest request) {
-    Session session = sessionManager.createSession(request.agentName(), request.title());
+    Session session = agentSessionService.createSession(request.title());
     return metaAssembler.toMeta(session.id());
   }
 
@@ -33,5 +38,5 @@ public class SessionController {
     return metaAssembler.toMeta(id);
   }
 
-  public record CreateSessionRequest(String agentName, String title) {}
+  public record CreateSessionRequest(String title) {}
 }

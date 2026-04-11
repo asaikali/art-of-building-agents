@@ -29,6 +29,11 @@ public class BasicChatbotHandler implements AgentHandler {
   }
 
   @Override
+  public String getInitialAssistantMessage() {
+    return "I'm a basic chatbot. Send any message and I'll reply directly with no tools, memory, or guardrails.";
+  }
+
+  @Override
   public void onMessage(Session session, AgentMessage message) {
     int turn = turnCounter.incrementAndGet();
 

@@ -32,6 +32,16 @@ public class JarvisHandler implements AgentHandler {
   }
 
   @Override
+  public String getInitialAssistantMessage() {
+    return """
+        Hi, I'm Jarvis 👋
+
+        I specialize in planning memorable dining experiences.
+        Tell me about the occasion, and I’ll help you design something just right.
+        """;
+  }
+
+  @Override
   public void onMessage(Session session, AgentMessage message) {
     int turn = turnCounter.incrementAndGet();
     session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));

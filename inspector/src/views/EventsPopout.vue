@@ -10,8 +10,6 @@ const route = useRoute()
 const sessionId = computed(() => route.params.id as string)
 const meta = ref<AgentSessionMeta | null>(null)
 
-const eventsViewerRef = ref<InstanceType<typeof EventsViewer> | null>(null)
-
 watch(
   sessionId,
   async (id) => {
@@ -33,8 +31,8 @@ watch(
       :agent-name="meta?.agentName ?? 'Agent'"
       :session-title="meta?.title ?? 'Loading...'"
       :session-id="sessionId"
-      :sse-status="eventsViewerRef?.sseStatus ?? 'disconnected'"
+      sse-status="disconnected"
     />
-    <EventsViewer ref="eventsViewerRef" :session-id="sessionId" class="flex-1" />
+    <EventsViewer :session-id="sessionId" class="flex-1" />
   </div>
 </template>

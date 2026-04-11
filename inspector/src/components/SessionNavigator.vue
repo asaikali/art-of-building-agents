@@ -16,7 +16,7 @@ const router = useRouter()
 const route = useRoute()
 
 const { sessions, loading, createSession, isSessionStale } = useSessions()
-const { agentName: heartbeatAgentName, status: heartbeatStatus } = useHeartbeat()
+const { status: heartbeatStatus } = useHeartbeat()
 
 const currentSessionId = computed(() => Number(route.params.id))
 
@@ -29,8 +29,7 @@ async function handleNewChat() {
   if (title === null) return // user cancelled
 
   try {
-    const agentName = heartbeatAgentName.value ?? 'Agent'
-    const meta = await createSession(agentName, title.trim() || 'New Session')
+    const meta = await createSession(title.trim() || 'New Session')
     router.push(`/sessions/${meta.sessionId}`)
   } catch (e) {
     console.error('Failed to create session:', e)

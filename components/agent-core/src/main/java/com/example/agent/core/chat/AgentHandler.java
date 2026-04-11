@@ -10,5 +10,10 @@ public interface AgentHandler {
     return "Agent";
   }
 
+  /** Optional assistant message shown when a new session is created. */
+  default String getInitialAssistantMessage() {
+    return null;
+  }
+
   void onMessage(Session session, AgentMessage message);
 }

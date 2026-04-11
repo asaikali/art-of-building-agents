@@ -69,8 +69,8 @@ async function refresh() {
   }
 }
 
-async function createSession(agentName: string, title: string): Promise<AgentSessionMeta> {
-  const body: CreateSessionRequest = { agentName, title }
+async function createSession(title: string): Promise<AgentSessionMeta> {
+  const body: CreateSessionRequest = { title }
   const meta = await apiPost<AgentSessionMeta>('/sessions', body)
   await refresh() // Refresh list so the new session appears
   return meta

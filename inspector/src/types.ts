@@ -46,7 +46,6 @@ export interface HeartbeatMessage {
 // --- Request body types ---
 
 export interface CreateSessionRequest {
-  agentName: string
   title: string
 }
 
