@@ -9,6 +9,7 @@ import com.example.jarvis.requirements.DietaryConstraint;
 import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.TravelMode;
+import com.example.jarvis.requirements.UserRequirements;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -21,6 +22,7 @@ class RequirementsReplyBuilderTest {
   @Test
   void buildsClarificationReplyFromFirstMissingField() {
     JarvisAgentContext context = new JarvisAgentContext();
+    context.setUserRequirements(new UserRequirements());
     context.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
     context.setMissingInformation(List.of("Time", "Party Size"));
 
@@ -43,9 +45,12 @@ class RequirementsReplyBuilderTest {
     attendee.setTravelMode(TravelMode.TRANSIT);
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
 
+    UserRequirements userRequirements = new UserRequirements();
+    userRequirements.setEventRequirements(requirements);
+    userRequirements.setAttendees(List.of(attendee));
+
     JarvisAgentContext context = new JarvisAgentContext();
-    context.setEventRequirements(requirements);
-    context.setAttendees(List.of(attendee));
+    context.setUserRequirements(userRequirements);
     context.setStatus(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
     String reply = replyBuilder.buildReply(context);
@@ -61,6 +66,7 @@ class RequirementsReplyBuilderTest {
   @Test
   void buildsConfirmedReply() {
     JarvisAgentContext context = new JarvisAgentContext();
+    context.setUserRequirements(new UserRequirements());
     context.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
 
     assertThat(replyBuilder.buildReply(context)).contains("requirements and they're confirmed");

@@ -3,6 +3,7 @@ package com.example.jarvis.requirements.alignment;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,8 @@ public class RequirementsAlignmentLoop {
   }
 
   public TurnResult handleTurn(JarvisAgentContext state, String userMessage) {
-    boolean hasExistingContext =
-        state.getEventRequirements() != null || !state.getAttendees().isEmpty();
+    UserRequirements userRequirements = state.getUserRequirements();
+    boolean hasExistingContext = !userRequirements.isEmpty();
 
     if (!hasExistingContext && turnClassifier.isOpener(userMessage)) {
       initializeStateForClarification(state);
@@ -49,10 +50,9 @@ public class RequirementsAlignmentLoop {
           state, requirementsReplyBuilder.buildReply(state), "clarification-requested");
     }
 
-    RequirementsExtractor.ExtractedPlanningContext extracted =
+    UserRequirements extracted =
         requirementsExtractor.extract(hasExistingContext ? state : null, userMessage);
-    state.setEventRequirements(extracted.getEventRequirements());
-    state.setAttendees(extracted.getAttendees());
+    state.setUserRequirements(extracted);
     state.setMissingInformation(
         requirementsCompletionPolicy.missingCriticalFields(extracted.getEventRequirements()));
     state.setStatus(requirementsCompletionPolicy.decideStatus(state));
@@ -64,8 +64,10 @@ public class RequirementsAlignmentLoop {
   }
 
   private void initializeStateForClarification(JarvisAgentContext state) {
-    state.setEventRequirements(new EventRequirements());
-    state.setAttendees(List.of());
+    UserRequirements userRequirements = new UserRequirements();
+    userRequirements.setEventRequirements(new EventRequirements());
+    userRequirements.setAttendees(List.of());
+    state.setUserRequirements(userRequirements);
     state.setMissingInformation(REQUIRED_FIELDS);
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }

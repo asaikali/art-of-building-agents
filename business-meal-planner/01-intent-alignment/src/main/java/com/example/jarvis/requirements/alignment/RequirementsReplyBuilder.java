@@ -3,6 +3,7 @@ package com.example.jarvis.requirements.alignment;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,8 @@ public class RequirementsReplyBuilder {
   }
 
   private String buildConfirmationReply(JarvisAgentContext context) {
-    EventRequirements eventRequirements = context.getEventRequirements();
+    UserRequirements userRequirements = context.getUserRequirements();
+    EventRequirements eventRequirements = userRequirements.getEventRequirements();
     List<String> summaryLines = new ArrayList<>();
     summaryLines.add("Here's my understanding so far:");
     if (eventRequirements.getDate() != null) {
@@ -59,7 +61,7 @@ public class RequirementsReplyBuilder {
     for (String requirement : eventRequirements.getAdditionalRequirements()) {
       summaryLines.add("- Requirement: " + requirement);
     }
-    for (Attendee attendee : context.getAttendees()) {
+    for (Attendee attendee : userRequirements.getAttendees()) {
       summaryLines.add("- Attendee: " + summarizeAttendee(attendee));
     }
     summaryLines.add("Please confirm or correct anything I should change.");

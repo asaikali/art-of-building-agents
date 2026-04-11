@@ -9,6 +9,7 @@ import com.example.jarvis.requirements.DietaryConstraint;
 import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.TravelMode;
+import com.example.jarvis.requirements.UserRequirements;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayDeque;
@@ -53,7 +54,8 @@ class RequirementsAlignmentLoopTest {
     assertThat(result.eventName()).isEqualTo("plan-generated");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(result.assistantReply()).contains("Please confirm or correct");
-    assertThat(state.getEventRequirements()).isSameAs(result.state().getEventRequirements());
+    assertThat(state.getUserRequirements().getEventRequirements())
+        .isSameAs(result.state().getUserRequirements().getEventRequirements());
   }
 
   @Test
@@ -76,7 +78,7 @@ class RequirementsAlignmentLoopTest {
   @Test
   void nonActionableReplyRequestsClarificationWithoutChangingContext() {
     JarvisAgentContext state = new JarvisAgentContext();
-    RequirementsExtractor.ExtractedPlanningContext initialContext =
+    UserRequirements initialContext =
         planningContext(
             eventRequirements(
                 LocalDate.of(2026, 4, 11),
@@ -92,7 +94,7 @@ class RequirementsAlignmentLoopTest {
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
-    assertThat(result.state().getEventRequirements())
+    assertThat(result.state().getUserRequirements().getEventRequirements())
         .isSameAs(initialContext.getEventRequirements());
     assertThat(result.assistantReply()).contains("next detail");
     assertThat(requirementsExtractor.extractCalls).isEqualTo(1);
@@ -126,7 +128,8 @@ class RequirementsAlignmentLoopTest {
         alignmentLoop.handleTurn(state, "Not dinner, it's lunch tomorrow.");
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
-    assertThat(result.state().getEventRequirements().getMealType()).isEqualTo(MealType.LUNCH);
+    assertThat(result.state().getUserRequirements().getEventRequirements().getMealType())
+        .isEqualTo(MealType.LUNCH);
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(requirementsExtractor.extractCalls).isEqualTo(2);
   }
@@ -177,18 +180,16 @@ class RequirementsAlignmentLoopTest {
     return attendee;
   }
 
-  private RequirementsExtractor.ExtractedPlanningContext planningContext(
+  private UserRequirements planningContext(
       EventRequirements eventRequirements, List<Attendee> attendees) {
-    RequirementsExtractor.ExtractedPlanningContext context =
-        new RequirementsExtractor.ExtractedPlanningContext();
-    context.setEventRequirements(eventRequirements);
-    context.setAttendees(attendees);
-    return context;
+    UserRequirements userRequirements = new UserRequirements();
+    userRequirements.setEventRequirements(eventRequirements);
+    userRequirements.setAttendees(attendees);
+    return userRequirements;
   }
 
   private static final class FakeRequirementsExtractor extends RequirementsExtractor {
-    private final Queue<RequirementsExtractor.ExtractedPlanningContext> extractedContexts =
-        new ArrayDeque<>();
+    private final Queue<UserRequirements> extractedContexts = new ArrayDeque<>();
     private int extractCalls;
 
     private FakeRequirementsExtractor() {
@@ -196,8 +197,7 @@ class RequirementsAlignmentLoopTest {
     }
 
     @Override
-    public RequirementsExtractor.ExtractedPlanningContext extract(
-        JarvisAgentContext existingState, String userMessage) {
+    public UserRequirements extract(JarvisAgentContext existingState, String userMessage) {
       extractCalls++;
       return extractedContexts.remove();
     }

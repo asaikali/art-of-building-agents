@@ -8,6 +8,7 @@ import com.example.jarvis.requirements.EventRequirements;
 import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.NoiseLevel;
 import com.example.jarvis.requirements.TravelMode;
+import com.example.jarvis.requirements.UserRequirements;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,8 @@ class JarvisAgentContextMarkdownTest {
   @Test
   void rendersRequiredSectionsAndStatusLabel() {
     JarvisAgentContext state = new JarvisAgentContext();
-    state.setEventRequirements(
+    UserRequirements userRequirements = new UserRequirements();
+    userRequirements.setEventRequirements(
         eventRequirements(
             LocalDate.of(2026, 4, 11),
             LocalTime.of(18, 0),
@@ -30,7 +32,8 @@ class JarvisAgentContextMarkdownTest {
             NoiseLevel.QUIET,
             List.of("Professional setting"),
             List.of("Italian")));
-    state.setAttendees(List.of(attendee("Alex", "Union Station", TravelMode.TRANSIT)));
+    userRequirements.setAttendees(List.of(attendee("Alex", "Union Station", TravelMode.TRANSIT)));
+    state.setUserRequirements(userRequirements);
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
@@ -50,8 +53,10 @@ class JarvisAgentContextMarkdownTest {
   @Test
   void rendersNoneForEmptyLists() {
     JarvisAgentContext state = new JarvisAgentContext();
-    state.setEventRequirements(new EventRequirements());
-    state.setAttendees(List.of());
+    UserRequirements userRequirements = new UserRequirements();
+    userRequirements.setEventRequirements(new EventRequirements());
+    userRequirements.setAttendees(List.of());
+    state.setUserRequirements(userRequirements);
     state.setMissingInformation(List.of());
     state.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
 

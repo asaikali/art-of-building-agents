@@ -1,31 +1,21 @@
 package com.example.jarvis.agent;
 
 import com.example.agent.core.session.AgentContext;
-import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 
 public class JarvisAgentContext implements AgentContext {
 
-  private EventRequirements eventRequirements;
-  private List<Attendee> attendees = List.of();
+  private UserRequirements userRequirements = new UserRequirements();
   private List<String> missingInformation = List.of();
   private RequirementStatus status = RequirementStatus.WAITING_FOR_CLARIFICATION;
 
-  public EventRequirements getEventRequirements() {
-    return eventRequirements;
+  public UserRequirements getUserRequirements() {
+    return userRequirements;
   }
 
-  public void setEventRequirements(EventRequirements eventRequirements) {
-    this.eventRequirements = eventRequirements;
-  }
-
-  public List<Attendee> getAttendees() {
-    return attendees;
-  }
-
-  public void setAttendees(List<Attendee> attendees) {
-    this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
+  public void setUserRequirements(UserRequirements userRequirements) {
+    this.userRequirements = userRequirements == null ? new UserRequirements() : userRequirements;
   }
 
   public List<String> getMissingInformation() {
@@ -46,12 +36,7 @@ public class JarvisAgentContext implements AgentContext {
   }
 
   public String toMarkdown() {
-    EventRequirements requirements =
-        eventRequirements == null ? new EventRequirements() : eventRequirements;
     return """
-        %s
-
-        ## Attendees
         %s
 
         ## Missing Information
@@ -60,20 +45,7 @@ public class JarvisAgentContext implements AgentContext {
         ## Status
         %s
         """
-        .formatted(
-            requirements.toMarkdown(),
-            renderAttendees(attendees),
-            renderList(missingInformation),
-            status.label());
-  }
-
-  private static String renderAttendees(List<Attendee> attendees) {
-    if (attendees.isEmpty()) {
-      return "- None";
-    }
-    return attendees.stream()
-        .map(Attendee::toMarkdown)
-        .collect(java.util.stream.Collectors.joining("\n"));
+        .formatted(userRequirements.toMarkdown(), renderList(missingInformation), status.label());
   }
 
   private static String renderList(List<String> items) {

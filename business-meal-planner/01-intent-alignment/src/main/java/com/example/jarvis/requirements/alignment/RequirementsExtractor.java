@@ -3,6 +3,7 @@ package com.example.jarvis.requirements.alignment;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
@@ -29,8 +30,8 @@ public class RequirementsExtractor {
       - Do not rank or book anything.
       """;
 
-  private static final BeanOutputConverter<ExtractedPlanningContext> OUTPUT_CONVERTER =
-      new BeanOutputConverter<>(ExtractedPlanningContext.class);
+  private static final BeanOutputConverter<UserRequirements> OUTPUT_CONVERTER =
+      new BeanOutputConverter<>(UserRequirements.class);
 
   private final ChatClient extractionClient;
 
@@ -42,9 +43,9 @@ public class RequirementsExtractor {
     this.extractionClient = null;
   }
 
-  public ExtractedPlanningContext extract(JarvisAgentContext existingState, String userMessage) {
+  public UserRequirements extract(JarvisAgentContext existingState, String userMessage) {
     String prompt =
-        existingState == null || existingState.getEventRequirements() == null
+        existingState == null || existingState.getUserRequirements().isEmpty()
             ? """
               User request:
               %s
@@ -66,14 +67,12 @@ public class RequirementsExtractor {
               """
                 .formatted(toJson(existingState), userMessage.trim(), OUTPUT_CONVERTER.getFormat());
 
-    ExtractedPlanningContext extracted =
-        extractionClient.prompt().user(prompt).call().entity(OUTPUT_CONVERTER);
-    extracted.setAttendees(extracted.getAttendees());
-    return extracted;
+    return extractionClient.prompt().user(prompt).call().entity(OUTPUT_CONVERTER);
   }
 
   private String toJson(JarvisAgentContext state) {
-    EventRequirements eventRequirements = state.getEventRequirements();
+    UserRequirements userRequirements = state.getUserRequirements();
+    EventRequirements eventRequirements = userRequirements.getEventRequirements();
     return """
         {
           "eventRequirements": {
@@ -104,7 +103,7 @@ public class RequirementsExtractor {
             toJsonValue(eventRequirements.getNoiseLevel()),
             toJsonArray(eventRequirements.getAdditionalRequirements()),
             toJsonArray(eventRequirements.getCuisinePreferences()),
-            toAttendeeJsonArray(state.getAttendees()));
+            toAttendeeJsonArray(userRequirements.getAttendees()));
   }
 
   private String toAttendeeJsonArray(List<Attendee> attendees) {
@@ -154,30 +153,5 @@ public class RequirementsExtractor {
 
   private String escape(String value) {
     return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
-  }
-
-  public static class ExtractedPlanningContext {
-
-    private EventRequirements eventRequirements = new EventRequirements();
-    private List<Attendee> attendees = List.of();
-
-    public ExtractedPlanningContext() {}
-
-    public EventRequirements getEventRequirements() {
-      return eventRequirements;
-    }
-
-    public void setEventRequirements(EventRequirements eventRequirements) {
-      this.eventRequirements =
-          eventRequirements == null ? new EventRequirements() : eventRequirements;
-    }
-
-    public List<Attendee> getAttendees() {
-      return attendees;
-    }
-
-    public void setAttendees(List<Attendee> attendees) {
-      this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
-    }
   }
 }

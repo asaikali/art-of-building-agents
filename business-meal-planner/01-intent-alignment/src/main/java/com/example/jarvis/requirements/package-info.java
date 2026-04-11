@@ -2,8 +2,8 @@
  * Stable planning requirements captured from the user during the early phases of the Jarvis
  * workflow.
  *
- * <p>This package is meant to hold the raw inputs that define what the user wants to plan. The
- * central split is:
+ * <p>This package is meant to hold the raw inputs that define what the user wants to plan. The main
+ * aggregate is {@link com.example.jarvis.requirements.UserRequirements}, which groups:
  *
  * <ul>
  *   <li>{@link com.example.jarvis.requirements.EventRequirements} for requirements that apply to

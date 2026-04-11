@@ -22,6 +22,7 @@ This module now demonstrates:
 | `RequirementsAlignmentLoop.java` | Main phase-one loop: opener handling, one model call, deterministic status, deterministic reply |
 | `RequirementsExtractor.java` | Single `ChatClient` call that extracts or updates the planning context JSON |
 | `JarvisAgentContext.java` | The session context object for this module |
+| `UserRequirements.java` | The captured user requirements aggregate for this module |
 | `EventRequirements.java` | Event-level facts captured during intent alignment |
 | `Attendee.java` | Per-person constraints captured during intent alignment |
 | `application.yml` | Local app and model configuration |

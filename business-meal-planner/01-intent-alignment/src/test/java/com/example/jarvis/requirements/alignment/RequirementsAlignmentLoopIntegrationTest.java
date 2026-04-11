@@ -7,6 +7,7 @@ import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.EventRequirements;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
@@ -185,9 +186,10 @@ class RequirementsAlignmentLoopIntegrationTest {
 
     private String flattenedState() {
       JarvisAgentContext state = result.state();
-      EventRequirements eventRequirements = state.getEventRequirements();
+      UserRequirements userRequirements = state.getUserRequirements();
+      EventRequirements eventRequirements = userRequirements.getEventRequirements();
       String attendees =
-          state.getAttendees().stream()
+          userRequirements.getAttendees().stream()
               .map(this::flattenAttendee)
               .collect(java.util.stream.Collectors.joining("\n"));
       return String.join(
