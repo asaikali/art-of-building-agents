@@ -1,8 +1,10 @@
 package com.example.jarvis.requirements.alignment.scenarios;
 
+import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
+import java.util.Map;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,11 @@ class ClarificationFlowWalkthrough {
     System.out.println("\n=== Turn " + turn + " ===");
     System.out.println("Status: " + context.getStatus().label());
     System.out.println("Assistant: " + result.reply());
-    System.out.println("State:\n" + context.toMarkdown());
+    System.out.println(
+        "State:\n"
+            + JsonUtils.toJson(
+                Map.of(
+                    "requirements", context.getUserRequirements(),
+                    "status", context.getStatus())));
   }
 }

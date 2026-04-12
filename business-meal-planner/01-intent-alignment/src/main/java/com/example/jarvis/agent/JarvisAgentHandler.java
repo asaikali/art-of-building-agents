@@ -2,6 +2,7 @@ package com.example.jarvis.agent;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
+import com.example.agent.core.json.JsonUtils;
 import com.example.agent.core.session.Session;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
 import java.util.Map;
@@ -49,7 +50,9 @@ public class JarvisAgentHandler implements AgentHandler {
     session.reply(result.reply());
 
     // Update inspector state and log the outcome
-    session.updateState(context.toMarkdown());
+    session.updateState(
+        JsonUtils.toJson(
+            Map.of("requirements", context.getUserRequirements(), "status", context.getStatus())));
     session.logEvent(
         context.getStatus().label(),
         Map.of("missingFieldCount", result.missingRequiredFields().size()));

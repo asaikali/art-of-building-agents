@@ -33,19 +33,6 @@ public class UserRequirements {
     this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
   }
 
-  public boolean isEmpty() {
-    return meal.getDate() == null
-        && meal.getTime() == null
-        && meal.getPartySize() == null
-        && meal.getMealType() == null
-        && meal.getPurpose() == null
-        && meal.getBudgetPerPerson() == null
-        && meal.getNoiseLevel() == null
-        && meal.getAdditionalRequirements().isEmpty()
-        && meal.getCuisinePreferences().isEmpty()
-        && attendees.isEmpty();
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
