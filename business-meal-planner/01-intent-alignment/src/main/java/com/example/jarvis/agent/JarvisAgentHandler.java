@@ -52,9 +52,7 @@ public class JarvisAgentHandler implements AgentHandler {
     // Update inspector state and log the outcome
     session.updateState(context.toMarkdown());
     session.logEvent(
-        context.getStatus().eventName(),
-        Map.of(
-            "status", context.getStatus().label(),
-            "missingInformationCount", context.getMissingInformation().size()));
+        context.getStatus().label(),
+        Map.of("missingInformationCount", context.getMissingInformation().size()));
   }
 }
