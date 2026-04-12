@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
  * pipeline in {@link RequirementsAligner}.
  *
  * <p>Hard criteria ({@link #findMissingRequiredFields}) are checked deterministically — date, time,
- * and party size must be present before the workflow can move to confirmation. Soft criteria
- * ({@link #suggestFollowUp}) use the model to suggest one useful follow-up question based on the
- * specific meal context.
+ * and party size must be present before the workflow can move to confirming. Soft criteria ({@link
+ * #suggestFollowUp}) use the model to suggest one useful follow-up question based on the specific
+ * meal context.
  */
 @Component
 public class RequirementsAssessor {
@@ -32,7 +32,7 @@ public class RequirementsAssessor {
 
   /**
    * Identifies the required fields that must be present before the alignment phase can move to
-   * confirmation. These are the hard gates: date, time, and party size. Returns an empty list when
+   * confirming. These are the hard gates: date, time, and party size. Returns an empty list when
    * all required fields are present.
    */
   public List<String> findMissingRequiredFields(Meal meal) {

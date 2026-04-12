@@ -7,7 +7,7 @@ import com.example.jarvis.requirements.alignment.AlignmentStatus;
 public class JarvisAgentContext implements AgentContext {
 
   private UserRequirements userRequirements = new UserRequirements();
-  private AlignmentStatus status = AlignmentStatus.WAITING_FOR_CLARIFICATION;
+  private AlignmentStatus status = AlignmentStatus.GATHERING_REQUIREMENTS;
 
   public UserRequirements getUserRequirements() {
     return userRequirements;

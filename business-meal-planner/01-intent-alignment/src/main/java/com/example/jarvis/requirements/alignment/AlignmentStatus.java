@@ -7,16 +7,17 @@ package com.example.jarvis.requirements.alignment;
  * <p>The status progresses through these states:
  *
  * <ul>
- *   <li>{@link #WAITING_FOR_CLARIFICATION} — required fields are missing, we need to ask the user
- *   <li>{@link #WAITING_FOR_CONFIRMATION} — all required fields are present, we need the user to
- *       confirm before proceeding
+ *   <li>{@link #GATHERING_REQUIREMENTS} — required fields are missing, the agent asks the user for
+ *       more information
+ *   <li>{@link #CONFIRMING_REQUIREMENTS} — all required fields are present, the agent asks the user
+ *       to confirm or correct before proceeding
  *   <li>{@link #REQUIREMENTS_CONFIRMED} — the user confirmed, alignment is complete and the next
  *       phase can begin
  * </ul>
  */
 public enum AlignmentStatus {
-  WAITING_FOR_CLARIFICATION("Waiting for clarification"),
-  WAITING_FOR_CONFIRMATION("Waiting for confirmation"),
+  GATHERING_REQUIREMENTS("Gathering requirements"),
+  CONFIRMING_REQUIREMENTS("Confirming requirements"),
   REQUIREMENTS_CONFIRMED("Requirements confirmed");
 
   private final String label;

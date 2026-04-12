@@ -78,7 +78,7 @@ public class RequirementsAligner {
     List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
     String suggestion = requirementsAssessor.suggestFollowUp(updated);
     boolean userConfirmed =
-        currentStatus == AlignmentStatus.WAITING_FOR_CONFIRMATION
+        currentStatus == AlignmentStatus.CONFIRMING_REQUIREMENTS
             && updated.equals(currentRequirements);
     log.info(
         "[Jarvis:Aligner] step2-assess | missingFields={} | userConfirmed={} | suggestion=\"{}\"",
@@ -93,9 +93,9 @@ public class RequirementsAligner {
     // Step 4: Reply — compose a natural response based on the status
     String reply =
         switch (status) {
-          case WAITING_FOR_CLARIFICATION ->
+          case GATHERING_REQUIREMENTS ->
               replyComposer.askForMissingField(missing.getFirst(), updated);
-          case WAITING_FOR_CONFIRMATION -> replyComposer.askForConfirmation(suggestion, updated);
+          case CONFIRMING_REQUIREMENTS -> replyComposer.askForConfirmation(suggestion, updated);
           case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
         };
     log.info("[Jarvis:Aligner] step4-reply | reply=\"{}\"", reply);
@@ -105,11 +105,11 @@ public class RequirementsAligner {
 
   private AlignmentStatus assessStatus(List<String> missingRequiredFields, boolean userConfirmed) {
     if (!missingRequiredFields.isEmpty()) {
-      return AlignmentStatus.WAITING_FOR_CLARIFICATION;
+      return AlignmentStatus.GATHERING_REQUIREMENTS;
     }
     if (userConfirmed) {
       return AlignmentStatus.REQUIREMENTS_CONFIRMED;
     }
-    return AlignmentStatus.WAITING_FOR_CONFIRMATION;
+    return AlignmentStatus.CONFIRMING_REQUIREMENTS;
   }
 }

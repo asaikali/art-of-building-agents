@@ -36,20 +36,20 @@ class AlignmentVerificationScenario {
     var context = new JarvisAgentContext();
 
     // User provides a detailed initial request with enough info (date, time, party size)
-    // for the aligner to move straight to confirmation
+    // for the aligner to move straight to confirming
     sendMessage(
         context,
         """
         I have a client dinner tomorrow at 7 pm for 4 people.
         One guest is vegetarian. I want somewhere quiet.
         """);
-    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.CONFIRMING_REQUIREMENTS);
     assertThat(stateJson(context)).contains("dinner", "vegetarian");
 
     // User corrects the meal type and adds budget — the aligner should update
     // the requirements and ask for confirmation again (not confirm automatically)
     sendMessage(context, "Actually make it lunch, not dinner. Budget is 80 per person.");
-    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.CONFIRMING_REQUIREMENTS);
     assertThat(stateJson(context)).contains("lunch", "80");
 
     // User confirms — the aligner detects that the requirements are unchanged
@@ -59,19 +59,19 @@ class AlignmentVerificationScenario {
   }
 
   @Test
-  @DisplayName("Vague start, then clarification, then confirmation")
-  void vagueStartThenClarificationThenConfirmation() {
+  @DisplayName("Vague start, then gathering, then confirming")
+  void vagueStartThenGatheringThenConfirming() {
     var context = new JarvisAgentContext();
 
     // User starts with a vague request that lacks required fields (date, time, party size).
-    // The aligner should ask for clarification instead of moving to confirmation.
+    // The aligner should stay in gathering instead of moving to confirming.
     sendMessage(context, "Help me plan a business meal.");
-    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.WAITING_FOR_CLARIFICATION);
+    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.GATHERING_REQUIREMENTS);
 
     // User provides the missing details. The aligner should now have enough
-    // information to move to confirmation.
+    // information to move to confirming.
     sendMessage(context, "Team lunch on April 20th at noon for 6 people, one gluten-free.");
-    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(context.getStatus()).isEqualTo(AlignmentStatus.CONFIRMING_REQUIREMENTS);
     assertThat(stateJson(context)).contains("lunch", "6");
 
     // User confirms the requirements

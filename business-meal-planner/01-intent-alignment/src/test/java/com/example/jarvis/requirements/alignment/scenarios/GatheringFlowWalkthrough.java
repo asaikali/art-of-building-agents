@@ -11,24 +11,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Student walkthrough: starting with a vague request and going through clarification. Set
- * breakpoints after each processMessage call to inspect the context, or just run the test and read
- * the console output.
+ * Student walkthrough: starting with a vague request and going through gathering. Set breakpoints
+ * after each processMessage call to inspect the context, or just run the test and read the console
+ * output.
  *
  * <pre>
- * mvn test -Dgroups=integration -Dtest=ClarificationFlowWalkthrough
+ * mvn test -Dgroups=integration -Dtest=GatheringFlowWalkthrough
  * </pre>
  */
 @SpringBootTest(
     classes = IntentAlignmentApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Tag("integration")
-class ClarificationFlowWalkthrough {
+class GatheringFlowWalkthrough {
 
   @Autowired private RequirementsAligner aligner;
 
   @Test
-  void vagueRequestToClarificationToConfirmation() {
+  void vagueRequestToGatheringToConfirming() {
     var context = new JarvisAgentContext();
 
     // Turn 1: Vague request — agent should ask for missing details
