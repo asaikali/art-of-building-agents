@@ -71,23 +71,28 @@ public class RequirementsAligner {
     return new Result(updatedRequirements, missingFields, updatedStatus, reply);
   }
 
-  // If required fields are missing we stay in gathering. If the user confirmed (requirements
-  // unchanged after a confirmation prompt) we're done. Otherwise we ask the user to confirm.
   private AlignmentStatus determineStatus(
       List<String> missingFields,
       AlignmentStatus currentStatus,
       UserRequirements before,
       UserRequirements after) {
-    if (!missingFields.isEmpty()) {
+    // Required fields are missing — stay in gathering
+    if (hasMissingFields(missingFields)) {
       return AlignmentStatus.GATHERING_REQUIREMENTS;
     }
-    if (isConfirmation(currentStatus, before, after)) {
+    // User confirmed (requirements unchanged after a confirmation prompt) — we're done
+    if (hasUserConfirmed(currentStatus, before, after)) {
       return AlignmentStatus.REQUIREMENTS_CONFIRMED;
     }
+    // All required fields present but not yet confirmed — ask the user to confirm
     return AlignmentStatus.CONFIRMING_REQUIREMENTS;
   }
 
-  private boolean isConfirmation(
+  private boolean hasMissingFields(List<String> missingFields) {
+    return !missingFields.isEmpty();
+  }
+
+  private boolean hasUserConfirmed(
       AlignmentStatus currentStatus, UserRequirements before, UserRequirements after) {
     return currentStatus == AlignmentStatus.CONFIRMING_REQUIREMENTS && isUnchanged(before, after);
   }
