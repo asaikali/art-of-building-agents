@@ -3,7 +3,6 @@ package com.example.jarvis.requirements.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.DietaryConstraint;
 import com.example.jarvis.requirements.Meal;

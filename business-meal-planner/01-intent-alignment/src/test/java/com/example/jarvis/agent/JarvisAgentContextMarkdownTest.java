@@ -9,6 +9,7 @@ import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.NoiseLevel;
 import com.example.jarvis.requirements.TravelMode;
 import com.example.jarvis.requirements.UserRequirements;
+import com.example.jarvis.requirements.alignment.RequirementStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;

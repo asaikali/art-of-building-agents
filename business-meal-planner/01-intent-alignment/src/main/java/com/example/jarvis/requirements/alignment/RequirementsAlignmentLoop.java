@@ -1,7 +1,6 @@
 package com.example.jarvis.requirements.alignment;
 
 import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;

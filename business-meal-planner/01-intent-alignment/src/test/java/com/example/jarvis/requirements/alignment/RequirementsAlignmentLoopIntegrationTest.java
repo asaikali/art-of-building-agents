@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.agent.RequirementStatus;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;

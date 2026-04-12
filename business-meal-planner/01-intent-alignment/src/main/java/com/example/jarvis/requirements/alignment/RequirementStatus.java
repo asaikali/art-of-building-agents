@@ -1,4 +1,4 @@
-package com.example.jarvis.agent;
+package com.example.jarvis.requirements.alignment;
 
 public enum RequirementStatus {
   WAITING_FOR_CONFIRMATION("Waiting for confirmation"),

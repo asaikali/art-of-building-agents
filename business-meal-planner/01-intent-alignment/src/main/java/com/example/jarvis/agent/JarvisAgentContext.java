@@ -2,6 +2,7 @@ package com.example.jarvis.agent;
 
 import com.example.agent.core.session.AgentContext;
 import com.example.jarvis.requirements.UserRequirements;
+import com.example.jarvis.requirements.alignment.RequirementStatus;
 import java.util.List;
 
 public class JarvisAgentContext implements AgentContext {
