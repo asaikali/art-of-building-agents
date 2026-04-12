@@ -12,20 +12,17 @@ import org.springframework.stereotype.Service;
  * and a natural reply. Called by {@link com.example.jarvis.agent.JarvisAgentHandler} on each
  * message.
  *
- * <p>The pipeline coordinates three collaborators:
+ * <p>The pipeline has three steps:
  *
  * <ol>
- *   <li>{@link RequirementsExtractor} — uses the model to merge the user message into the current
- *       {@link UserRequirements}
- *   <li>{@link RequirementsAssessor} — checks what required fields are missing and suggests a
- *       follow-up
- *   <li>{@link ReplyComposer} — uses the model to write a natural reply based on the current {@link
- *       AlignmentStatus}
+ *   <li><b>Extract</b> — {@link RequirementsExtractor} uses the model to merge the user message
+ *       into the current {@link UserRequirements}
+ *   <li><b>Determine status</b> — deterministic logic checks what required fields are missing and
+ *       whether the user confirmed, then decides the {@link AlignmentStatus}
+ *   <li><b>Compose reply</b> — {@link ReplyComposer} uses the model to write a natural reply based
+ *       on the status. {@link RequirementsAssessor#suggestFollowUp} is called only when the status
+ *       is {@link AlignmentStatus#CONFIRMING_REQUIREMENTS}
  * </ol>
- *
- * <p>The aligner itself decides the workflow status (step 3) and picks which composer method to
- * call. It returns a {@link Result} with the updated requirements, status, and reply — the handler
- * applies these to the session context.
  */
 @Service
 public class RequirementsAligner {
@@ -57,52 +54,38 @@ public class RequirementsAligner {
    * com.example.jarvis.agent.JarvisAgentHandler} each time the user sends a message. The handler
    * passes in the current requirements and status, and applies the returned {@link Result} to the
    * session context.
-   *
-   * <p>The pipeline has four steps:
-   *
-   * <ol>
-   *   <li><b>Extract</b> — the model merges the user message into the current requirements
-   *   <li><b>Assess</b> — deterministic check for required fields, model suggests a follow-up
-   *   <li><b>Status</b> — code decides the workflow status based on the assessment
-   *   <li><b>Reply</b> — the model composes a natural response based on the status
-   * </ol>
    */
   public Result processMessage(
       UserRequirements currentRequirements, AlignmentStatus currentStatus, String userMessage) {
 
-    // Step 1: Extract — model maps user message into updated requirements
+    // Step 1: Extract — model merges the user message into the current requirements
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
     log.info("[Jarvis:Aligner] step1-extract | updatedRequirements={}", JsonUtils.toJson(updated));
 
-    // Step 2: Assess — deterministic hard gates + model-based follow-up suggestion
+    // Step 2: Determine status — all status logic in one place
     List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
-    String suggestion = requirementsAssessor.suggestFollowUp(updated);
-    boolean userConfirmed = isConfirmation(currentStatus, currentRequirements, updated);
-    log.info(
-        "[Jarvis:Aligner] step2-assess | missingFields={} | userConfirmed={} | suggestion=\"{}\"",
-        missing,
-        userConfirmed,
-        suggestion);
+    AlignmentStatus status = determineStatus(missing, currentStatus, currentRequirements, updated);
+    log.info("[Jarvis:Aligner] step2-status | {} → {}", currentStatus.label(), status.label());
 
-    // Step 3: Status — decide the workflow status
-    AlignmentStatus status = assessStatus(missing, userConfirmed);
-    log.info("[Jarvis:Aligner] step3-status | {} → {}", currentStatus.label(), status.label());
-
-    // Step 4: Reply — compose a natural response based on the status
-    String reply =
-        switch (status) {
-          case GATHERING_REQUIREMENTS ->
-              replyComposer.askForMissingField(missing.getFirst(), updated);
-          case CONFIRMING_REQUIREMENTS -> replyComposer.askForConfirmation(suggestion, updated);
-          case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
-        };
-    log.info("[Jarvis:Aligner] step4-reply | reply=\"{}\"", reply);
+    // Step 3: Compose reply — model writes a response appropriate to the status
+    String reply = composeReply(status, missing, updated);
+    log.info("[Jarvis:Aligner] step3-reply | reply=\"{}\"", reply);
 
     return new Result(updated, missing, status, reply);
   }
 
-  private boolean isUnchanged(UserRequirements before, UserRequirements after) {
-    return before.equals(after);
+  private AlignmentStatus determineStatus(
+      List<String> missing,
+      AlignmentStatus currentStatus,
+      UserRequirements before,
+      UserRequirements after) {
+    if (!missing.isEmpty()) {
+      return AlignmentStatus.GATHERING_REQUIREMENTS;
+    }
+    if (isConfirmation(currentStatus, before, after)) {
+      return AlignmentStatus.REQUIREMENTS_CONFIRMED;
+    }
+    return AlignmentStatus.CONFIRMING_REQUIREMENTS;
   }
 
   private boolean isConfirmation(
@@ -110,13 +93,20 @@ public class RequirementsAligner {
     return currentStatus == AlignmentStatus.CONFIRMING_REQUIREMENTS && isUnchanged(before, after);
   }
 
-  private AlignmentStatus assessStatus(List<String> missingRequiredFields, boolean userConfirmed) {
-    if (!missingRequiredFields.isEmpty()) {
-      return AlignmentStatus.GATHERING_REQUIREMENTS;
-    }
-    if (userConfirmed) {
-      return AlignmentStatus.REQUIREMENTS_CONFIRMED;
-    }
-    return AlignmentStatus.CONFIRMING_REQUIREMENTS;
+  private boolean isUnchanged(UserRequirements before, UserRequirements after) {
+    return before.equals(after);
+  }
+
+  private String composeReply(
+      AlignmentStatus status, List<String> missing, UserRequirements updated) {
+    return switch (status) {
+      case GATHERING_REQUIREMENTS -> replyComposer.askForMissingField(missing.getFirst(), updated);
+      case CONFIRMING_REQUIREMENTS -> {
+        String suggestion = requirementsAssessor.suggestFollowUp(updated);
+        log.info("[Jarvis:Aligner] suggestFollowUp | suggestion=\"{}\"", suggestion);
+        yield replyComposer.askForConfirmation(suggestion, updated);
+      }
+      case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
+    };
   }
 }
