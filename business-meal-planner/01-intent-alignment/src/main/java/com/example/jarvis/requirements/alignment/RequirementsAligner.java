@@ -77,9 +77,7 @@ public class RequirementsAligner {
     // Step 2: Assess — deterministic hard gates + model-based follow-up suggestion
     List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
     String suggestion = requirementsAssessor.suggestFollowUp(updated);
-    boolean userConfirmed =
-        currentStatus == AlignmentStatus.CONFIRMING_REQUIREMENTS
-            && updated.equals(currentRequirements);
+    boolean userConfirmed = isConfirmation(currentStatus, currentRequirements, updated);
     log.info(
         "[Jarvis:Aligner] step2-assess | missingFields={} | userConfirmed={} | suggestion=\"{}\"",
         missing,
@@ -101,6 +99,15 @@ public class RequirementsAligner {
     log.info("[Jarvis:Aligner] step4-reply | reply=\"{}\"", reply);
 
     return new Result(updated, missing, status, reply);
+  }
+
+  private boolean isUnchanged(UserRequirements before, UserRequirements after) {
+    return before.equals(after);
+  }
+
+  private boolean isConfirmation(
+      AlignmentStatus currentStatus, UserRequirements before, UserRequirements after) {
+    return currentStatus == AlignmentStatus.CONFIRMING_REQUIREMENTS && isUnchanged(before, after);
   }
 
   private AlignmentStatus assessStatus(List<String> missingRequiredFields, boolean userConfirmed) {
