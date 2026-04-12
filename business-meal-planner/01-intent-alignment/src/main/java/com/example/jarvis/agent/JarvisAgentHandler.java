@@ -27,7 +27,7 @@ public class JarvisAgentHandler implements AgentHandler {
         Hi, I'm Jarvis 👋
 
         I specialize in planning memorable dining experiences.
-        Tell me about the occasion, and I’ll help you design something just right.
+        Tell me about the occasion, and I'll help you design something just right.
         """;
   }
 
@@ -37,11 +37,20 @@ public class JarvisAgentHandler implements AgentHandler {
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
     // Run the alignment pipeline: extract → check → directive → reply
-    String reply =
-        requirementsAligner.processMessage(context, message.text(), session.getMessages());
+    var result =
+        requirementsAligner.processMessage(
+            context.getUserRequirements(),
+            context.getStatus(),
+            message.text(),
+            session.getMessages());
+
+    // Update workflow state with the computed outputs
+    context.setUserRequirements(result.updatedRequirements());
+    context.setMissingInformation(result.check().missingCriticalFields());
+    context.setStatus(result.check().status());
 
     // Send the reply
-    session.reply(reply);
+    session.reply(result.reply());
 
     // Update inspector state and log the outcome
     session.updateState(context.toMarkdown());

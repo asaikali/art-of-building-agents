@@ -35,29 +35,46 @@ class ClarificationFlowWalkthrough {
     var history = new ArrayList<AgentMessage>();
 
     // Turn 1: Vague request — agent should ask for missing details
-    var reply1 = aligner.processMessage(context, "Help me plan a business meal.", history);
+    var result1 =
+        aligner.processMessage(
+            context.getUserRequirements(),
+            context.getStatus(),
+            "Help me plan a business meal.",
+            history);
+    applyResult(context, result1);
     history.add(new AgentMessage(Instant.now(), Role.USER, "Help me plan a business meal."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply1));
-    printTurn(1, context, reply1);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result1.reply()));
+    printTurn(1, context, result1.reply());
 
     // Turn 2: Provide the details the agent asked about
-    var reply2 =
+    var result2 =
         aligner.processMessage(
-            context,
+            context.getUserRequirements(),
+            context.getStatus(),
             """
             It's an internal team lunch on April 20th at noon for 6 people.
             One person is gluten-free. I only want recommendations, no booking.
             """,
             history);
+    applyResult(context, result2);
     history.add(new AgentMessage(Instant.now(), Role.USER, "It's an internal team lunch..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply2));
-    printTurn(2, context, reply2);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result2.reply()));
+    printTurn(2, context, result2.reply());
 
     // Turn 3: Confirm
-    var reply3 = aligner.processMessage(context, "exactly", history);
+    var result3 =
+        aligner.processMessage(
+            context.getUserRequirements(), context.getStatus(), "exactly", history);
+    applyResult(context, result3);
     history.add(new AgentMessage(Instant.now(), Role.USER, "exactly"));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply3));
-    printTurn(3, context, reply3);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result3.reply()));
+    printTurn(3, context, result3.reply());
+  }
+
+  private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
+    context.setUserRequirements(result.updatedRequirements());
+    context.setMissingInformation(result.check().missingCriticalFields());
+    context.setStatus(result.check().status());
   }
 
   private void printTurn(int turn, JarvisAgentContext context, String reply) {

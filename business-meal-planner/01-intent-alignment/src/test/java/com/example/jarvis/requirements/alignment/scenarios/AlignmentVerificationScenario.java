@@ -90,9 +90,14 @@ class AlignmentVerificationScenario {
 
   private void sendMessage(
       JarvisAgentContext context, List<AgentMessage> history, String userMessage) {
-    String reply = aligner.processMessage(context, userMessage, history);
+    var result =
+        aligner.processMessage(
+            context.getUserRequirements(), context.getStatus(), userMessage, history);
+    context.setUserRequirements(result.updatedRequirements());
+    context.setMissingInformation(result.check().missingCriticalFields());
+    context.setStatus(result.check().status());
     history.add(new AgentMessage(Instant.now(), Role.USER, userMessage));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply));
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result.reply()));
   }
 
   private String stateJson(JarvisAgentContext context) {

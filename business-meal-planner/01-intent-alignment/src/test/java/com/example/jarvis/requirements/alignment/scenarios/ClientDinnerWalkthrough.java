@@ -34,28 +34,42 @@ class ClientDinnerWalkthrough {
     var history = new ArrayList<AgentMessage>();
 
     // Turn 1: Describe the meal
-    var reply1 =
+    var result1 =
         aligner.processMessage(
-            context,
+            context.getUserRequirements(),
+            context.getStatus(),
             "I have a client dinner tomorrow at 7pm for 4 people, one is vegetarian.",
             history);
+    applyResult(context, result1);
     history.add(new AgentMessage(Instant.now(), Role.USER, "I have a client dinner..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply1));
-    printTurn(1, context, reply1);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result1.reply()));
+    printTurn(1, context, result1.reply());
 
     // Turn 2: Add budget and origin
-    var reply2 =
+    var result2 =
         aligner.processMessage(
-            context, "I'm leaving from Union Station. Keep it under 120 CAD per person.", history);
+            context.getUserRequirements(),
+            context.getStatus(),
+            "I'm leaving from Union Station. Keep it under 120 CAD per person.",
+            history);
+    applyResult(context, result2);
     history.add(new AgentMessage(Instant.now(), Role.USER, "I'm leaving from Union Station..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply2));
-    printTurn(2, context, reply2);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result2.reply()));
+    printTurn(2, context, result2.reply());
 
     // Turn 3: Confirm
-    var reply3 = aligner.processMessage(context, "yes", history);
+    var result3 =
+        aligner.processMessage(context.getUserRequirements(), context.getStatus(), "yes", history);
+    applyResult(context, result3);
     history.add(new AgentMessage(Instant.now(), Role.USER, "yes"));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply3));
-    printTurn(3, context, reply3);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result3.reply()));
+    printTurn(3, context, result3.reply());
+  }
+
+  private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
+    context.setUserRequirements(result.updatedRequirements());
+    context.setMissingInformation(result.check().missingCriticalFields());
+    context.setStatus(result.check().status());
   }
 
   private void printTurn(int turn, JarvisAgentContext context, String reply) {
