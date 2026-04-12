@@ -132,13 +132,10 @@ constraints before any restaurant search or booking happens.
 
 ### Responsibilities
 
-- capture the shared meal information
-- capture attendee-specific requirements
+- capture shared meal information and attendee-specific requirements
 - identify missing information needed to continue
-- determine whether the request should move to clarification or confirmation
-- summarize understanding back to the user
-- ask for confirmation or correction
-- repeat until requirements are confirmed or clarification is needed
+- summarize understanding back to the user and ask for confirmation
+- repeat until requirements are confirmed
 
 ### Non-goals
 
@@ -147,214 +144,28 @@ constraints before any restaurant search or booking happens.
 - ranking candidates
 - booking
 
-### Output
-
-Phase 1 uses a Markdown string as the inspector artifact, but the underlying captured input is
-structured as:
-
-- `UserRequirements`
-  - `Meal`
-  - `List<Attendee>`
-
-Phase 1 workflow state is kept separately in agent context:
-
-- `JarvisAgentContext`
-  - `UserRequirements`
-  - `AlignmentStatus`
-
-The inspector state is rendered as a Markdown string with two sections:
-
-```md
-## Requirements
-(JSON representation of UserRequirements)
-
-## Status
-(AlignmentStatus label)
-```
-
-The `Status` section shows one of:
-
-- `Gathering requirements`
-- `Confirming requirements`
-- `Requirements confirmed`
-
-This phase should not store inferred defaults, assumptions, validation output, or search/planning
-results inside the captured requirements model.
-
-### Greeting And Session-Start Behavior
-
-The agent should not start with a blank chat.
-
-Each sample agent should be able to publish an initial assistant message when a session is
-created so the UI can immediately show:
-
-- what the agent does
-- what kind of input it expects
-- what the user should provide first
-
-For the business meal planner, the initial message should introduce Jarvis and explain that
-the planner first aligns on the meal requirements before searching or booking.
-
-If the user sends only a greeting or opener such as:
-
-- hi
-- hello
-- can you help
-
-then the agent should respond with a short orientation message instead of a generic
-clarification request.
-
 ### Required Search-Ready Constraints
 
-Phase 1 should distinguish between:
-
-- requirements captured
-- requirements confirmed
-- requirements ready for restaurant search
-
-For this sample, the minimum required constraints to leave intent alignment are:
-
-- when
-  - date and time
-- where from
-  - origin address
-- how many
-  - party size
-
-The planner may confirm other constraints before these are complete, but it should not be
-considered search-ready until all three are present.
-
-For this teaching sample, `where` means a concrete origin address, not only a neighborhood.
-
-### Open Product Decision: Origin As A Required Phase 1 Field
-
-This part of the specification is currently incomplete and must be confirmed before future
-sessions change the implementation.
-
-Current code behavior in `01-intent-alignment` treats these as the required completeness fields:
+The minimum required fields before Phase 1 can move to confirming are:
 
 - date
 - time
 - party size
 
-The current code does **not** require origin address before Phase 1 can move to
-`Confirming requirements`.
+These are checked deterministically. All other fields are optional.
 
-The written product intent above still says Phase 1 search-ready requirements should include:
+### Open Product Decision: Origin As A Required Phase 1 Field
 
-- date and time
-- origin address
-- party size
+Current code does **not** require origin address before moving to `Confirming requirements`.
+The original product intent included origin as a required field. Until this is resolved, the
+current code behavior wins. Future sessions should confirm the intended rule with the user
+before reintroducing origin as a required field.
 
-Until this is resolved, the current code behavior wins for implementation continuity. Future
-sessions should not silently reintroduce origin as a required Phase 1 field or rewrite the
-specification around the current implementation. They should stop and confirm the intended rule
-with the user first.
+### Greeting Behavior
 
-### Alignment Pipeline
-
-Each user message runs through a three-step pipeline orchestrated by `RequirementsAligner`:
-
-1. **Extract** — `RequirementsExtractor` uses the model to merge the user message into the
-   current `UserRequirements`. The model preserves existing data unless the user explicitly
-   corrects it, so requirements accumulate over multiple turns.
-2. **Determine status** — `RequirementsAssessor.findMissingRequiredFields` checks hard gates
-   deterministically (date, time, party size). The aligner then decides the `AlignmentStatus`
-   based on whether required fields are present and whether the user confirmed (detected by
-   equality of requirements before and after extraction).
-3. **Compose reply** — `ReplyComposer` uses the model to write a natural response. The aligner
-   picks which composer method to call based on the status: `askForMissingField`,
-   `askForConfirmation`, or `acknowledgeConfirmation`. `RequirementsAssessor.suggestFollowUp`
-   is called only when the status is `CONFIRMING_REQUIREMENTS`, to avoid a wasted model call
-   during gathering.
-
-### Confirmation Behavior
-
-Confirmation is detected by comparing the `UserRequirements` before and after extraction. If
-the status was `CONFIRMING_REQUIREMENTS` and the extractor returns identical requirements
-(the user said "yes" or "looks good" without changing anything), the aligner marks the
-requirements as confirmed.
-
-If the user says "yes but change the time to 8pm," the extractor updates the time, the
-requirements differ from the previous turn, and the aligner does not confirm — it asks for
-confirmation again with the updated summary.
-
-The model handles all conversational nuance (greetings, vague responses, corrections with
-confirmations) naturally through the extraction step. There is no deterministic pattern
-matching for user intent.
-
-### Clarification Priority
-
-When required fields are missing, the aligner asks about the first missing field from the
-assessor's list (date, time, party size — in that order). The `ReplyComposer.askForMissingField`
-method receives the single field name and writes a natural question about it.
-
-The agent should avoid broad follow-ups such as "please clarify the details" when a more
-specific question is possible.
-
-### Deterministic Checks Inside Phase 1
-
-`RequirementsAssessor.findMissingRequiredFields` performs a deterministic completeness check
-for the required search-ready fields:
-
-- has date
-- has time
-- has party size (greater than zero)
-
-`Origin address` is intentionally omitted because the requirement is still under discussion.
-See `Open Product Decision: Origin As A Required Phase 1 Field`.
-
-These are requirement-completeness checks, not restaurant-candidate validators.
-
-### Implementation Conventions
-
-The current implementation follows these conventions:
-
-1. `agent-core` owns shared session runtime concerns: chat, events, rendered state, and a
-   session-backed `AgentContext`.
-2. Each planner phase should keep the root package focused on application/bootstrap classes.
-3. Each planner phase should use an `.agent` package for the `AgentHandler` and agent-owned
-   workflow state.
-4. Stable captured user input should live in `.requirements`.
-5. Phase-specific logic around filling or checking those requirements should live in a nested
-   package such as `.requirements.alignment`.
-6. Phase 1 should keep the captured requirements model separate from workflow status and other
-   agent-runtime concerns.
-
-### Example Phase 1 Inspector State
-
-```md
-# Agent Context
-
-## Requirements
-​```json
-{
-  "meal": {
-    "date": "2026-04-11",
-    "time": "18:00:00",
-    "partySize": 4,
-    "mealType": "DINNER",
-    "purpose": "Client dinner",
-    "budgetPerPerson": 120,
-    "noiseLevel": "QUIET",
-    "additionalRequirements": ["Professional setting"],
-    "cuisinePreferences": ["Italian"]
-  },
-  "attendees": [
-    {
-      "name": "Alex",
-      "origin": "Union Station",
-      "departureTime": "17:30:00",
-      "travelMode": "TRANSIT",
-      "dietaryConstraints": ["VEGETARIAN"]
-    }
-  ]
-}
-​```
-
-## Status
-Confirming requirements
-```
+The agent publishes an initial assistant message when a session is created. If the user sends
+only a greeting (hi, hello, can you help), the agent responds with a short orientation message
+instead of a generic clarification request.
 
 ## Phase 2: Constraint Checking
 
