@@ -6,10 +6,14 @@ import com.example.agent.core.json.JsonUtils;
 import com.example.agent.core.session.Session;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JarvisAgentHandler implements AgentHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(JarvisAgentHandler.class);
 
   private final RequirementsAligner requirementsAligner;
 
@@ -37,6 +41,11 @@ public class JarvisAgentHandler implements AgentHandler {
     // Retrieve or initialize the workflow state for this session
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
+    log.info(
+        "[Jarvis:Handler] onMessage | status={} | user=\"{}\"",
+        context.getStatus().label(),
+        message.text());
+
     // Run the alignment pipeline: extract → assess → status → reply
     var result =
         requirementsAligner.processMessage(
@@ -45,6 +54,11 @@ public class JarvisAgentHandler implements AgentHandler {
     // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());
     context.setStatus(result.status());
+
+    log.info(
+        "[Jarvis:Handler] done | status={} | missingFields={}",
+        result.status().label(),
+        result.missingRequiredFields().size());
 
     // Send the reply
     session.reply(result.reply());

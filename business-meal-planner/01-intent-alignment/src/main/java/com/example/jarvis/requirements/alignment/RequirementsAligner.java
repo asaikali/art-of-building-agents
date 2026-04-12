@@ -1,7 +1,10 @@
 package com.example.jarvis.requirements.alignment;
 
+import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,6 +29,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RequirementsAligner {
+
+  private static final Logger log = LoggerFactory.getLogger(RequirementsAligner.class);
 
   private final RequirementsExtractor requirementsExtractor;
   private final RequirementsAssessor requirementsAssessor;
@@ -67,6 +72,7 @@ public class RequirementsAligner {
 
     // Step 1: Extract — model maps user message into updated requirements
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
+    log.info("[Jarvis:Aligner] step1-extract | updatedRequirements={}", JsonUtils.toJson(updated));
 
     // Step 2: Assess — deterministic hard gates + model-based follow-up suggestion
     List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
@@ -74,9 +80,15 @@ public class RequirementsAligner {
     boolean userConfirmed =
         currentStatus == AlignmentStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
+    log.info(
+        "[Jarvis:Aligner] step2-assess | missingFields={} | userConfirmed={} | suggestion=\"{}\"",
+        missing,
+        userConfirmed,
+        suggestion);
 
     // Step 3: Status — decide the workflow status
     AlignmentStatus status = assessStatus(missing, userConfirmed);
+    log.info("[Jarvis:Aligner] step3-status | {} → {}", currentStatus.label(), status.label());
 
     // Step 4: Reply — compose a natural response based on the status
     String reply =
@@ -86,6 +98,7 @@ public class RequirementsAligner {
           case WAITING_FOR_CONFIRMATION -> replyComposer.askForConfirmation(suggestion, updated);
           case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
         };
+    log.info("[Jarvis:Aligner] step4-reply | reply=\"{}\"", reply);
 
     return new Result(updated, missing, status, reply);
   }

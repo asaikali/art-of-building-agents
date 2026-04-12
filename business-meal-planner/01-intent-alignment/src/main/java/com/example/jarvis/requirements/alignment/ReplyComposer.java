@@ -2,6 +2,8 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReplyComposer {
 
+  private static final Logger log = LoggerFactory.getLogger(ReplyComposer.class);
+
   private final ChatClient chatClient;
 
   public ReplyComposer(ChatClient.Builder chatClientBuilder) {
@@ -44,12 +48,14 @@ public class ReplyComposer {
   }
 
   public String askForMissingField(String missingField, UserRequirements requirements) {
-    return chatClient
-        .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
+    log.info("[Jarvis:Composer] askForMissingField | missingField=\"{}\"", missingField);
+    String reply =
+        chatClient
+            .prompt()
+            .user(
+                u ->
+                    u.text(
+                            """
                     We need to know the following before we can start looking for restaurants.
                     Write a brief, friendly question asking about it.
 
@@ -61,19 +67,23 @@ public class ReplyComposer {
                     {requirements}
                     </requirements>
                     """)
-                    .param("missingField", missingField)
-                    .param("requirements", JsonUtils.toJson(requirements)))
-        .call()
-        .content();
+                        .param("missingField", missingField)
+                        .param("requirements", JsonUtils.toJson(requirements)))
+            .call()
+            .content();
+    log.info("[Jarvis:Composer] askForMissingField | reply=\"{}\"", reply);
+    return reply;
   }
 
   public String askForConfirmation(String suggestedFollowUp, UserRequirements requirements) {
-    return chatClient
-        .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
+    log.info("[Jarvis:Composer] askForConfirmation | suggestedFollowUp=\"{}\"", suggestedFollowUp);
+    String reply =
+        chatClient
+            .prompt()
+            .user(
+                u ->
+                    u.text(
+                            """
                     We have enough information to start searching for restaurants. Summarize the
                     requirements below in a readable way and ask the user to confirm or correct.
                     If the suggested follow-up is relevant, mention it casually.
@@ -86,19 +96,23 @@ public class ReplyComposer {
                     {suggestedFollowUp}
                     </suggestedFollowUp>
                     """)
-                    .param("requirements", JsonUtils.toJson(requirements))
-                    .param("suggestedFollowUp", suggestedFollowUp))
-        .call()
-        .content();
+                        .param("requirements", JsonUtils.toJson(requirements))
+                        .param("suggestedFollowUp", suggestedFollowUp))
+            .call()
+            .content();
+    log.info("[Jarvis:Composer] askForConfirmation | reply=\"{}\"", reply);
+    return reply;
   }
 
   public String acknowledgeConfirmation(UserRequirements requirements) {
-    return chatClient
-        .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
+    log.info("[Jarvis:Composer] acknowledgeConfirmation");
+    String reply =
+        chatClient
+            .prompt()
+            .user(
+                u ->
+                    u.text(
+                            """
                     The user has confirmed the requirements below. Acknowledge briefly and let
                     them know you will start looking for restaurants.
 
@@ -106,8 +120,10 @@ public class ReplyComposer {
                     {requirements}
                     </requirements>
                     """)
-                    .param("requirements", JsonUtils.toJson(requirements)))
-        .call()
-        .content();
+                        .param("requirements", JsonUtils.toJson(requirements)))
+            .call()
+            .content();
+    log.info("[Jarvis:Composer] acknowledgeConfirmation | reply=\"{}\"", reply);
+    return reply;
   }
 }

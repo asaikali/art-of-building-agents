@@ -5,6 +5,8 @@ import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RequirementsAssessor {
+
+  private static final Logger log = LoggerFactory.getLogger(RequirementsAssessor.class);
 
   private final ChatClient chatClient;
 
@@ -42,6 +46,9 @@ public class RequirementsAssessor {
     if (meal == null || meal.getPartySize() == null || meal.getPartySize() <= 0) {
       missing.add("Party Size");
     }
+    log.info(
+        "[Jarvis:Assessor] missing | fields={}",
+        missing.isEmpty() ? "none — all required fields present" : missing);
     return missing;
   }
 
@@ -51,10 +58,11 @@ public class RequirementsAssessor {
    * the model has no suggestion it will say so and the composer will ignore it.
    */
   public String suggestFollowUp(UserRequirements requirements) {
-    return chatClient
-        .prompt()
-        .system(
-            """
+    String result =
+        chatClient
+            .prompt()
+            .system(
+                """
             You are an executive assistant assessing business meal planning requirements.
 
             Given the current requirements, suggest ONE thing that would be most useful
@@ -69,18 +77,20 @@ public class RequirementsAssessor {
             - For example, a client dinner for 20 might need dress code or parking info,
               while a casual team lunch for 3 probably doesn't.
             """)
-        .user(
-            u ->
-                u.text(
-                        """
+            .user(
+                u ->
+                    u.text(
+                            """
                     <requirements>
                     {requirements}
                     </requirements>
 
                     What is the single most useful thing to ask about next?
                     """)
-                    .param("requirements", JsonUtils.toJson(requirements)))
-        .call()
-        .content();
+                        .param("requirements", JsonUtils.toJson(requirements)))
+            .call()
+            .content();
+    log.info("[Jarvis:Assessor] followUp | suggestion=\"{}\"", result);
+    return result;
   }
 }

@@ -3,6 +3,8 @@ package com.example.jarvis.requirements.alignment;
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
 import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RequirementsExtractor {
+
+  private static final Logger log = LoggerFactory.getLogger(RequirementsExtractor.class);
 
   private final ChatClient extractionClient;
 
@@ -54,12 +58,18 @@ public class RequirementsExtractor {
   }
 
   public UserRequirements extract(UserRequirements currentRequirements, String userMessage) {
-    return extractionClient
-        .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
+    log.info(
+        "[Jarvis:Extractor] input | currentRequirements={} | userMessage=\"{}\"",
+        JsonUtils.toJson(currentRequirements),
+        userMessage.trim());
+
+    UserRequirements result =
+        extractionClient
+            .prompt()
+            .user(
+                u ->
+                    u.text(
+                            """
                     Today's date: {today}
 
                     <currentState>
@@ -72,10 +82,13 @@ public class RequirementsExtractor {
 
                     Return the updated planning state.
                     """)
-                    .param("today", LocalDate.now().toString())
-                    .param("currentState", JsonUtils.toJson(currentRequirements))
-                    .param("userMessage", userMessage.trim()))
-        .call()
-        .entity(UserRequirements.class);
+                        .param("today", LocalDate.now().toString())
+                        .param("currentState", JsonUtils.toJson(currentRequirements))
+                        .param("userMessage", userMessage.trim()))
+            .call()
+            .entity(UserRequirements.class);
+
+    log.info("[Jarvis:Extractor] output | extractedRequirements={}", JsonUtils.toJson(result));
+    return result;
   }
 }
