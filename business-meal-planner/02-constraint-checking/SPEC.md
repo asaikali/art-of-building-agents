@@ -14,6 +14,16 @@ This phase introduces a small set of constraint checks grouped by category.
 
 - `DietarySuitabilityCheck`
 
+The detailed design for `DietarySuitabilityCheck`, including:
+
+- deterministic evidence gathering
+- prompt shape
+- short-circuit rules
+- service API
+- suggested integration tests
+
+is documented in [dietarysuitability.md](dietarysuitability.md).
+
 ## LLM-As-Judge Checks
 
 - `BusinessMealSuitabilityCheck`
