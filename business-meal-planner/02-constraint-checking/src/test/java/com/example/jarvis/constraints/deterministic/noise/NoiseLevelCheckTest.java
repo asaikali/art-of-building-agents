@@ -3,21 +3,22 @@ package com.example.jarvis.constraints.deterministic.noise;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.example.jarvis.ConstraintCheckingApplication;
 import com.example.jarvis.requirements.NoiseLevel;
+import com.example.restaurant.RestaurantService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(
-    classes = ConstraintCheckingApplication.class,
-    webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Tag("integration")
-class NoiseLevelCheckIntegrationTest {
+class NoiseLevelCheckTest {
 
-  @Autowired private NoiseLevelCheck check;
+  private NoiseLevelCheck check;
+
+  @BeforeEach
+  void setUp() {
+    var restaurantService = new RestaurantService(new ObjectMapper());
+    check = new NoiseLevelCheck(restaurantService);
+  }
 
   @Test
   @DisplayName("Returns PASS when no noise preference is provided")
