@@ -49,7 +49,7 @@ public class JarvisAgentHandler implements AgentHandler {
     session.reply(result.reply());
 
     // Update inspector state and log the outcome
-    session.updateState(context.toMarkdown(result.missingRequiredFields()));
+    session.updateState(context.toMarkdown());
     session.logEvent(
         context.getStatus().label(),
         Map.of("missingFieldCount", result.missingRequiredFields().size()));

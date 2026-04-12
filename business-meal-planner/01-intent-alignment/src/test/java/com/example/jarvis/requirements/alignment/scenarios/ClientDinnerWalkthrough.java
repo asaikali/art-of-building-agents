@@ -61,6 +61,6 @@ class ClientDinnerWalkthrough {
     System.out.println("\n=== Turn " + turn + " ===");
     System.out.println("Status: " + context.getStatus().label());
     System.out.println("Assistant: " + result.reply());
-    System.out.println("State:\n" + context.toMarkdown(result.missingRequiredFields()));
+    System.out.println("State:\n" + context.toMarkdown());
   }
 }
