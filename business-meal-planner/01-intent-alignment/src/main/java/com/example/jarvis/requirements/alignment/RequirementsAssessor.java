@@ -43,8 +43,8 @@ public class RequirementsAssessor {
 
   /**
    * Uses the model to suggest one optional follow-up question that a good executive assistant would
-   * ask given the current requirements. The reply writer handles the output naturally — if the
-   * model has no suggestion it will say so and the reply writer will ignore it.
+   * ask given the current requirements. The {@link ReplyComposer} handles the output naturally — if
+   * the model has no suggestion it will say so and the composer will ignore it.
    */
   public String suggestFollowUp(UserRequirements requirements) {
     return chatClient

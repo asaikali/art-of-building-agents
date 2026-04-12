@@ -36,7 +36,7 @@ public class JarvisAgentHandler implements AgentHandler {
     // Retrieve or initialize the workflow state for this session
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
-    // Run the alignment pipeline: extract → check → directive → reply
+    // Run the alignment pipeline: extract → assess → status → reply
     var result =
         requirementsAligner.processMessage(
             context.getUserRequirements(), context.getStatus(), message.text());
