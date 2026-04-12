@@ -1,7 +1,7 @@
 package com.example.jarvis.requirements.alignment;
 
+import com.example.agent.core.chat.AgentMessage;
 import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -9,109 +9,56 @@ import org.springframework.stereotype.Service;
 @Service
 public class RequirementsAlignmentLoop {
 
-  private static final List<String> REQUIRED_FIELDS = List.of("Date", "Time", "Party Size");
-
-  private final TurnClassifier turnClassifier;
   private final RequirementsExtractor requirementsExtractor;
   private final RequirementsCompletionPolicy requirementsCompletionPolicy;
-  private final RequirementsReplyBuilder requirementsReplyBuilder;
+  private final RequirementsReplyWriter requirementsReplyWriter;
 
   public RequirementsAlignmentLoop(
-      TurnClassifier turnClassifier,
       RequirementsExtractor requirementsExtractor,
       RequirementsCompletionPolicy requirementsCompletionPolicy,
-      RequirementsReplyBuilder requirementsReplyBuilder) {
-    this.turnClassifier = turnClassifier;
+      RequirementsReplyWriter requirementsReplyWriter) {
     this.requirementsExtractor = requirementsExtractor;
     this.requirementsCompletionPolicy = requirementsCompletionPolicy;
-    this.requirementsReplyBuilder = requirementsReplyBuilder;
+    this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
-  public TurnResult handleTurn(JarvisAgentContext context, String userMessage) {
-    boolean hasExistingRequirements = hasExistingRequirements(context);
+  public TurnResult handleTurn(
+      JarvisAgentContext context, String userMessage, List<AgentMessage> conversationHistory) {
 
-    if (isFirstTurnOpener(context, userMessage)) {
-      return startClarification(context);
-    }
+    // Step 1: Extract — model maps user message into updated requirements
+    UserRequirements updated =
+        requirementsExtractor.extract(context.getUserRequirements(), userMessage);
 
-    if (isConfirmationTurn(context, userMessage)) {
-      return confirmRequirements(context);
-    }
+    // Step 2: Check — deterministic policy evaluation
+    boolean userConfirmed =
+        context.getStatus() == RequirementStatus.WAITING_FOR_CONFIRMATION
+            && updated.equals(context.getUserRequirements());
 
-    if (isUncertainTurn(context, userMessage)) {
-      return requestClarification(context);
-    }
+    RequirementsCompletionPolicy.CompletionResult check =
+        requirementsCompletionPolicy.evaluate(updated, userConfirmed);
 
-    UserRequirements updatedRequirements = updateRequirements(context, userMessage);
-    updateWorkflowState(context, updatedRequirements);
+    // Step 3: Directive — code picks what the reply must accomplish
+    ReplyDirective directive =
+        new ReplyDirective(
+            check.status(), check.missingCriticalFields(), check.suggestedFollowUps(), updated);
 
-    return new TurnResult(
-        context,
-        requirementsReplyBuilder.buildReply(context),
-        chooseAction(hasExistingRequirements, context.getStatus()));
+    // Step 4: Reply — model writes a natural response
+    String reply = requirementsReplyWriter.writeReply(directive, conversationHistory);
+
+    // Update context
+    context.setUserRequirements(updated);
+    context.setMissingInformation(check.missingCriticalFields());
+    context.setStatus(check.status());
+
+    return new TurnResult(context, reply, chooseEventName(check.status()));
   }
 
-  private boolean hasExistingRequirements(JarvisAgentContext context) {
-    return !context.getUserRequirements().isEmpty();
-  }
-
-  private boolean isFirstTurnOpener(JarvisAgentContext context, String userMessage) {
-    return !hasExistingRequirements(context) && turnClassifier.isOpener(userMessage);
-  }
-
-  private boolean isConfirmationTurn(JarvisAgentContext context, String userMessage) {
-    return hasExistingRequirements(context) && turnClassifier.isAffirmative(userMessage);
-  }
-
-  private boolean isUncertainTurn(JarvisAgentContext context, String userMessage) {
-    return hasExistingRequirements(context) && turnClassifier.isUncertain(userMessage);
-  }
-
-  private TurnResult startClarification(JarvisAgentContext context) {
-    initializeStateForClarification(context);
-    return new TurnResult(
-        context, requirementsReplyBuilder.buildReply(context), "clarification-requested");
-  }
-
-  private TurnResult confirmRequirements(JarvisAgentContext context) {
-    context.setStatus(RequirementStatus.REQUIREMENTS_CONFIRMED);
-    return new TurnResult(
-        context, requirementsReplyBuilder.buildReply(context), "requirements-confirmed");
-  }
-
-  private TurnResult requestClarification(JarvisAgentContext context) {
-    context.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
-    return new TurnResult(
-        context, requirementsReplyBuilder.buildReply(context), "clarification-requested");
-  }
-
-  private UserRequirements updateRequirements(JarvisAgentContext context, String userMessage) {
-    return requirementsExtractor.extract(
-        hasExistingRequirements(context) ? context : null, userMessage);
-  }
-
-  private void updateWorkflowState(
-      JarvisAgentContext context, UserRequirements updatedRequirements) {
-    context.setUserRequirements(updatedRequirements);
-    context.setMissingInformation(
-        requirementsCompletionPolicy.missingCriticalFields(updatedRequirements.getMeal()));
-    context.setStatus(requirementsCompletionPolicy.decideStatus(context));
-  }
-
-  private void initializeStateForClarification(JarvisAgentContext context) {
-    UserRequirements userRequirements = new UserRequirements();
-    userRequirements.setMeal(new Meal());
-    userRequirements.setAttendees(List.of());
-    context.setUserRequirements(userRequirements);
-    context.setMissingInformation(REQUIRED_FIELDS);
-    context.setStatus(RequirementStatus.WAITING_FOR_CLARIFICATION);
-  }
-
-  private String chooseAction(boolean hasExistingPlan, RequirementStatus status) {
-    if (status == RequirementStatus.WAITING_FOR_CLARIFICATION) {
-      return "clarification-requested";
-    }
-    return hasExistingPlan ? "plan-updated" : "plan-generated";
+  private String chooseEventName(RequirementStatus status) {
+    return switch (status) {
+      case WAITING_FOR_CLARIFICATION -> "clarification-requested";
+      case WAITING_FOR_CONFIRMATION -> "plan-updated";
+      case REQUIREMENTS_CONFIRMED -> "requirements-confirmed";
+    };
   }
 
   public record TurnResult(JarvisAgentContext state, String assistantReply, String eventName) {}

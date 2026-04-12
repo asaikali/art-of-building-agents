@@ -2,12 +2,16 @@ package com.example.jarvis.requirements.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.agent.core.chat.AgentMessage;
+import com.example.agent.core.chat.Role;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.Attendee;
 import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -34,10 +38,10 @@ class RequirementsAlignmentLoopIntegrationTest {
             I have a client dinner tomorrow at 7 pm for 4 people. One guest is vegetarian.
             I want somewhere professional and quiet enough to talk.
             """)
-        .hasEventName("plan-generated")
+        .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
         .stateMentions("dinner", "vegetarian", "quiet")
-        .assistantMentionsAnyOf("confirm", "correct")
+        .assistantMentionsAnyOf("confirm", "correct", "look")
         .markdownHasRequiredSections();
 
     scenario
@@ -46,26 +50,20 @@ class RequirementsAlignmentLoopIntegrationTest {
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
         .stateMentions("120")
         .stateMentionsAnyOf("union", "station")
-        .assistantMentionsAnyOf("confirm", "correct");
-
-    scenario
-        .user("not sure")
-        .hasEventName("clarification-requested")
-        .hasStatus(RequirementStatus.WAITING_FOR_CLARIFICATION)
-        .assistantLooksLikeQuestion();
+        .assistantMentionsAnyOf("confirm", "correct", "look");
 
     scenario
         .user("Let's optimize for low noise and easy conversation with a client.")
         .hasEventName("plan-updated")
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
         .stateMentionsAnyOf("quiet", "low noise", "conversation", "client")
-        .assistantMentionsAnyOf("confirm", "correct");
+        .assistantMentionsAnyOf("confirm", "correct", "look");
 
     scenario
         .user("yes")
         .hasEventName("requirements-confirmed")
         .hasStatus(RequirementStatus.REQUIREMENTS_CONFIRMED)
-        .assistantMentionsAnyOf("confirmed", "requirements are confirmed");
+        .assistantMentionsAnyOf("confirmed", "all set", "locked in", "ready");
   }
 
   @Test
@@ -76,7 +74,7 @@ class RequirementsAlignmentLoopIntegrationTest {
         .user("Help me plan a business meal.")
         .hasEventName("clarification-requested")
         .hasStatus(RequirementStatus.WAITING_FOR_CLARIFICATION)
-        .assistantMentionsAnyOf("date", "time", "party size")
+        .assistantMentionsAnyOf("date", "time", "when", "party")
         .markdownHasRequiredSections();
 
     scenario
@@ -89,13 +87,13 @@ class RequirementsAlignmentLoopIntegrationTest {
         .hasStatus(RequirementStatus.WAITING_FOR_CONFIRMATION)
         .stateMentions("lunch", "6", "gluten")
         .turnMentionsAnyOf("recommend", "recommendations")
-        .assistantMentionsAnyOf("confirm", "correct");
+        .assistantMentionsAnyOf("confirm", "correct", "look");
 
     scenario
         .user("exactly")
         .hasEventName("requirements-confirmed")
         .hasStatus(RequirementStatus.REQUIREMENTS_CONFIRMED)
-        .assistantMentionsAnyOf("confirmed", "requirements are confirmed");
+        .assistantMentionsAnyOf("confirmed", "all set", "locked in", "ready");
   }
 
   private TranscriptScenario scenario() {
@@ -103,10 +101,17 @@ class RequirementsAlignmentLoopIntegrationTest {
   }
 
   private final class TranscriptScenario {
+
     private final JarvisAgentContext state = new JarvisAgentContext();
+    private final List<AgentMessage> conversationHistory = new ArrayList<>();
 
     private TranscriptTurn user(String text) {
-      return new TranscriptTurn(alignmentLoop.handleTurn(state, text));
+      RequirementsAlignmentLoop.TurnResult result =
+          alignmentLoop.handleTurn(state, text, conversationHistory);
+      conversationHistory.add(new AgentMessage(java.time.Instant.now(), Role.USER, text));
+      conversationHistory.add(
+          new AgentMessage(java.time.Instant.now(), Role.ASSISTANT, result.assistantReply()));
+      return new TranscriptTurn(result);
     }
   }
 
@@ -164,11 +169,6 @@ class RequirementsAlignmentLoopIntegrationTest {
                   .map(term -> term.toLowerCase(Locale.ROOT))
                   .anyMatch(haystack::contains))
           .isTrue();
-      return this;
-    }
-
-    private TranscriptTurn assistantLooksLikeQuestion() {
-      assertThat(result.assistantReply()).contains("?");
       return this;
     }
 

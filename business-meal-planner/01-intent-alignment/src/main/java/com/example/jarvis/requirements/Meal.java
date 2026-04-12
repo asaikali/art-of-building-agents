@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Captures the shared information about the meal being planned.
@@ -152,6 +153,36 @@ public class Meal {
       return "Missing";
     }
     return value.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Meal meal = (Meal) o;
+    return Objects.equals(date, meal.date)
+        && Objects.equals(time, meal.time)
+        && Objects.equals(partySize, meal.partySize)
+        && mealType == meal.mealType
+        && Objects.equals(purpose, meal.purpose)
+        && Objects.equals(budgetPerPerson, meal.budgetPerPerson)
+        && noiseLevel == meal.noiseLevel
+        && Objects.equals(additionalRequirements, meal.additionalRequirements)
+        && Objects.equals(cuisinePreferences, meal.cuisinePreferences);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        date,
+        time,
+        partySize,
+        mealType,
+        purpose,
+        budgetPerPerson,
+        noiseLevel,
+        additionalRequirements,
+        cuisinePreferences);
   }
 
   private static String renderList(List<String> items) {

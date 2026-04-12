@@ -1,10 +1,10 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.Meal;
 import com.example.jarvis.requirements.UserRequirements;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
@@ -12,142 +12,80 @@ import org.springframework.stereotype.Component;
 @Component
 public class RequirementsExtractor {
 
-  private static final String EXTRACTION_SYSTEM_PROMPT =
+  private static final String SYSTEM_PROMPT =
       """
-      You convert business meal requests into a structured planning context.
+      You are a structured data extractor for a business meal planning assistant.
 
-      Capture only user-provided inputs.
-      Do not infer search areas, validation results, readiness flags, or planning logic.
+      Your job: given the current planning state and a new user message, return an
+      updated UserRequirements JSON that merges the new information.
 
-      Modeling rules:
-      - Meal describes the shared facts about the meal as a whole.
-      - Attendees describe person-specific needs.
-      - If something varies by person, put it on an attendee.
-      - If something applies to the whole meal, put it on meal.
-      - Preserve valid existing information unless the new message corrects it.
+      Rules:
+      - Preserve all existing valid information unless the new message explicitly corrects it.
+      - Add new information from the user message.
+      - Remove information only when the user explicitly contradicts it.
+      - If the user message is a greeting, affirmation, or contains no plannable information,
+        return the current state unchanged.
+      - Do not infer information the user did not provide. If they say "dinner" but no time,
+        set mealType to DINNER but leave time null.
+      - Do not recommend restaurants, rank options, or make booking decisions.
       - Keep additionalRequirements and cuisinePreferences short and concrete.
-      - Do not recommend restaurants.
-      - Do not rank or book anything.
+
+      Domain model:
+      - Meal: date (ISO LocalDate e.g. 2026-04-13), time (ISO LocalTime e.g. 18:00),
+        partySize (integer), mealType (BREAKFAST | BRUNCH | LUNCH | DINNER),
+        purpose (string), budgetPerPerson (decimal),
+        noiseLevel (QUIET | MODERATE | LIVELY),
+        additionalRequirements (list of strings), cuisinePreferences (list of strings)
+      - Attendee: name (string), origin (string), departureTime (ISO LocalTime),
+        travelMode (WALKING | DRIVING | TRANSIT | TAXI),
+        maxTravelTimeMinutes (integer), maxDistanceKm (double),
+        dietaryConstraints (list of VEGETARIAN | VEGAN | GLUTEN_FREE | HALAL | KOSHER | NONE | OTHER)
+      """;
+
+  private static final String USER_PROMPT_TEMPLATE =
+      """
+      Current planning state:
+      %s
+
+      New user message:
+      %s
+
+      Return the updated planning state.
+
+      %s
       """;
 
   private static final BeanOutputConverter<UserRequirements> OUTPUT_CONVERTER =
       new BeanOutputConverter<>(UserRequirements.class);
 
+  private static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper()
+          .registerModule(new JavaTimeModule())
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
   private final ChatClient extractionClient;
 
   public RequirementsExtractor(ChatClient.Builder chatClientBuilder) {
-    this.extractionClient = chatClientBuilder.defaultSystem(EXTRACTION_SYSTEM_PROMPT).build();
+    this.extractionClient = chatClientBuilder.defaultSystem(SYSTEM_PROMPT).build();
   }
 
   protected RequirementsExtractor() {
     this.extractionClient = null;
   }
 
-  public UserRequirements extract(JarvisAgentContext existingState, String userMessage) {
+  public UserRequirements extract(UserRequirements currentRequirements, String userMessage) {
+    String currentStateJson = serializeToJson(currentRequirements);
     String prompt =
-        existingState == null || existingState.getUserRequirements().isEmpty()
-            ? """
-              User request:
-              %s
-
-              %s
-              """
-                .formatted(userMessage.trim(), OUTPUT_CONVERTER.getFormat())
-            : """
-              Existing planning context JSON:
-              %s
-
-              New user message:
-              %s
-
-              Update the planning context by preserving valid details, incorporating
-              corrections and additions, and removing anything the new message contradicts.
-
-              %s
-              """
-                .formatted(toJson(existingState), userMessage.trim(), OUTPUT_CONVERTER.getFormat());
-
+        USER_PROMPT_TEMPLATE.formatted(
+            currentStateJson, userMessage.trim(), OUTPUT_CONVERTER.getFormat());
     return extractionClient.prompt().user(prompt).call().entity(OUTPUT_CONVERTER);
   }
 
-  private String toJson(JarvisAgentContext state) {
-    UserRequirements userRequirements = state.getUserRequirements();
-    Meal meal = userRequirements.getMeal();
-    return """
-        {
-          "meal": {
-            "date": %s,
-            "time": %s,
-            "partySize": %s,
-            "mealType": %s,
-            "purpose": %s,
-            "budgetPerPerson": %s,
-            "noiseLevel": %s,
-            "additionalRequirements": %s,
-            "cuisinePreferences": %s
-          },
-          "attendees": %s
-        }
-        """
-        .formatted(
-            toJsonValue(meal.getDate()),
-            toJsonValue(meal.getTime()),
-            meal.getPartySize() == null ? "null" : meal.getPartySize().toString(),
-            toJsonValue(meal.getMealType()),
-            toJsonValue(meal.getPurpose()),
-            meal.getBudgetPerPerson() == null ? "null" : meal.getBudgetPerPerson().toPlainString(),
-            toJsonValue(meal.getNoiseLevel()),
-            toJsonArray(meal.getAdditionalRequirements()),
-            toJsonArray(meal.getCuisinePreferences()),
-            toAttendeeJsonArray(userRequirements.getAttendees()));
-  }
-
-  private String toAttendeeJsonArray(List<Attendee> attendees) {
-    return attendees.stream()
-        .map(
-            attendee ->
-                """
-                {
-                  "name": %s,
-                  "origin": %s,
-                  "departureTime": %s,
-                  "travelMode": %s,
-                  "maxTravelTimeMinutes": %s,
-                  "maxDistanceKm": %s,
-                  "dietaryConstraints": %s
-                }
-                """
-                    .formatted(
-                        toJsonValue(attendee.getName()),
-                        toJsonValue(attendee.getOrigin()),
-                        toJsonValue(attendee.getDepartureTime()),
-                        toJsonValue(attendee.getTravelMode()),
-                        attendee.getMaxTravelTimeMinutes() == null
-                            ? "null"
-                            : attendee.getMaxTravelTimeMinutes().toString(),
-                        attendee.getMaxDistanceKm() == null
-                            ? "null"
-                            : attendee.getMaxDistanceKm().toString(),
-                        toJsonArray(
-                            attendee.getDietaryConstraints().stream().map(Enum::name).toList())))
-        .collect(java.util.stream.Collectors.joining(", ", "[", "]"));
-  }
-
-  private String toJsonValue(Object value) {
-    return value == null ? "null" : quote(value.toString());
-  }
-
-  private String toJsonArray(List<String> values) {
-    return values.stream()
-        .map(this::quote)
-        .collect(java.util.stream.Collectors.joining(", ", "[", "]"));
-  }
-
-  private String quote(String value) {
-    return "\"" + escape(value) + "\"";
-  }
-
-  private String escape(String value) {
-    return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+  private static String serializeToJson(UserRequirements requirements) {
+    try {
+      return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(requirements);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Failed to serialize UserRequirements to JSON", e);
+    }
   }
 }

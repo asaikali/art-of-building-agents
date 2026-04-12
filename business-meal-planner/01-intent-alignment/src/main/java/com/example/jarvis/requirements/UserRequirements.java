@@ -1,6 +1,7 @@
 package com.example.jarvis.requirements;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Captures the full set of requirements gathered from the user for this phase.
@@ -53,6 +54,19 @@ public class UserRequirements {
         && meal.getAdditionalRequirements().isEmpty()
         && meal.getCuisinePreferences().isEmpty()
         && attendees.isEmpty();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    UserRequirements that = (UserRequirements) o;
+    return Objects.equals(meal, that.meal) && Objects.equals(attendees, that.attendees);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(meal, attendees);
   }
 
   private static String renderAttendees(List<Attendee> attendees) {

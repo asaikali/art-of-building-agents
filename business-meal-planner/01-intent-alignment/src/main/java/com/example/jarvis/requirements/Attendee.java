@@ -3,6 +3,7 @@ package com.example.jarvis.requirements;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Captures requirements that belong to one specific person attending the meal.
@@ -106,6 +107,32 @@ public class Attendee {
 
   private static String renderValue(Object value) {
     return value == null ? "Missing" : value.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Attendee attendee = (Attendee) o;
+    return Objects.equals(name, attendee.name)
+        && Objects.equals(origin, attendee.origin)
+        && Objects.equals(departureTime, attendee.departureTime)
+        && travelMode == attendee.travelMode
+        && Objects.equals(maxTravelTimeMinutes, attendee.maxTravelTimeMinutes)
+        && Objects.equals(maxDistanceKm, attendee.maxDistanceKm)
+        && Objects.equals(dietaryConstraints, attendee.dietaryConstraints);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        name,
+        origin,
+        departureTime,
+        travelMode,
+        maxTravelTimeMinutes,
+        maxDistanceKm,
+        dietaryConstraints);
   }
 
   private static String renderEnum(Enum<?> value) {

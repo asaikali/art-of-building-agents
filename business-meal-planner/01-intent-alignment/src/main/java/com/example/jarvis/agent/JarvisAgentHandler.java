@@ -39,7 +39,7 @@ public class JarvisAgentHandler implements AgentHandler {
 
     JarvisAgentContext context = getOrCreateContext(session);
     RequirementsAlignmentLoop.TurnResult result =
-        requirementsAlignmentLoop.handleTurn(context, message.text());
+        requirementsAlignmentLoop.handleTurn(context, message.text(), session.getMessages());
     JarvisAgentContext state = result.state();
 
     session.logEvent(
