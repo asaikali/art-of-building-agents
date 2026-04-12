@@ -33,16 +33,6 @@ public class UserRequirements {
     this.attendees = attendees == null ? List.of() : List.copyOf(attendees);
   }
 
-  public String toMarkdown() {
-    return """
-        %s
-
-        ## Attendees
-        %s
-        """
-        .formatted(meal.toMarkdown(), renderAttendees(attendees));
-  }
-
   public boolean isEmpty() {
     return meal.getDate() == null
         && meal.getTime() == null
@@ -67,14 +57,5 @@ public class UserRequirements {
   @Override
   public int hashCode() {
     return Objects.hash(meal, attendees);
-  }
-
-  private static String renderAttendees(List<Attendee> attendees) {
-    if (attendees.isEmpty()) {
-      return "- None";
-    }
-    return attendees.stream()
-        .map(Attendee::toMarkdown)
-        .collect(java.util.stream.Collectors.joining("\n"));
   }
 }

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -101,35 +100,6 @@ public class Meal {
     this.cuisinePreferences = sanitize(cuisinePreferences);
   }
 
-  public String toMarkdown() {
-    return """
-        ## Meal
-        - Date: %s
-        - Time: %s
-        - Party Size: %s
-        - Meal Type: %s
-        - Purpose: %s
-        - Budget Per Person: %s
-        - Noise Level: %s
-
-        ## Additional Requirements
-        %s
-
-        ## Cuisine Preferences
-        %s
-        """
-        .formatted(
-            renderValue(date),
-            renderValue(time),
-            renderValue(partySize),
-            renderEnum(mealType),
-            renderValue(purpose),
-            renderValue(budgetPerPerson),
-            renderEnum(noiseLevel),
-            renderList(additionalRequirements),
-            renderList(cuisinePreferences));
-  }
-
   private static String normalizeText(String value) {
     return value == null || value.isBlank() ? null : value.trim();
   }
@@ -142,17 +112,6 @@ public class Meal {
         .filter(value -> value != null && !value.isBlank())
         .map(String::trim)
         .toList();
-  }
-
-  private static String renderValue(Object value) {
-    return value == null ? "Missing" : value.toString();
-  }
-
-  private static String renderEnum(Enum<?> value) {
-    if (value == null) {
-      return "Missing";
-    }
-    return value.name().toLowerCase(Locale.ROOT).replace('_', ' ');
   }
 
   @Override
@@ -183,14 +142,5 @@ public class Meal {
         noiseLevel,
         additionalRequirements,
         cuisinePreferences);
-  }
-
-  private static String renderList(List<String> items) {
-    if (items.isEmpty()) {
-      return "- None";
-    }
-    return items.stream()
-        .map(item -> "- " + item)
-        .collect(java.util.stream.Collectors.joining("\n"));
   }
 }

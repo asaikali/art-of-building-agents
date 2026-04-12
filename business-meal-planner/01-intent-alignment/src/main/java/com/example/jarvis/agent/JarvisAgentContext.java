@@ -1,5 +1,6 @@
 package com.example.jarvis.agent;
 
+import com.example.agent.core.json.JsonUtils;
 import com.example.agent.core.session.AgentContext;
 import com.example.jarvis.requirements.UserRequirements;
 import com.example.jarvis.requirements.alignment.AlignmentStatus;
@@ -38,7 +39,15 @@ public class JarvisAgentContext implements AgentContext {
 
   public String toMarkdown() {
     return """
+        ## Meal
+        ```json
         %s
+        ```
+
+        ## Attendees
+        ```json
+        %s
+        ```
 
         ## Missing Information
         %s
@@ -46,7 +55,11 @@ public class JarvisAgentContext implements AgentContext {
         ## Status
         %s
         """
-        .formatted(userRequirements.toMarkdown(), renderList(missingInformation), status.label());
+        .formatted(
+            JsonUtils.toJson(userRequirements.getMeal()),
+            JsonUtils.toJson(userRequirements.getAttendees()),
+            renderList(missingInformation),
+            status.label());
   }
 
   private static String renderList(List<String> items) {
