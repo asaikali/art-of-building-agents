@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public enum NoiseLevel {
   QUIET,
   MODERATE,
-  LIVELY;
+  LOUD;
 
   // LLMs sometimes return "" instead of null for unknown enum fields.
   @JsonCreator
