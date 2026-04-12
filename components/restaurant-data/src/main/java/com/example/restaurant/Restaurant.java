@@ -12,5 +12,5 @@ public record Restaurant(
     String menuUrl,
     String menuPdfUrl,
     String noiseLevel,
-    String priceRangePerPerson,
+    PriceRange priceRangePerPerson,
     String description) {}

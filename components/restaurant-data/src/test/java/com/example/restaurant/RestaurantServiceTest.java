@@ -29,6 +29,10 @@ class RestaurantServiceTest {
       assertThat(r.name()).as("name for %s", r.id()).isNotBlank();
       assertThat(r.address()).as("address for %s", r.id()).isNotBlank();
       assertThat(r.neighborhood()).as("neighborhood for %s", r.id()).isNotBlank();
+      assertThat(r.priceRangePerPerson()).as("price range for %s", r.id()).isNotNull();
+      assertThat(r.priceRangePerPerson().min()).as("min price for %s", r.id()).isNotNull();
+      assertThat(r.priceRangePerPerson().max()).as("max price for %s", r.id()).isNotNull();
+      assertThat(r.priceRangePerPerson().currency()).as("currency for %s", r.id()).isEqualTo("CAD");
     }
   }
 
@@ -37,6 +41,8 @@ class RestaurantServiceTest {
     var result = service.findById("canoe");
     assertThat(result).isPresent();
     assertThat(result.get().name()).isEqualTo("Canoe Restaurant");
+    assertThat(result.get().priceRangePerPerson().min()).isEqualTo(70);
+    assertThat(result.get().priceRangePerPerson().max()).isEqualTo(110);
   }
 
   @Test
