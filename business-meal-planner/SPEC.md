@@ -161,7 +161,7 @@ Phase 1 workflow state is kept separately in agent context:
 - `JarvisAgentContext`
   - `UserRequirements`
   - `missingInformation`
-  - `RequirementStatus`
+  - `AlignmentStatus`
 
 The Markdown must contain these sections:
 
@@ -253,64 +253,57 @@ sessions should not silently reintroduce origin as a required Phase 1 field or r
 specification around the current implementation. They should stop and confirm the intended rule
 with the user first.
 
-### Mini Agentic Loop
+### Alignment Pipeline
 
-1. The user sends a free-form request.
-2. A single model call maps the request into `UserRequirements`.
-3. Deterministic checks decide whether required fields are missing.
-4. Deterministic reply construction summarizes the current understanding and asks either for
-   confirmation or for the next missing field.
-5. If the user confirms, the requirements are marked confirmed.
-6. If the user corrects or adds information, the requirements are updated and the loop repeats.
-7. If the user response is too vague, the agent asks a targeted clarification question.
+Each user message runs through a four-step pipeline orchestrated by `RequirementsAligner`:
+
+1. **Extract** — `RequirementsExtractor` uses the model to merge the user message into the
+   current `UserRequirements`. The model preserves existing data unless the user explicitly
+   corrects it, so requirements accumulate over multiple turns.
+2. **Assess** — `RequirementsAssessor` checks hard gates deterministically (date, time, party
+   size) and uses the model to suggest one optional follow-up question.
+3. **Status** — The aligner decides the `AlignmentStatus` based on whether required fields
+   are present and whether the user confirmed (detected by equality of requirements before
+   and after extraction).
+4. **Reply** — `ReplyComposer` uses the model to write a natural response. The aligner picks
+   which composer method to call based on the status: `askForMissingField`,
+   `askForConfirmation`, or `acknowledgeConfirmation`.
 
 ### Confirmation Behavior
 
-If the user responds with an affirmative such as:
+Confirmation is detected by comparing the `UserRequirements` before and after extraction. If
+the status was `WAITING_FOR_CONFIRMATION` and the extractor returns identical requirements
+(the user said "yes" or "looks good" without changing anything), the aligner marks the
+requirements as confirmed.
 
-- yes
-- correct
-- looks good
-- exactly
+If the user says "yes but change the time to 8pm," the extractor updates the time, the
+requirements differ from the previous turn, and the aligner does not confirm — it asks for
+confirmation again with the updated summary.
 
-then the requirements are considered confirmed.
-
-If the user responds with corrections or additions such as:
-
-- no, budget is 80 per person
-- not dinner, it's lunch
-- it must be quiet
-- do not book yet, only recommend
-
-then the constraints are merged and the loop repeats.
-
-If the user reply is not actionable, the agent should ask a targeted follow-up question
-instead of proceeding.
+The model handles all conversational nuance (greetings, vague responses, corrections with
+confirmations) naturally through the extraction step. There is no deterministic pattern
+matching for user intent.
 
 ### Clarification Priority
 
-When Phase 1 is missing search-ready fields, the agent should ask one targeted question at a
-time in this order:
-
-1. date and time
-2. origin address
-3. party size
+When required fields are missing, the aligner asks about the first missing field from the
+assessor's list (date, time, party size — in that order). The `ReplyComposer.askForMissingField`
+method receives the single field name and writes a natural question about it.
 
 The agent should avoid broad follow-ups such as "please clarify the details" when a more
 specific question is possible.
 
 ### Deterministic Checks Inside Phase 1
 
-Although Phase 2 is the main constraint-checking module, Phase 1 should already perform a
-small deterministic completeness check for the required search-ready fields:
+`RequirementsAssessor.findMissingRequiredFields` performs a deterministic completeness check
+for the required search-ready fields:
 
-- has date and time
-- has party size
-- can move to confirmation
+- has date
+- has time
+- has party size (greater than zero)
 
-`Origin address` is intentionally omitted from the current implementation note above because the
-requirement is still under discussion. See `Open Product Decision: Origin As A Required Phase 1
-Field`.
+`Origin address` is intentionally omitted because the requirement is still under discussion.
+See `Open Product Decision: Origin As A Required Phase 1 Field`.
 
 These are requirement-completeness checks, not restaurant-candidate validators.
 
@@ -678,9 +671,10 @@ Fallback transitions:
 
 ### Phase 1
 
-- use `ChatClient` to map the user request into a Markdown constraint plan
-- use deterministic Java checks to determine whether the request is search-ready
-- use `ChatClient` again to produce a user-facing confirmation summary
+- use `ChatClient` with `.entity(UserRequirements.class)` to extract structured requirements
+- use `ChatClient` to suggest an optional follow-up question
+- use deterministic Java checks to determine whether required fields are present
+- use `ChatClient` to compose a natural reply based on the alignment status
 
 ### Phase 2
 
@@ -752,8 +746,7 @@ Fallback transitions:
 Run on every build with `mvn test`. No API key required. No model calls.
 
 Test targets:
-- Completion policy logic (hard gates, follow-up suggestions, status decisions)
-- Markdown rendering of agent context
+- Assessor logic (hard gates for required fields)
 - Any pure Java business logic added in future phases
 
 These tests should use real objects, not fakes. If a class requires an LLM to construct,
@@ -776,10 +769,10 @@ Examples:
 
 ```bash
 # Run all integration scenarios
-mvn test -Dgroups=integration
+mvn test -DexcludedGroups= -Dgroups=integration
 
 # Run a specific scenario
-mvn test -Dgroups=integration -Dtest=AlignmentVerificationScenario
+mvn test -DexcludedGroups= -Dgroups=integration -Dtest=AlignmentVerificationScenario
 ```
 
 All model integration scenarios live in a `scenarios` sub-package beneath the feature they
@@ -792,7 +785,7 @@ com.example.jarvis.requirements.alignment.scenarios
 This makes them easy to find in the IDE and to run as a group:
 
 ```bash
-mvn test -Djarvis.integration.skip=false -Dtest="com.example.jarvis.requirements.alignment.scenarios.*"
+mvn test -DexcludedGroups= -Dgroups=integration -Dtest="com.example.jarvis.requirements.alignment.scenarios.*"
 ```
 
 Two kinds of scenario, distinguished by naming convention:
@@ -811,7 +804,7 @@ Conventions:
 Run only verification scenarios:
 
 ```bash
-mvn test -Djarvis.integration.skip=false -Dtest="*VerificationScenario"
+mvn test -DexcludedGroups= -Dgroups=integration -Dtest="*VerificationScenario"
 ```
 
 #### Walkthrough scenarios (`*Walkthrough`)
