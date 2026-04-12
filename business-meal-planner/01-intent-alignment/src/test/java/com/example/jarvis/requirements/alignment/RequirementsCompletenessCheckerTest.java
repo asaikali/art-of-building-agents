@@ -12,39 +12,39 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class RequirementsCompletionPolicyTest {
+class RequirementsCompletenessCheckerTest {
 
-  private final RequirementsCompletionPolicy policy = new RequirementsCompletionPolicy();
+  private final RequirementsCompletenessChecker checker = new RequirementsCompletenessChecker();
 
   @Test
   void returnsMissingCriticalFields() {
     Meal meal = new Meal();
     meal.setDate(LocalDate.of(2026, 4, 11));
 
-    assertThat(policy.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
+    assertThat(checker.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
   }
 
   @Test
   void waitsForClarificationWhenFieldsAreMissing() {
-    assertThat(policy.decideStatus(List.of("Time"), false))
+    assertThat(checker.decideStatus(List.of("Time"), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
   @Test
   void waitsForConfirmationWhenCriticalFieldsArePresent() {
-    assertThat(policy.decideStatus(List.of(), false))
+    assertThat(checker.decideStatus(List.of(), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
   }
 
   @Test
   void confirmsWhenUserConfirmedAndNoCriticalFieldsMissing() {
-    assertThat(policy.decideStatus(List.of(), true))
+    assertThat(checker.decideStatus(List.of(), true))
         .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
   @Test
   void clarificationOverridesConfirmationWhenFieldsStillMissing() {
-    assertThat(policy.decideStatus(List.of("Date"), true))
+    assertThat(checker.decideStatus(List.of("Date"), true))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
@@ -52,7 +52,7 @@ class RequirementsCompletionPolicyTest {
   void suggestsDietaryForLargeGroupWithoutConstraints() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of());
 
-    assertThat(policy.suggestFollowUps(requirements)).anyMatch(s -> s.contains("dietary"));
+    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("dietary"));
   }
 
   @Test
@@ -62,7 +62,7 @@ class RequirementsCompletionPolicyTest {
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of(attendee));
 
-    assertThat(policy.suggestFollowUps(requirements)).noneMatch(s -> s.contains("dietary"));
+    assertThat(checker.suggestFollowUps(requirements)).noneMatch(s -> s.contains("dietary"));
   }
 
   @Test
@@ -70,21 +70,21 @@ class RequirementsCompletionPolicyTest {
     UserRequirements requirements =
         requirements(meal(4, MealType.DINNER, "Client dinner"), List.of());
 
-    assertThat(policy.suggestFollowUps(requirements)).anyMatch(s -> s.contains("budget"));
+    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("budget"));
   }
 
   @Test
   void suggestsNoiseLevelWhenPurposeIsSet() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, "Team lunch"), List.of());
 
-    assertThat(policy.suggestFollowUps(requirements)).anyMatch(s -> s.contains("noise"));
+    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("noise"));
   }
 
   @Test
   void suggestsAttendeeDetailsWhenListIsEmpty() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of());
 
-    assertThat(policy.suggestFollowUps(requirements)).anyMatch(s -> s.contains("attendee"));
+    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("attendee"));
   }
 
   @Test
@@ -95,7 +95,7 @@ class RequirementsCompletionPolicyTest {
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
     UserRequirements requirements = requirements(meal, List.of(attendee));
 
-    assertThat(policy.suggestFollowUps(requirements)).isEmpty();
+    assertThat(checker.suggestFollowUps(requirements)).isEmpty();
   }
 
   @Test
@@ -105,7 +105,7 @@ class RequirementsCompletionPolicyTest {
     requirements.getMeal().setDate(LocalDate.of(2026, 4, 13));
     requirements.getMeal().setTime(LocalTime.of(19, 0));
 
-    RequirementsCompletionPolicy.CompletionResult result = policy.evaluate(requirements, false);
+    RequirementsCompletenessChecker.CompletionResult result = checker.evaluate(requirements, false);
 
     assertThat(result.missingCriticalFields()).isEmpty();
     assertThat(result.suggestedFollowUps()).isNotEmpty();

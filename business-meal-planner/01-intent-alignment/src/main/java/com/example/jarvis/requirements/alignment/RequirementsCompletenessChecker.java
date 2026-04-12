@@ -10,7 +10,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequirementsCompletionPolicy {
+public class RequirementsCompletenessChecker {
 
   public record CompletionResult(
       List<String> missingCriticalFields,

@@ -9,22 +9,22 @@ import org.springframework.stereotype.Service;
 public class RequirementsAligner {
 
   private final RequirementsExtractor requirementsExtractor;
-  private final RequirementsCompletionPolicy requirementsCompletionPolicy;
+  private final RequirementsCompletenessChecker requirementsCompletenessChecker;
   private final RequirementsReplyWriter requirementsReplyWriter;
 
   public RequirementsAligner(
       RequirementsExtractor requirementsExtractor,
-      RequirementsCompletionPolicy requirementsCompletionPolicy,
+      RequirementsCompletenessChecker requirementsCompletenessChecker,
       RequirementsReplyWriter requirementsReplyWriter) {
     this.requirementsExtractor = requirementsExtractor;
-    this.requirementsCompletionPolicy = requirementsCompletionPolicy;
+    this.requirementsCompletenessChecker = requirementsCompletenessChecker;
     this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
   /** The computed outputs of a single alignment turn. */
   public record Result(
       UserRequirements updatedRequirements,
-      RequirementsCompletionPolicy.CompletionResult check,
+      RequirementsCompletenessChecker.CompletionResult check,
       String reply) {}
 
   /**
@@ -37,7 +37,7 @@ public class RequirementsAligner {
    *
    * <ol>
    *   <li><b>Extract</b> — the model merges the user message into the current requirements
-   *   <li><b>Check</b> — deterministic policy evaluates completeness and suggests follow-ups
+   *   <li><b>Check</b> — deterministic checker evaluates completeness and suggests follow-ups
    *   <li><b>Directive</b> — code picks what the reply must accomplish based on the check result
    *   <li><b>Reply</b> — the model writes a natural response following the directive
    * </ol>
@@ -56,8 +56,8 @@ public class RequirementsAligner {
         currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
-    RequirementsCompletionPolicy.CompletionResult check =
-        requirementsCompletionPolicy.evaluate(updated, userConfirmed);
+    RequirementsCompletenessChecker.CompletionResult check =
+        requirementsCompletenessChecker.evaluate(updated, userConfirmed);
 
     // Step 3: Directive — code picks what the reply must accomplish
     ReplyDirective directive =
