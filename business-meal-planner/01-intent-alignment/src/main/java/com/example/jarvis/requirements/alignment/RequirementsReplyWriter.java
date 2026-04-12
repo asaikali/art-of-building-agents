@@ -1,11 +1,7 @@
 package com.example.jarvis.requirements.alignment;
 
 import com.example.agent.core.chat.AgentMessage;
-import com.example.jarvis.requirements.UserRequirements;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.example.agent.core.json.JsonUtils;
 import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
@@ -33,11 +29,6 @@ public class RequirementsReplyWriter {
 
   private static final int RECENT_MESSAGE_LIMIT = 6;
 
-  private static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper()
-          .registerModule(new JavaTimeModule())
-          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
   private final ChatClient replyClient;
 
   public RequirementsReplyWriter(ChatClient.Builder chatClientBuilder) {
@@ -54,7 +45,7 @@ public class RequirementsReplyWriter {
   }
 
   private String buildPrompt(ReplyDirective directive, List<AgentMessage> conversationHistory) {
-    String requirementsJson = serializeToJson(directive.currentRequirements());
+    String requirementsJson = JsonUtils.toJson(directive.currentRequirements());
     String recentConversation = formatRecentMessages(conversationHistory);
 
     return switch (directive.status()) {
@@ -135,13 +126,5 @@ public class RequirementsReplyWriter {
       sb.append(msg.role().name()).append(": ").append(msg.text()).append("\n");
     }
     return sb.toString().trim();
-  }
-
-  private static String serializeToJson(UserRequirements requirements) {
-    try {
-      return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(requirements);
-    } catch (JsonProcessingException e) {
-      throw new IllegalStateException("Failed to serialize UserRequirements to JSON", e);
-    }
   }
 }
