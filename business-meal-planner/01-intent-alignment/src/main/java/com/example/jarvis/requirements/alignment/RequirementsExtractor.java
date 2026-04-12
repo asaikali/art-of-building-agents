@@ -21,7 +21,14 @@ public class RequirementsExtractor {
                 Your job: given the current planning state and a new user message, return an
                 updated UserRequirements JSON that merges the new information.
 
-                Rules:
+                Modeling rules:
+                - Meal holds shared facts about the meal: date, time, party size, type, purpose,
+                  budget, noise level, cuisine preferences, and additional requirements.
+                - Attendees hold per-person details: name, origin, travel, and dietary constraints.
+                - If something varies by person (e.g. dietary needs, origin), put it on an attendee.
+                - If something applies to the whole meal (e.g. budget, noise level), put it on meal.
+
+                Extraction rules:
                 - Preserve all existing valid information unless the new message explicitly corrects it.
                 - Add new information from the user message.
                 - Remove information only when the user explicitly contradicts it.
@@ -32,19 +39,8 @@ public class RequirementsExtractor {
                 - Use null for unknown fields. Never use empty strings for enum or date/time fields.
                 - Resolve relative dates like "tomorrow" or "next Tuesday" using today's date
                   provided in the user prompt.
-                - Do not recommend restaurants, rank options, or make booking decisions.
-                - Keep additionalRequirements and cuisinePreferences short and concrete.
-
-                Domain model:
-                - Meal: date (ISO LocalDate e.g. 2026-04-13), time (ISO LocalTime e.g. 18:00),
-                  partySize (integer), mealType (BREAKFAST | BRUNCH | LUNCH | DINNER),
-                  purpose (string), budgetPerPerson (decimal),
-                  noiseLevel (QUIET | MODERATE | LIVELY),
-                  additionalRequirements (list of strings), cuisinePreferences (list of strings)
-                - Attendee: name (string), origin (string), departureTime (ISO LocalTime),
-                  travelMode (WALKING | DRIVING | TRANSIT | TAXI),
-                  maxTravelTimeMinutes (integer), maxDistanceKm (double),
-                  dietaryConstraints (list of VEGETARIAN | VEGAN | GLUTEN_FREE | HALAL | KOSHER | NONE | OTHER)
+                - Use dedicated fields before additionalRequirements. For example, dietary needs go
+                  on an attendee's dietaryConstraints, not in additionalRequirements.
                 """)
             .build();
   }
