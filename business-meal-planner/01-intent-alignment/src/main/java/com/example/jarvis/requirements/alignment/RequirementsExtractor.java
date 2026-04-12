@@ -6,6 +6,14 @@ import java.time.LocalDate;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Extracts structured {@link UserRequirements} from a user message using the model. This is step 1
+ * of the alignment pipeline in {@link RequirementsAligner}.
+ *
+ * <p>Each call takes the current requirements and a new user message, and returns an updated {@link
+ * UserRequirements} with the new information merged in. The model preserves existing data unless
+ * the user explicitly corrects it, so requirements accumulate over multiple turns.
+ */
 @Component
 public class RequirementsExtractor {
 

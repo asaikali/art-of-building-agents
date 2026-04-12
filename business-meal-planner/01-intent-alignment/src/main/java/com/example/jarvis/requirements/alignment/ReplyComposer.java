@@ -5,6 +5,22 @@ import com.example.jarvis.requirements.UserRequirements;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Composes natural-language replies using the model. This is step 4 of the alignment pipeline in
+ * {@link RequirementsAligner}.
+ *
+ * <p>The aligner decides which kind of reply is needed based on the {@link AlignmentStatus}, then
+ * calls the corresponding method here:
+ *
+ * <ul>
+ *   <li>{@link #askForMissingField} — asks about a required field that is still missing
+ *   <li>{@link #askForConfirmation} — summarizes the requirements and asks the user to confirm
+ *   <li>{@link #acknowledgeConfirmation} — acknowledges that the user confirmed
+ * </ul>
+ *
+ * <p>Each method receives the data it needs and the model writes the reply. The system prompt
+ * establishes the assistant's tone so each method only needs to describe what to say, not how.
+ */
 @Component
 public class ReplyComposer {
 

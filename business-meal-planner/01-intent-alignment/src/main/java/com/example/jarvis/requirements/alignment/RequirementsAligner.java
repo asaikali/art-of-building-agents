@@ -4,6 +4,26 @@ import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * Orchestrates the alignment pipeline that turns a user message into an updated set of requirements
+ * and a natural reply. Called by {@link com.example.jarvis.agent.JarvisAgentHandler} on each
+ * message.
+ *
+ * <p>The pipeline coordinates three collaborators:
+ *
+ * <ol>
+ *   <li>{@link RequirementsExtractor} — uses the model to merge the user message into the current
+ *       {@link UserRequirements}
+ *   <li>{@link RequirementsAssessor} — checks what required fields are missing and suggests a
+ *       follow-up
+ *   <li>{@link ReplyComposer} — uses the model to write a natural reply based on the current {@link
+ *       AlignmentStatus}
+ * </ol>
+ *
+ * <p>The aligner itself decides the workflow status (step 3) and picks which composer method to
+ * call. It returns a {@link Result} with the updated requirements, status, and reply — the handler
+ * applies these to the session context.
+ */
 @Service
 public class RequirementsAligner {
 

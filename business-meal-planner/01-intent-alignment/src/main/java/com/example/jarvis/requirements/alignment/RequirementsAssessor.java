@@ -9,9 +9,13 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 /**
- * Assesses {@link UserRequirements} against hard and soft criteria. Used by the {@link
- * RequirementsAligner} after each extraction to determine what information is still needed and what
- * optional follow-ups would be useful.
+ * Assesses {@link UserRequirements} against hard and soft criteria. This is step 2 of the alignment
+ * pipeline in {@link RequirementsAligner}.
+ *
+ * <p>Hard criteria ({@link #findMissingRequiredFields}) are checked deterministically — date, time,
+ * and party size must be present before the workflow can move to confirmation. Soft criteria
+ * ({@link #suggestFollowUp}) use the model to suggest one useful follow-up question based on the
+ * specific meal context.
  */
 @Component
 public class RequirementsAssessor {
