@@ -27,7 +27,7 @@ public class ReplyComposer {
             .build();
   }
 
-  public String composeClarificationReply(String missingField, UserRequirements requirements) {
+  public String askForMissingField(String missingField, UserRequirements requirements) {
     return chatClient
         .prompt()
         .user(
@@ -51,7 +51,7 @@ public class ReplyComposer {
         .content();
   }
 
-  public String composeConfirmationReply(String suggestedFollowUp, UserRequirements requirements) {
+  public String askForConfirmation(String suggestedFollowUp, UserRequirements requirements) {
     return chatClient
         .prompt()
         .user(
@@ -76,7 +76,7 @@ public class ReplyComposer {
         .content();
   }
 
-  public String composeConfirmedReply(UserRequirements requirements) {
+  public String acknowledgeConfirmation(UserRequirements requirements) {
     return chatClient
         .prompt()
         .user(

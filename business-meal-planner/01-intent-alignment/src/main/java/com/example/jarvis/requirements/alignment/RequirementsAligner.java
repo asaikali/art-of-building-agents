@@ -24,7 +24,7 @@ public class RequirementsAligner {
   public record Result(
       UserRequirements updatedRequirements,
       List<String> missingRequiredFields,
-      RequirementStatus status,
+      AlignmentStatus status,
       String reply) {}
 
   /**
@@ -43,7 +43,7 @@ public class RequirementsAligner {
    * </ol>
    */
   public Result processMessage(
-      UserRequirements currentRequirements, RequirementStatus currentStatus, String userMessage) {
+      UserRequirements currentRequirements, AlignmentStatus currentStatus, String userMessage) {
 
     // Step 1: Extract — model maps user message into updated requirements
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
@@ -52,33 +52,31 @@ public class RequirementsAligner {
     List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
     String suggestion = requirementsAssessor.suggestFollowUp(updated);
     boolean userConfirmed =
-        currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
+        currentStatus == AlignmentStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
     // Step 3: Status — decide the workflow status
-    RequirementStatus status = assessStatus(missing, userConfirmed);
+    AlignmentStatus status = assessStatus(missing, userConfirmed);
 
     // Step 4: Reply — compose a natural response based on the status
     String reply =
         switch (status) {
           case WAITING_FOR_CLARIFICATION ->
-              replyComposer.composeClarificationReply(missing.getFirst(), updated);
-          case WAITING_FOR_CONFIRMATION ->
-              replyComposer.composeConfirmationReply(suggestion, updated);
-          case REQUIREMENTS_CONFIRMED -> replyComposer.composeConfirmedReply(updated);
+              replyComposer.askForMissingField(missing.getFirst(), updated);
+          case WAITING_FOR_CONFIRMATION -> replyComposer.askForConfirmation(suggestion, updated);
+          case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
         };
 
     return new Result(updated, missing, status, reply);
   }
 
-  private RequirementStatus assessStatus(
-      List<String> missingRequiredFields, boolean userConfirmed) {
+  private AlignmentStatus assessStatus(List<String> missingRequiredFields, boolean userConfirmed) {
     if (!missingRequiredFields.isEmpty()) {
-      return RequirementStatus.WAITING_FOR_CLARIFICATION;
+      return AlignmentStatus.WAITING_FOR_CLARIFICATION;
     }
     if (userConfirmed) {
-      return RequirementStatus.REQUIREMENTS_CONFIRMED;
+      return AlignmentStatus.REQUIREMENTS_CONFIRMED;
     }
-    return RequirementStatus.WAITING_FOR_CONFIRMATION;
+    return AlignmentStatus.WAITING_FOR_CONFIRMATION;
   }
 }

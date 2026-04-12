@@ -2,14 +2,14 @@ package com.example.jarvis.agent;
 
 import com.example.agent.core.session.AgentContext;
 import com.example.jarvis.requirements.UserRequirements;
-import com.example.jarvis.requirements.alignment.RequirementStatus;
+import com.example.jarvis.requirements.alignment.AlignmentStatus;
 import java.util.List;
 
 public class JarvisAgentContext implements AgentContext {
 
   private UserRequirements userRequirements = new UserRequirements();
   private List<String> missingInformation = List.of();
-  private RequirementStatus status = RequirementStatus.WAITING_FOR_CLARIFICATION;
+  private AlignmentStatus status = AlignmentStatus.WAITING_FOR_CLARIFICATION;
 
   public UserRequirements getUserRequirements() {
     return userRequirements;
@@ -28,11 +28,11 @@ public class JarvisAgentContext implements AgentContext {
         missingInformation == null ? List.of() : List.copyOf(missingInformation);
   }
 
-  public RequirementStatus getStatus() {
+  public AlignmentStatus getStatus() {
     return status;
   }
 
-  public void setStatus(RequirementStatus status) {
+  public void setStatus(AlignmentStatus status) {
     this.status = status;
   }
 
