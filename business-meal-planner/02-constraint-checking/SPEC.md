@@ -33,6 +33,7 @@ is documented in [budgetperpersoncheck.md](budgetperpersoncheck.md).
 ## Hybrid Checks
 
 - `DietarySuitabilityCheck`
+- `RestaurantCandidateCheckService`
 
 The detailed design for `DietarySuitabilityCheck`, including:
 
@@ -43,6 +44,15 @@ The detailed design for `DietarySuitabilityCheck`, including:
 - suggested integration tests
 
 is documented in [dietarysuitability.md](dietarysuitability.md).
+
+The detailed design for `RestaurantCandidateCheckService`, including:
+
+- strongly typed aggregate result
+- orchestration of underlying checks
+- adapter logic from `UserRequirements` to lower-level checker inputs
+- suggested tests
+
+is documented in [restaurantcandidatecheck.md](restaurantcandidatecheck.md).
 
 ## LLM-As-Judge Checks
 
