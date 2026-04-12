@@ -7,7 +7,7 @@ import com.example.jarvis.requirements.alignment.AlignmentStatus;
 public class JarvisAgentContext implements AgentContext {
 
   private UserRequirements userRequirements = new UserRequirements();
-  private AlignmentStatus status = AlignmentStatus.GATHERING_REQUIREMENTS;
+  private AlignmentStatus alignmentStatus = AlignmentStatus.GATHERING_REQUIREMENTS;
 
   public UserRequirements getUserRequirements() {
     return userRequirements;
@@ -17,11 +17,11 @@ public class JarvisAgentContext implements AgentContext {
     this.userRequirements = userRequirements == null ? new UserRequirements() : userRequirements;
   }
 
-  public AlignmentStatus getStatus() {
-    return status;
+  public AlignmentStatus getAlignmentStatus() {
+    return alignmentStatus;
   }
 
-  public void setStatus(AlignmentStatus status) {
-    this.status = status;
+  public void setAlignmentStatus(AlignmentStatus alignmentStatus) {
+    this.alignmentStatus = alignmentStatus;
   }
 }

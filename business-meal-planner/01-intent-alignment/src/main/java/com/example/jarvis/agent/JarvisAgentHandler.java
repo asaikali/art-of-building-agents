@@ -41,16 +41,19 @@ public class JarvisAgentHandler implements AgentHandler {
     // Retrieve or initialize the workflow state for this session
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
-    log.info("onMessage | status={} | user=\"{}\"", context.getStatus().label(), message.text());
+    log.info(
+        "onMessage | status={} | user=\"{}\"",
+        context.getAlignmentStatus().label(),
+        message.text());
 
     // Run the alignment pipeline: extract → determine status → compose reply
     var result =
         requirementsAligner.processMessage(
-            context.getUserRequirements(), context.getStatus(), message.text());
+            context.getUserRequirements(), context.getAlignmentStatus(), message.text());
 
     // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());
-    context.setStatus(result.status());
+    context.setAlignmentStatus(result.status());
 
     log.info(
         "done | status={} | missingFields={}",
@@ -74,9 +77,10 @@ public class JarvisAgentHandler implements AgentHandler {
         %s
         """
             .formatted(
-                JsonUtils.toJson(context.getUserRequirements()), context.getStatus().label()));
+                JsonUtils.toJson(context.getUserRequirements()),
+                context.getAlignmentStatus().label()));
     session.logEvent(
-        context.getStatus().label(),
+        context.getAlignmentStatus().label(),
         Map.of("missingFieldCount", result.missingRequiredFields().size()));
   }
 }

@@ -34,7 +34,9 @@ class GatheringFlowWalkthrough {
     // Turn 1: Vague request — agent should ask for missing details
     var result1 =
         aligner.processMessage(
-            context.getUserRequirements(), context.getStatus(), "Help me plan a business meal.");
+            context.getUserRequirements(),
+            context.getAlignmentStatus(),
+            "Help me plan a business meal.");
     applyResult(context, result1);
     printTurn(1, context, result1);
 
@@ -42,7 +44,7 @@ class GatheringFlowWalkthrough {
     var result2 =
         aligner.processMessage(
             context.getUserRequirements(),
-            context.getStatus(),
+            context.getAlignmentStatus(),
             """
             It's an internal team lunch on April 20th at noon for 6 people.
             One person is gluten-free. I only want recommendations, no booking.
@@ -52,25 +54,26 @@ class GatheringFlowWalkthrough {
 
     // Turn 3: Confirm
     var result3 =
-        aligner.processMessage(context.getUserRequirements(), context.getStatus(), "exactly");
+        aligner.processMessage(
+            context.getUserRequirements(), context.getAlignmentStatus(), "exactly");
     applyResult(context, result3);
     printTurn(3, context, result3);
   }
 
   private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
     context.setUserRequirements(result.updatedRequirements());
-    context.setStatus(result.status());
+    context.setAlignmentStatus(result.status());
   }
 
   private void printTurn(int turn, JarvisAgentContext context, RequirementsAligner.Result result) {
     System.out.println("\n=== Turn " + turn + " ===");
-    System.out.println("Status: " + context.getStatus().label());
+    System.out.println("Status: " + context.getAlignmentStatus().label());
     System.out.println("Assistant: " + result.reply());
     System.out.println(
         "State:\n"
             + JsonUtils.toJson(
                 Map.of(
                     "requirements", context.getUserRequirements(),
-                    "status", context.getStatus())));
+                    "status", context.getAlignmentStatus())));
   }
 }
