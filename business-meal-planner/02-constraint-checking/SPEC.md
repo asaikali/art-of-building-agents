@@ -48,6 +48,16 @@ is documented in [dietarysuitability.md](dietarysuitability.md).
 
 - `BusinessMealSuitabilityCheck`
 
+The detailed design for `BusinessMealSuitabilityCheck`, including:
+
+- purpose-based meal-context evaluation
+- prompt shape
+- validation behavior
+- service API
+- suggested integration tests
+
+is documented in [businessmealsuitability.md](businessmealsuitability.md).
+
 ## Travel Time Estimator
 
 `TravelTimeCheck` should use a fake deterministic `TravelTimeEstimator`.
