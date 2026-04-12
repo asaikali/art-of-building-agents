@@ -10,6 +10,16 @@ This phase introduces a small set of constraint checks grouped by category.
 - `BudgetPerPersonCheck`
 - `TravelTimeCheck`
 
+The detailed design for `NoiseLevelCheck`, including:
+
+- canonical noise levels
+- comparison rule
+- validation behavior
+- service API
+- suggested integration tests
+
+is documented in [noiselevelcheck.md](noiselevelcheck.md).
+
 ## Hybrid Checks
 
 - `DietarySuitabilityCheck`

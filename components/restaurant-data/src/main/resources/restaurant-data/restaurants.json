@@ -8,7 +8,7 @@
       "url": "https://www.terroni.com/locations/terroni-adelaide",
       "menuUrl": "https://www.terroni.com/locations/terroni-adelaide#menu",
       "menuPdfUrl": null,
-      "noiseLevel": "lively",
+      "noiseLevel": "loud",
       "priceRangePerPerson": "$$ (40–70 CAD)",
       "description": "Classic Southern Italian restaurant set in a historic space, known for traditional pasta, pizza, and an energetic dining room."
     },
@@ -128,7 +128,7 @@
       "url": "https://www.messini.ca/",
       "menuUrl": "https://www.messini.ca/take-out-menu/",
       "menuPdfUrl": "https://www.messini.ca/wp-content/uploads/2020/02/messini-main-menu.pdf",
-      "noiseLevel": "lively",
+      "noiseLevel": "loud",
       "priceRangePerPerson": "$ (20–35 CAD)",
       "description": "Popular Greektown eatery specializing in gyros, souvlaki, and other casual Greek staples."
     },
@@ -176,7 +176,7 @@
       "url": "https://www.kintoriyakitori.com/",
       "menuUrl": "https://www.kintoriyakitori.com/",
       "menuPdfUrl": "https://wnam-cdn.lacarte.menu/storage/media/companies_menu_pdf/131261773/kintori-yakitori-izakaya-toronto-menu.pdf",
-      "noiseLevel": "lively",
+      "noiseLevel": "loud",
       "priceRangePerPerson": "$$$ (60–95 CAD)",
       "description": "Japanese yakitori and small-plates izakaya focusing on skewers, shareable dishes, and drinks."
     },
@@ -212,7 +212,7 @@
       "url": "https://rolsanrestaurant.com/",
       "menuUrl": "https://rolsanrestaurant.com/menu/",
       "menuPdfUrl": null,
-      "noiseLevel": "lively",
+      "noiseLevel": "loud",
       "priceRangePerPerson": "$ (20–35 CAD)",
       "description": "Large, bustling Cantonese restaurant offering budget-friendly dishes ideal for groups, located farther from the downtown business core."
     },
@@ -260,7 +260,7 @@
       "url": "https://www.petros82.com/",
       "menuUrl": "https://www.petros82.com/",
       "menuPdfUrl": null,
-      "noiseLevel": "lively",
+      "noiseLevel": "loud",
       "priceRangePerPerson": "$$$ (50–90 CAD)",
       "description": "Contemporary Greek restaurant with a vibrant atmosphere, fresh seafood market, shareable plates, and an authentic Mediterranean experience."
     },
