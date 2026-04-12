@@ -5,6 +5,7 @@ import com.example.agent.core.session.AgentContext;
 import com.example.jarvis.requirements.UserRequirements;
 import com.example.jarvis.requirements.alignment.AlignmentStatus;
 import java.util.List;
+import java.util.Map;
 
 public class JarvisAgentContext implements AgentContext {
 
@@ -29,27 +30,15 @@ public class JarvisAgentContext implements AgentContext {
 
   public String toMarkdown(List<String> missingRequiredFields) {
     return """
-        ## Requirements
         ```json
         %s
         ```
-
-        ## Missing Information
-        %s
-
-        ## Status
-        %s
         """
         .formatted(
-            JsonUtils.toJson(userRequirements), renderList(missingRequiredFields), status.label());
-  }
-
-  private static String renderList(List<String> items) {
-    if (items == null || items.isEmpty()) {
-      return "- None";
-    }
-    return items.stream()
-        .map(item -> "- " + item)
-        .collect(java.util.stream.Collectors.joining("\n"));
+            JsonUtils.toJson(
+                Map.of(
+                    "requirements", userRequirements,
+                    "missingRequiredFields", missingRequiredFields,
+                    "status", status.label())));
   }
 }
