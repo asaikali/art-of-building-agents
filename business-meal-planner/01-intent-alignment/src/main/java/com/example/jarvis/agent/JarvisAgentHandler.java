@@ -2,7 +2,6 @@ package com.example.jarvis.agent;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
-import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
 import java.util.Map;
@@ -34,24 +33,22 @@ public class JarvisAgentHandler implements AgentHandler {
 
   @Override
   public void onMessage(Session session, AgentMessage message) {
-    long turn = session.getMessages().stream().filter(m -> m.role() == Role.USER).count();
-    session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));
+    // Retrieve or initialize the workflow state for this session
+    var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
-    JarvisAgentContext context =
-        session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
+    // Run the alignment pipeline: extract → check → directive → reply
     RequirementsAligner.Result result =
         requirementsAligner.processMessage(context, message.text(), session.getMessages());
-    JarvisAgentContext state = result.state();
 
+    // Send the reply
+    session.reply(result.assistantReply());
+
+    // Update inspector state and log the outcome
+    session.updateState(context.toMarkdown());
     session.logEvent(
         result.eventName(),
         Map.of(
-            "turn", turn,
-            "status", state.getStatus().label(),
-            "missingInformationCount", state.getMissingInformation().size()));
-    session.updateState(state.toMarkdown());
-    session.appendMessage(Role.ASSISTANT, result.assistantReply());
-    session.logEvent(
-        "assistant-reply-sent", Map.of("turn", turn, "reply", result.assistantReply()));
+            "status", context.getStatus().label(),
+            "missingInformationCount", context.getMissingInformation().size()));
   }
 }

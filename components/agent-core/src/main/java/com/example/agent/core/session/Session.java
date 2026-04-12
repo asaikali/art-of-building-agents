@@ -49,6 +49,10 @@ public class Session {
 
   // ── facade methods ──────────────────────────────────────────────────
 
+  public AgentMessage reply(String text) {
+    return appendMessage(Role.ASSISTANT, text);
+  }
+
   public AgentMessage appendMessage(Role role, String text) {
     var msg = chatService.appendMessage(sessionId, role, text);
     touch();
