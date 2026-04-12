@@ -41,6 +41,8 @@ class AlignmentVerificationScenario {
     var context = new JarvisAgentContext();
     var conversationHistory = new ArrayList<AgentMessage>();
 
+    // User provides a detailed initial request with enough info (date, time, party size)
+    // for the aligner to move straight to confirmation
     var initial =
         processMessage(
             context,
@@ -52,6 +54,8 @@ class AlignmentVerificationScenario {
     assertThat(initial.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(stateJson(initial)).contains("dinner", "vegetarian");
 
+    // User corrects the meal type and adds budget — the aligner should update
+    // the requirements and ask for confirmation again (not confirm automatically)
     var correction =
         processMessage(
             context,
@@ -61,6 +65,8 @@ class AlignmentVerificationScenario {
         .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(stateJson(correction)).contains("lunch", "80");
 
+    // User confirms — the aligner detects that the requirements are unchanged
+    // from the previous turn and marks them as confirmed
     var confirmation = processMessage(context, "yes", conversationHistory);
     assertThat(confirmation.state().getStatus())
         .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
@@ -72,9 +78,13 @@ class AlignmentVerificationScenario {
     var context = new JarvisAgentContext();
     var conversationHistory = new ArrayList<AgentMessage>();
 
+    // User starts with a vague request that lacks required fields (date, time, party size).
+    // The aligner should ask for clarification instead of moving to confirmation.
     var vague = processMessage(context, "Help me plan a business meal.", conversationHistory);
     assertThat(vague.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
 
+    // User provides the missing details. The aligner should now have enough
+    // information to move to confirmation.
     var result =
         processMessage(
             context,
@@ -83,6 +93,7 @@ class AlignmentVerificationScenario {
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(stateJson(result)).contains("lunch", "6");
 
+    // User confirms the requirements
     var confirmation = processMessage(context, "looks good", conversationHistory);
     assertThat(confirmation.state().getStatus())
         .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
