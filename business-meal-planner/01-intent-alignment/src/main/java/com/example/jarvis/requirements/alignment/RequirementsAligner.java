@@ -22,7 +22,7 @@ public class RequirementsAligner {
     this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
-  public Result processMessage(
+  public String processMessage(
       JarvisAgentContext context, String userMessage, List<AgentMessage> conversationHistory) {
 
     // Step 1: Extract — model maps user message into updated requirements
@@ -50,16 +50,6 @@ public class RequirementsAligner {
     context.setMissingInformation(check.missingCriticalFields());
     context.setStatus(check.status());
 
-    return new Result(context, reply, chooseEventName(check.status()));
+    return reply;
   }
-
-  private String chooseEventName(RequirementStatus status) {
-    return switch (status) {
-      case WAITING_FOR_CLARIFICATION -> "clarification-requested";
-      case WAITING_FOR_CONFIRMATION -> "plan-updated";
-      case REQUIREMENTS_CONFIRMED -> "requirements-confirmed";
-    };
-  }
-
-  public record Result(JarvisAgentContext state, String assistantReply, String eventName) {}
 }

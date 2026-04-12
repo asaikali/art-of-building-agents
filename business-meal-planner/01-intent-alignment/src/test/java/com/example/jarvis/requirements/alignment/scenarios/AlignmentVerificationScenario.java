@@ -39,75 +39,63 @@ class AlignmentVerificationScenario {
   @DisplayName("Initial request, then correction, then confirmation")
   void initialRequestThenCorrectionThenConfirmation() {
     var context = new JarvisAgentContext();
-    var conversationHistory = new ArrayList<AgentMessage>();
+    var history = new ArrayList<AgentMessage>();
 
     // User provides a detailed initial request with enough info (date, time, party size)
     // for the aligner to move straight to confirmation
-    var initial =
-        processMessage(
-            context,
-            """
-            I have a client dinner tomorrow at 7 pm for 4 people.
-            One guest is vegetarian. I want somewhere quiet.
-            """,
-            conversationHistory);
-    assertThat(initial.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(stateJson(initial)).contains("dinner", "vegetarian");
+    sendMessage(
+        context,
+        history,
+        """
+        I have a client dinner tomorrow at 7 pm for 4 people.
+        One guest is vegetarian. I want somewhere quiet.
+        """);
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(stateJson(context)).contains("dinner", "vegetarian");
 
     // User corrects the meal type and adds budget — the aligner should update
     // the requirements and ask for confirmation again (not confirm automatically)
-    var correction =
-        processMessage(
-            context,
-            "Actually make it lunch, not dinner. Budget is 80 per person.",
-            conversationHistory);
-    assertThat(correction.state().getStatus())
-        .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(stateJson(correction)).contains("lunch", "80");
+    sendMessage(context, history, "Actually make it lunch, not dinner. Budget is 80 per person.");
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(stateJson(context)).contains("lunch", "80");
 
     // User confirms — the aligner detects that the requirements are unchanged
     // from the previous turn and marks them as confirmed
-    var confirmation = processMessage(context, "yes", conversationHistory);
-    assertThat(confirmation.state().getStatus())
-        .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
+    sendMessage(context, history, "yes");
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
   @Test
   @DisplayName("Vague start, then clarification, then confirmation")
   void vagueStartThenClarificationThenConfirmation() {
     var context = new JarvisAgentContext();
-    var conversationHistory = new ArrayList<AgentMessage>();
+    var history = new ArrayList<AgentMessage>();
 
     // User starts with a vague request that lacks required fields (date, time, party size).
     // The aligner should ask for clarification instead of moving to confirmation.
-    var vague = processMessage(context, "Help me plan a business meal.", conversationHistory);
-    assertThat(vague.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
+    sendMessage(context, history, "Help me plan a business meal.");
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
 
     // User provides the missing details. The aligner should now have enough
     // information to move to confirmation.
-    var result =
-        processMessage(
-            context,
-            "Team lunch on April 20th at noon for 6 people, one gluten-free.",
-            conversationHistory);
-    assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(stateJson(result)).contains("lunch", "6");
+    sendMessage(
+        context, history, "Team lunch on April 20th at noon for 6 people, one gluten-free.");
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
+    assertThat(stateJson(context)).contains("lunch", "6");
 
     // User confirms the requirements
-    var confirmation = processMessage(context, "looks good", conversationHistory);
-    assertThat(confirmation.state().getStatus())
-        .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
+    sendMessage(context, history, "looks good");
+    assertThat(context.getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
-  private RequirementsAligner.Result processMessage(
-      JarvisAgentContext context, String userMessage, List<AgentMessage> history) {
-    var result = aligner.processMessage(context, userMessage, history);
+  private void sendMessage(
+      JarvisAgentContext context, List<AgentMessage> history, String userMessage) {
+    String reply = aligner.processMessage(context, userMessage, history);
     history.add(new AgentMessage(Instant.now(), Role.USER, userMessage));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result.assistantReply()));
-    return result;
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply));
   }
 
-  private String stateJson(RequirementsAligner.Result result) {
-    return JsonUtils.toJson(result.state().getUserRequirements()).toLowerCase(Locale.ROOT);
+  private String stateJson(JarvisAgentContext context) {
+    return JsonUtils.toJson(context.getUserRequirements()).toLowerCase(Locale.ROOT);
   }
 }

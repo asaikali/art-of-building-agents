@@ -35,13 +35,13 @@ class ClarificationFlowWalkthrough {
     var history = new ArrayList<AgentMessage>();
 
     // Turn 1: Vague request — agent should ask for missing details
-    var result1 = aligner.processMessage(context, "Help me plan a business meal.", history);
+    var reply1 = aligner.processMessage(context, "Help me plan a business meal.", history);
     history.add(new AgentMessage(Instant.now(), Role.USER, "Help me plan a business meal."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result1.assistantReply()));
-    printTurn(1, context, result1);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply1));
+    printTurn(1, context, reply1);
 
     // Turn 2: Provide the details the agent asked about
-    var result2 =
+    var reply2 =
         aligner.processMessage(
             context,
             """
@@ -50,20 +50,20 @@ class ClarificationFlowWalkthrough {
             """,
             history);
     history.add(new AgentMessage(Instant.now(), Role.USER, "It's an internal team lunch..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result2.assistantReply()));
-    printTurn(2, context, result2);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply2));
+    printTurn(2, context, reply2);
 
     // Turn 3: Confirm
-    var result3 = aligner.processMessage(context, "exactly", history);
+    var reply3 = aligner.processMessage(context, "exactly", history);
     history.add(new AgentMessage(Instant.now(), Role.USER, "exactly"));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result3.assistantReply()));
-    printTurn(3, context, result3);
+    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, reply3));
+    printTurn(3, context, reply3);
   }
 
-  private void printTurn(int turn, JarvisAgentContext context, RequirementsAligner.Result result) {
+  private void printTurn(int turn, JarvisAgentContext context, String reply) {
     System.out.println("\n=== Turn " + turn + " ===");
     System.out.println("Status: " + context.getStatus().label());
-    System.out.println("Assistant: " + result.assistantReply());
+    System.out.println("Assistant: " + reply);
     System.out.println("State:\n" + context.toMarkdown());
   }
 }

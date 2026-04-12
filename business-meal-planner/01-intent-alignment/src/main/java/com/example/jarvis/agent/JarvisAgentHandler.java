@@ -37,16 +37,16 @@ public class JarvisAgentHandler implements AgentHandler {
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
     // Run the alignment pipeline: extract → check → directive → reply
-    RequirementsAligner.Result result =
+    String reply =
         requirementsAligner.processMessage(context, message.text(), session.getMessages());
 
     // Send the reply
-    session.reply(result.assistantReply());
+    session.reply(reply);
 
     // Update inspector state and log the outcome
     session.updateState(context.toMarkdown());
     session.logEvent(
-        result.eventName(),
+        context.getStatus().eventName(),
         Map.of(
             "status", context.getStatus().label(),
             "missingInformationCount", context.getMissingInformation().size()));
