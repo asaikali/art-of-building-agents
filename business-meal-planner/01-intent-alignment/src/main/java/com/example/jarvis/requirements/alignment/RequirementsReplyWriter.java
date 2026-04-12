@@ -35,10 +35,6 @@ public class RequirementsReplyWriter {
     this.replyClient = chatClientBuilder.defaultSystem(SYSTEM_PROMPT).build();
   }
 
-  protected RequirementsReplyWriter() {
-    this.replyClient = null;
-  }
-
   public String writeReply(ReplyDirective directive, List<AgentMessage> conversationHistory) {
     String prompt = buildPrompt(directive, conversationHistory);
     return replyClient.prompt().user(prompt).call().content();

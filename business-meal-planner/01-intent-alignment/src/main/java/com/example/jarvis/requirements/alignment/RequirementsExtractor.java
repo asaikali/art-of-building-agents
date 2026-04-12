@@ -2,6 +2,7 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
+import java.time.LocalDate;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,9 @@ public class RequirementsExtractor {
                   return the current state unchanged.
                 - Do not infer information the user did not provide. If they say "dinner" but no time,
                   set mealType to DINNER but leave time null.
+                - Use null for unknown fields. Never use empty strings for enum or date/time fields.
+                - Resolve relative dates like "tomorrow" or "next Tuesday" using today's date
+                  provided in the user prompt.
                 - Do not recommend restaurants, rank options, or make booking decisions.
                 - Keep additionalRequirements and cuisinePreferences short and concrete.
 
@@ -45,10 +49,6 @@ public class RequirementsExtractor {
             .build();
   }
 
-  protected RequirementsExtractor() {
-    this.extractionClient = null;
-  }
-
   public UserRequirements extract(UserRequirements currentRequirements, String userMessage) {
     return extractionClient
         .prompt()
@@ -56,6 +56,8 @@ public class RequirementsExtractor {
             u ->
                 u.text(
                         """
+                    Today's date: {today}
+
                     Current planning state:
                     {currentState}
 
@@ -64,6 +66,7 @@ public class RequirementsExtractor {
 
                     Return the updated planning state.
                     """)
+                    .param("today", LocalDate.now().toString())
                     .param("currentState", JsonUtils.toJson(currentRequirements))
                     .param("userMessage", userMessage.trim()))
         .call()

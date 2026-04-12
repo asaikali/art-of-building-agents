@@ -735,3 +735,92 @@ Fallback transitions:
 ### Phase 5 succeeds when
 
 - the user-selected restaurant is booked or a clear failure is returned
+
+## Testing Strategy
+
+### Principles
+
+- No fake or mock objects for LLM-backed components. Fakes for extractors and reply
+  writers create maintenance burden and test glue code rather than real behavior.
+- Deterministic business logic gets unit tests that run on every build.
+- Model-dependent behavior gets integration scenarios that run explicitly and cost tokens.
+- Integration scenarios are conditional on environment variables so they never run
+  on a plain `mvn test`.
+
+### Tier 1: Deterministic Unit Tests
+
+Run on every build with `mvn test`. No API key required. No model calls.
+
+Test targets:
+- Completion policy logic (hard gates, follow-up suggestions, status decisions)
+- Markdown rendering of agent context
+- Any pure Java business logic added in future phases
+
+These tests should use real objects, not fakes. If a class requires an LLM to construct,
+it does not belong in tier 1.
+
+### Tier 2: Model Integration Scenarios
+
+Scenarios are tagged with `@Tag("integration")` and excluded from Maven builds via Surefire's
+`<excludedGroups>integration</excludedGroups>` configuration.
+
+- **IDE (IntelliJ, Eclipse):** tags are not filtered by default, so scenarios run normally.
+- **Maven (`mvn test`):** Surefire excludes the `integration` tag, scenarios are skipped.
+- **Maven explicit:** `mvn test -Dgroups=integration` includes only integration scenarios.
+
+The guard is model-provider agnostic — it does not check for a specific API key. The student
+or coding agent configures their provider (OpenAI, Anthropic, Ollama, etc.) via environment
+variables or `application.yml` as normal.
+
+Examples:
+
+```bash
+# Run all integration scenarios
+mvn test -Dgroups=integration
+
+# Run a specific scenario
+mvn test -Dgroups=integration -Dtest=AlignmentVerificationScenario
+```
+
+All model integration scenarios live in a `scenarios` sub-package beneath the feature they
+test. For example, Phase 1 alignment scenarios live in:
+
+```
+com.example.jarvis.requirements.alignment.scenarios
+```
+
+This makes them easy to find in the IDE and to run as a group:
+
+```bash
+mvn test -Djarvis.integration.skip=false -Dtest="com.example.jarvis.requirements.alignment.scenarios.*"
+```
+
+Two kinds of scenario, distinguished by naming convention:
+
+#### Verification scenarios (`*VerificationScenario`)
+
+Purpose: let coding agents confirm the pipeline still works after code changes.
+
+Conventions:
+- Class name ends with `VerificationScenario`
+- Assert on status and state content per turn using fuzzy matching
+- Do not assert on exact reply wording — model output varies
+- Keep assertions to status and captured requirements data
+- One class per verification scenario
+
+Run only verification scenarios:
+
+```bash
+mvn test -Djarvis.integration.skip=false -Dtest="*VerificationScenario"
+```
+
+#### Walkthrough scenarios (`*Walkthrough`)
+
+Purpose: let students step through the pipeline in a debugger or read the console output.
+
+Conventions:
+- Class name ends with `Walkthrough`
+- Each turn stored as a separate named variable for debugger inspection
+- Print the assistant reply and status to stdout after each turn
+- No assertions — these are for observation, not pass/fail
+- One class per walkthrough scenario
