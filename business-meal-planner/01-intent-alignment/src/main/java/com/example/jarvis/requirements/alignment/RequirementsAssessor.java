@@ -1,21 +1,26 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.jarvis.requirements.Attendee;
+import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.Meal;
-import com.example.jarvis.requirements.MealType;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 /**
  * Assesses {@link UserRequirements} against hard and soft criteria. Used by the {@link
  * RequirementsAligner} after each extraction to determine what information is still needed and what
- * workflow status to assign.
+ * optional follow-ups would be useful.
  */
 @Component
 public class RequirementsAssessor {
+
+  private final ChatClient chatClient;
+
+  public RequirementsAssessor(ChatClient.Builder chatClientBuilder) {
+    this.chatClient = chatClientBuilder == null ? null : chatClientBuilder.build();
+  }
 
   /**
    * Identifies the required fields that must be present before the alignment phase can move to
@@ -37,60 +42,40 @@ public class RequirementsAssessor {
   }
 
   /**
-   * Determines the workflow status based on whether required fields are present and whether the
-   * user has confirmed. Missing fields take priority — even if the user confirmed, the status stays
-   * at clarification until all required fields are filled.
+   * Uses the model to suggest one optional follow-up question that a good executive assistant would
+   * ask given the current requirements. The reply writer handles the output naturally — if the
+   * model has no suggestion it will say so and the reply writer will ignore it.
    */
-  public RequirementStatus assessStatus(List<String> missingRequiredFields, boolean userConfirmed) {
-    if (!missingRequiredFields.isEmpty()) {
-      return RequirementStatus.WAITING_FOR_CLARIFICATION;
-    }
-    if (userConfirmed) {
-      return RequirementStatus.REQUIREMENTS_CONFIRMED;
-    }
-    return RequirementStatus.WAITING_FOR_CONFIRMATION;
-  }
+  public String suggestFollowUp(UserRequirements requirements) {
+    return chatClient
+        .prompt()
+        .system(
+            """
+            You are an executive assistant assessing business meal planning requirements.
 
-  /**
-   * Suggests optional follow-up questions that a good executive assistant would ask given the
-   * current requirements. These are soft criteria — they don't block the workflow but help gather
-   * useful details like dietary needs, budget, or noise preferences.
-   */
-  public List<String> suggestFollowUps(UserRequirements requirements) {
-    List<String> suggestions = new ArrayList<>();
-    Meal meal = requirements.getMeal();
-    List<Attendee> attendees = requirements.getAttendees();
+            Given the current requirements, suggest ONE thing that would be most useful
+            to ask about next. Think about what a thoughtful assistant would want to know
+            given the specific context of this meal.
 
-    if (meal.getPartySize() != null && meal.getPartySize() > 2 && noDietaryConstraints(attendees)) {
-      suggestions.add("any dietary restrictions for the group");
-    }
+            Rules:
+            - Return a single short suggestion (under 15 words).
+            - If the requirements look complete enough, say so briefly.
+            - Do not suggest things that are already captured in the requirements.
+            - Prioritize what matters most for this specific meal context.
+            - For example, a client dinner for 20 might need dress code or parking info,
+              while a casual team lunch for 3 probably doesn't.
+            """)
+        .user(
+            u ->
+                u.text(
+                        """
+                    Current requirements:
+                    {requirements}
 
-    if (meal.getBudgetPerPerson() == null && isHighStakesMeal(meal)) {
-      suggestions.add("budget per person");
-    }
-
-    if (meal.getNoiseLevel() == null && meal.getPurpose() != null) {
-      suggestions.add("preferred noise level");
-    }
-
-    if (meal.getPartySize() != null && meal.getPartySize() > 0 && attendees.isEmpty()) {
-      suggestions.add(
-          "attendee details such as names, where they're coming from, and dietary needs");
-    }
-
-    return suggestions;
-  }
-
-  private boolean noDietaryConstraints(List<Attendee> attendees) {
-    return attendees.isEmpty()
-        || attendees.stream().allMatch(a -> a.getDietaryConstraints().isEmpty());
-  }
-
-  private boolean isHighStakesMeal(Meal meal) {
-    if (meal.getMealType() == MealType.DINNER) {
-      return true;
-    }
-    String purpose = meal.getPurpose();
-    return purpose != null && purpose.toLowerCase(Locale.ROOT).contains("client");
+                    What is the single most useful thing to ask about next?
+                    """)
+                    .param("requirements", JsonUtils.toJson(requirements)))
+        .call()
+        .content();
   }
 }

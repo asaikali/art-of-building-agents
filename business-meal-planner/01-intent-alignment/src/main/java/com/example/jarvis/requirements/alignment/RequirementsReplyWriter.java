@@ -76,24 +76,19 @@ public class RequirementsReplyWriter {
 
   private String buildConfirmationPrompt(
       ReplyDirective directive, String requirementsJson, String recentConversation) {
-    String suggestions =
-        directive.suggestedFollowUps().isEmpty()
-            ? "none"
-            : String.join(", ", directive.suggestedFollowUps());
-
     return """
         Directive: Summarize the current requirements and ask for confirmation.
         Current requirements:
         %s
 
-        Suggested optional follow-ups to weave in naturally: %s
+        Suggested optional follow-up to weave in naturally: %s
         Recent conversation:
         %s
 
-        Summarize what you have captured so far in a readable way. If there are suggested
-        follow-ups, mention them casually. End by asking the user to confirm or correct anything.
+        Summarize what you have captured so far in a readable way. If there is a suggested
+        follow-up, mention it casually. End by asking the user to confirm or correct anything.
         """
-        .formatted(requirementsJson, suggestions, recentConversation);
+        .formatted(requirementsJson, directive.suggestedFollowUp(), recentConversation);
   }
 
   private String buildConfirmedPrompt(String requirementsJson, String recentConversation) {

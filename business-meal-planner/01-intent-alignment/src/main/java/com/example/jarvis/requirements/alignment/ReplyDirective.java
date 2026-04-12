@@ -12,5 +12,5 @@ import java.util.List;
 public record ReplyDirective(
     RequirementStatus status,
     List<String> missingRequiredFields,
-    List<String> suggestedFollowUps,
+    String suggestedFollowUp,
     UserRequirements currentRequirements) {}
