@@ -7,50 +7,49 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequirementsReplyWriter {
-
-  private static final String SYSTEM_PROMPT =
-      """
-      You are Jarvis, a warm and professional executive dining assistant. You help
-      plan business meals by gathering requirements through natural conversation.
-
-      Write your reply based on the directive you receive. Your tone should be:
-      - Conversational and human, like a real assistant, not a form
-      - Brief, typically 2-4 sentences unless summarizing captured requirements
-      - Specific, name the actual detail you are asking about
-      - Never robotic, do not say things like "I have captured the following fields"
-
-      You will receive a directive telling you what kind of reply to write, the current
-      captured requirements, and recent conversation for context.
-
-      Follow the directive precisely. Do not ask about things the directive does not mention.
-      Do not skip what the directive tells you to cover.
-      """;
+public class ReplyComposer {
 
   private static final int RECENT_MESSAGE_LIMIT = 6;
 
-  private final ChatClient replyClient;
+  private final ChatClient chatClient;
 
-  public RequirementsReplyWriter(ChatClient.Builder chatClientBuilder) {
-    this.replyClient = chatClientBuilder.defaultSystem(SYSTEM_PROMPT).build();
+  public ReplyComposer(ChatClient.Builder chatClientBuilder) {
+    this.chatClient =
+        chatClientBuilder
+            .defaultSystem(
+                """
+                You are Jarvis, a warm and professional executive dining assistant. You help
+                plan business meals by gathering requirements through natural conversation.
+
+                Write your reply based on the directive you receive. Your tone should be:
+                - Conversational and human, like a real assistant, not a form
+                - Brief, typically 2-4 sentences unless summarizing captured requirements
+                - Specific, name the actual detail you are asking about
+                - Never robotic, do not say things like "I have captured the following fields"
+
+                You will receive a directive telling you what kind of reply to write, the current
+                captured requirements, and recent conversation for context.
+
+                Follow the directive precisely. Do not ask about things the directive does not mention.
+                Do not skip what the directive tells you to cover.
+                """)
+            .build();
   }
 
-  public String writeReply(ReplyDirective directive, List<AgentMessage> conversationHistory) {
-    String prompt = buildPrompt(directive, conversationHistory);
-    return replyClient.prompt().user(prompt).call().content();
-  }
-
-  private String buildPrompt(ReplyDirective directive, List<AgentMessage> conversationHistory) {
+  public String composeReply(ReplyDirective directive, List<AgentMessage> conversationHistory) {
     String requirementsJson = JsonUtils.toJson(directive.currentRequirements());
     String recentConversation = formatRecentMessages(conversationHistory);
 
-    return switch (directive.status()) {
-      case WAITING_FOR_CLARIFICATION ->
-          buildClarificationPrompt(directive, requirementsJson, recentConversation);
-      case WAITING_FOR_CONFIRMATION ->
-          buildConfirmationPrompt(directive, requirementsJson, recentConversation);
-      case REQUIREMENTS_CONFIRMED -> buildConfirmedPrompt(requirementsJson, recentConversation);
-    };
+    String prompt =
+        switch (directive.status()) {
+          case WAITING_FOR_CLARIFICATION ->
+              buildClarificationPrompt(directive, requirementsJson, recentConversation);
+          case WAITING_FOR_CONFIRMATION ->
+              buildConfirmationPrompt(directive, requirementsJson, recentConversation);
+          case REQUIREMENTS_CONFIRMED -> buildConfirmedPrompt(requirementsJson, recentConversation);
+        };
+
+    return chatClient.prompt().user(prompt).call().content();
   }
 
   private String buildClarificationPrompt(

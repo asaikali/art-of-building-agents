@@ -10,15 +10,15 @@ public class RequirementsAligner {
 
   private final RequirementsExtractor requirementsExtractor;
   private final RequirementsAssessor requirementsAssessor;
-  private final RequirementsReplyWriter requirementsReplyWriter;
+  private final ReplyComposer replyComposer;
 
   public RequirementsAligner(
       RequirementsExtractor requirementsExtractor,
       RequirementsAssessor requirementsAssessor,
-      RequirementsReplyWriter requirementsReplyWriter) {
+      ReplyComposer replyComposer) {
     this.requirementsExtractor = requirementsExtractor;
     this.requirementsAssessor = requirementsAssessor;
-    this.requirementsReplyWriter = requirementsReplyWriter;
+    this.replyComposer = replyComposer;
   }
 
   /** The computed outputs of a single alignment turn. */
@@ -65,7 +65,7 @@ public class RequirementsAligner {
     ReplyDirective directive = new ReplyDirective(status, missing, suggestion, updated);
 
     // Step 4: Reply — model writes a natural response
-    String reply = requirementsReplyWriter.writeReply(directive, conversationHistory);
+    String reply = replyComposer.composeReply(directive, conversationHistory);
 
     return new Result(updated, missing, status, reply);
   }
