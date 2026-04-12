@@ -69,8 +69,9 @@ public class RequirementsAssessor {
             u ->
                 u.text(
                         """
-                    Current requirements:
+                    <requirements>
                     {requirements}
+                    </requirements>
 
                     What is the single most useful thing to ask about next?
                     """)

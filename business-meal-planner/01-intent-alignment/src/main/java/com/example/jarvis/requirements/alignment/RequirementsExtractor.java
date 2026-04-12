@@ -54,11 +54,13 @@ public class RequirementsExtractor {
                         """
                     Today's date: {today}
 
-                    Current planning state:
+                    <currentState>
                     {currentState}
+                    </currentState>
 
-                    New user message:
+                    <userMessage>
                     {userMessage}
+                    </userMessage>
 
                     Return the updated planning state.
                     """)

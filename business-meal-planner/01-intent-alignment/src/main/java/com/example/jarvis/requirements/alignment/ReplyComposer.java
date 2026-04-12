@@ -2,14 +2,13 @@ package com.example.jarvis.requirements.alignment;
 
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.json.JsonUtils;
+import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ReplyComposer {
-
-  private static final int RECENT_MESSAGE_LIMIT = 6;
 
   private final ChatClient chatClient;
 
@@ -21,98 +20,117 @@ public class ReplyComposer {
                 You are Jarvis, a warm and professional executive dining assistant. You help
                 plan business meals by gathering requirements through natural conversation.
 
-                Write your reply based on the directive you receive. Your tone should be:
+                Your tone should be:
                 - Conversational and human, like a real assistant, not a form
                 - Brief, typically 2-4 sentences unless summarizing captured requirements
                 - Specific, name the actual detail you are asking about
                 - Never robotic, do not say things like "I have captured the following fields"
 
-                You will receive a directive telling you what kind of reply to write, the current
-                captured requirements, and recent conversation for context.
-
-                Follow the directive precisely. Do not ask about things the directive does not mention.
-                Do not skip what the directive tells you to cover.
+                Follow the instructions precisely. Do not ask about things that are not mentioned.
+                Do not skip what the instructions tell you to cover.
                 """)
             .build();
   }
 
-  public String composeReply(ReplyDirective directive, List<AgentMessage> conversationHistory) {
-    String requirementsJson = JsonUtils.toJson(directive.currentRequirements());
-    String recentConversation = formatRecentMessages(conversationHistory);
+  public String composeClarificationReply(
+      String missingField, UserRequirements requirements, List<AgentMessage> conversationHistory) {
+    return chatClient
+        .prompt()
+        .user(
+            u ->
+                u.text(
+                        """
+                    We still need some information before we can start looking for restaurants.
+                    Write a brief, friendly question asking about the missing field below.
+                    Do not list everything that is missing, just ask about the one thing.
 
-    String prompt =
-        switch (directive.status()) {
-          case WAITING_FOR_CLARIFICATION ->
-              buildClarificationPrompt(directive, requirementsJson, recentConversation);
-          case WAITING_FOR_CONFIRMATION ->
-              buildConfirmationPrompt(directive, requirementsJson, recentConversation);
-          case REQUIREMENTS_CONFIRMED -> buildConfirmedPrompt(requirementsJson, recentConversation);
-        };
+                    <missingField>
+                    {missingField}
+                    </missingField>
 
-    return chatClient.prompt().user(prompt).call().content();
+                    <requirements>
+                    {requirements}
+                    </requirements>
+
+                    <conversation>
+                    {conversation}
+                    </conversation>
+                    """)
+                    .param("missingField", missingField)
+                    .param("requirements", JsonUtils.toJson(requirements))
+                    .param("conversation", formatConversation(conversationHistory)))
+        .call()
+        .content();
   }
 
-  private String buildClarificationPrompt(
-      ReplyDirective directive, String requirementsJson, String recentConversation) {
-    String nextField =
-        directive.missingRequiredFields().isEmpty()
-            ? "any missing details"
-            : directive.missingRequiredFields().getFirst();
+  public String composeConfirmationReply(
+      String suggestedFollowUp,
+      UserRequirements requirements,
+      List<AgentMessage> conversationHistory) {
+    return chatClient
+        .prompt()
+        .user(
+            u ->
+                u.text(
+                        """
+                    We have enough information to start searching for restaurants. Before we do,
+                    summarize what the user has told us and ask them to confirm or correct anything.
 
-    return """
-        Directive: Ask the user about %s.
-        Current requirements:
-        %s
+                    <requirements>
+                    {requirements}
+                    </requirements>
 
-        Recent conversation:
-        %s
+                    <suggestedFollowUp>
+                    {suggestedFollowUp}
+                    </suggestedFollowUp>
 
-        Write a brief, friendly question asking specifically about the missing information.
-        Do not list everything that is missing, just ask about the one thing.
-        """
-        .formatted(nextField, requirementsJson, recentConversation);
+                    <conversation>
+                    {conversation}
+                    </conversation>
+
+                    Summarize the requirements in a readable way. If the suggested follow-up is
+                    relevant, mention it casually. End by asking the user to confirm or correct.
+                    """)
+                    .param("requirements", JsonUtils.toJson(requirements))
+                    .param("suggestedFollowUp", suggestedFollowUp)
+                    .param("conversation", formatConversation(conversationHistory)))
+        .call()
+        .content();
   }
 
-  private String buildConfirmationPrompt(
-      ReplyDirective directive, String requirementsJson, String recentConversation) {
-    return """
-        Directive: Summarize the current requirements and ask for confirmation.
-        Current requirements:
-        %s
+  public String composeConfirmedReply(
+      UserRequirements requirements, List<AgentMessage> conversationHistory) {
+    return chatClient
+        .prompt()
+        .user(
+            u ->
+                u.text(
+                        """
+                    The user has confirmed the requirements. Acknowledge briefly and let them
+                    know you will start looking for restaurants.
 
-        Suggested optional follow-up to weave in naturally: %s
-        Recent conversation:
-        %s
+                    <requirements>
+                    {requirements}
+                    </requirements>
 
-        Summarize what you have captured so far in a readable way. If there is a suggested
-        follow-up, mention it casually. End by asking the user to confirm or correct anything.
-        """
-        .formatted(requirementsJson, directive.suggestedFollowUp(), recentConversation);
+                    <conversation>
+                    {conversation}
+                    </conversation>
+
+                    Do not repeat all the details. Keep it short.
+                    """)
+                    .param("requirements", JsonUtils.toJson(requirements))
+                    .param("conversation", formatConversation(conversationHistory)))
+        .call()
+        .content();
   }
 
-  private String buildConfirmedPrompt(String requirementsJson, String recentConversation) {
-    return """
-        Directive: Acknowledge that the requirements are confirmed.
-        Current requirements:
-        %s
-
-        Recent conversation:
-        %s
-
-        Write a brief acknowledgment that the requirements are confirmed.
-        Do not repeat all the details.
-        """
-        .formatted(requirementsJson, recentConversation);
-  }
-
-  private String formatRecentMessages(List<AgentMessage> messages) {
+  private String formatConversation(List<AgentMessage> messages) {
     if (messages == null || messages.isEmpty()) {
       return "(no prior messages)";
     }
-    int start = Math.max(0, messages.size() - RECENT_MESSAGE_LIMIT);
-    List<AgentMessage> recent = messages.subList(start, messages.size());
     StringBuilder sb = new StringBuilder();
-    for (AgentMessage msg : recent) {
+    for (AgentMessage msg : messages) {
       sb.append(msg.role().name()).append(": ").append(msg.text()).append("\n");
     }
     return sb.toString().trim();

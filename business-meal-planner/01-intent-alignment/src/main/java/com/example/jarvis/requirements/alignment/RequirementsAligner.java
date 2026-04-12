@@ -39,8 +39,8 @@ public class RequirementsAligner {
    * <ol>
    *   <li><b>Extract</b> — the model merges the user message into the current requirements
    *   <li><b>Assess</b> — deterministic check for required fields, model suggests a follow-up
-   *   <li><b>Directive</b> — code picks what the reply must accomplish based on the assessment
-   *   <li><b>Reply</b> — the model writes a natural response following the directive
+   *   <li><b>Status</b> — code decides the workflow status based on the assessment
+   *   <li><b>Reply</b> — the model composes a natural response based on the status
    * </ol>
    */
   public Result processMessage(
@@ -53,19 +53,26 @@ public class RequirementsAligner {
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
 
     // Step 2: Assess — deterministic hard gates + model-based follow-up suggestion
+    List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
+    String suggestion = requirementsAssessor.suggestFollowUp(updated);
     boolean userConfirmed =
         currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
-    List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
-    String suggestion = requirementsAssessor.suggestFollowUp(updated);
+    // Step 3: Status — decide the workflow status
     RequirementStatus status = assessStatus(missing, userConfirmed);
 
-    // Step 3: Directive — code picks what the reply must accomplish
-    ReplyDirective directive = new ReplyDirective(status, missing, suggestion, updated);
-
-    // Step 4: Reply — model writes a natural response
-    String reply = replyComposer.composeReply(directive, conversationHistory);
+    // Step 4: Reply — compose a natural response based on the status
+    String reply =
+        switch (status) {
+          case WAITING_FOR_CLARIFICATION ->
+              replyComposer.composeClarificationReply(
+                  missing.getFirst(), updated, conversationHistory);
+          case WAITING_FOR_CONFIRMATION ->
+              replyComposer.composeConfirmationReply(suggestion, updated, conversationHistory);
+          case REQUIREMENTS_CONFIRMED ->
+              replyComposer.composeConfirmedReply(updated, conversationHistory);
+        };
 
     return new Result(updated, missing, status, reply);
   }
