@@ -47,8 +47,7 @@ public class RequirementsAssessor {
       missing.add("Party Size");
     }
     log.info(
-        "[Jarvis:Assessor] missing | fields={}",
-        missing.isEmpty() ? "none — all required fields present" : missing);
+        "missing | fields={}", missing.isEmpty() ? "none — all required fields present" : missing);
     return missing;
   }
 
@@ -90,7 +89,7 @@ public class RequirementsAssessor {
                         .param("requirements", JsonUtils.toJson(requirements)))
             .call()
             .content();
-    log.info("[Jarvis:Assessor] followUp | suggestion=\"{}\"", result);
+    log.info("followUp | suggestion=\"{}\"", result);
     return result;
   }
 }

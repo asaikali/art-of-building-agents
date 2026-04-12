@@ -48,7 +48,7 @@ public class ReplyComposer {
   }
 
   public String askForMissingField(String missingField, UserRequirements requirements) {
-    log.info("[Jarvis:Composer] askForMissingField | missingField=\"{}\"", missingField);
+    log.info("askForMissingField | missingField=\"{}\"", missingField);
     String reply =
         chatClient
             .prompt()
@@ -71,12 +71,12 @@ public class ReplyComposer {
                         .param("requirements", JsonUtils.toJson(requirements)))
             .call()
             .content();
-    log.info("[Jarvis:Composer] askForMissingField | reply=\"{}\"", reply);
+    log.info("askForMissingField | reply=\"{}\"", reply);
     return reply;
   }
 
   public String askForConfirmation(String suggestedFollowUp, UserRequirements requirements) {
-    log.info("[Jarvis:Composer] askForConfirmation | suggestedFollowUp=\"{}\"", suggestedFollowUp);
+    log.info("askForConfirmation | suggestedFollowUp=\"{}\"", suggestedFollowUp);
     String reply =
         chatClient
             .prompt()
@@ -100,12 +100,12 @@ public class ReplyComposer {
                         .param("suggestedFollowUp", suggestedFollowUp))
             .call()
             .content();
-    log.info("[Jarvis:Composer] askForConfirmation | reply=\"{}\"", reply);
+    log.info("askForConfirmation | reply=\"{}\"", reply);
     return reply;
   }
 
   public String acknowledgeConfirmation(UserRequirements requirements) {
-    log.info("[Jarvis:Composer] acknowledgeConfirmation");
+    log.info("acknowledgeConfirmation");
     String reply =
         chatClient
             .prompt()
@@ -123,7 +123,7 @@ public class ReplyComposer {
                         .param("requirements", JsonUtils.toJson(requirements)))
             .call()
             .content();
-    log.info("[Jarvis:Composer] acknowledgeConfirmation | reply=\"{}\"", reply);
+    log.info("acknowledgeConfirmation | reply=\"{}\"", reply);
     return reply;
   }
 }

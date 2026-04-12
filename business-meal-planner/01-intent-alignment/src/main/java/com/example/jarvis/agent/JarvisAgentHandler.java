@@ -41,12 +41,9 @@ public class JarvisAgentHandler implements AgentHandler {
     // Retrieve or initialize the workflow state for this session
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
-    log.info(
-        "[Jarvis:Handler] onMessage | status={} | user=\"{}\"",
-        context.getStatus().label(),
-        message.text());
+    log.info("onMessage | status={} | user=\"{}\"", context.getStatus().label(), message.text());
 
-    // Run the alignment pipeline: extract → assess → status → reply
+    // Run the alignment pipeline: extract → determine status → compose reply
     var result =
         requirementsAligner.processMessage(
             context.getUserRequirements(), context.getStatus(), message.text());
@@ -56,7 +53,7 @@ public class JarvisAgentHandler implements AgentHandler {
     context.setStatus(result.status());
 
     log.info(
-        "[Jarvis:Handler] done | status={} | missingFields={}",
+        "done | status={} | missingFields={}",
         result.status().label(),
         result.missingRequiredFields().size());
 

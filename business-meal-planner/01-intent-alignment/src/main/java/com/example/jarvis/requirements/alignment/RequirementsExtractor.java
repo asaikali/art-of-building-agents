@@ -59,7 +59,7 @@ public class RequirementsExtractor {
 
   public UserRequirements extract(UserRequirements currentRequirements, String userMessage) {
     log.info(
-        "[Jarvis:Extractor] input | currentRequirements={} | userMessage=\"{}\"",
+        "input | currentRequirements={} | userMessage=\"{}\"",
         JsonUtils.toJson(currentRequirements),
         userMessage.trim());
 
@@ -88,7 +88,7 @@ public class RequirementsExtractor {
             .call()
             .entity(UserRequirements.class);
 
-    log.info("[Jarvis:Extractor] output | extractedRequirements={}", JsonUtils.toJson(result));
+    log.info("output | extractedRequirements={}", JsonUtils.toJson(result));
     return result;
   }
 }

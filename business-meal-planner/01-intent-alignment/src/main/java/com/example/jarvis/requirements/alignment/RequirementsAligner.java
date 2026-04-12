@@ -1,6 +1,5 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.slf4j.Logger;
@@ -58,23 +57,22 @@ public class RequirementsAligner {
 
     // Step 1: Extract — model merges the user message into the current requirements
     UserRequirements updatedRequirements = extractor.extract(currentRequirements, userMessage);
-    log.info(
-        "[Jarvis:Aligner] step1-extract | updatedRequirements={}",
-        JsonUtils.toJson(updatedRequirements));
 
-    // Step 2: Determine status — all status logic in one place
+    // Step 2: Determine status based on what's missing and whether the user confirmed
     List<String> missingFields = assessor.findMissingRequiredFields(updatedRequirements.getMeal());
-    AlignmentStatus status =
+    AlignmentStatus updatedStatus =
         determineStatus(missingFields, currentStatus, currentRequirements, updatedRequirements);
-    log.info("[Jarvis:Aligner] step2-status | {} → {}", currentStatus.label(), status.label());
+    log.info("status | {} → {}", currentStatus.label(), updatedStatus.label());
 
     // Step 3: Compose reply — model writes a response appropriate to the status
-    String reply = composeReply(status, missingFields, updatedRequirements);
-    log.info("[Jarvis:Aligner] step3-reply | reply=\"{}\"", reply);
+    String reply = composeReply(updatedStatus, missingFields, updatedRequirements);
+    log.info("reply | \"{}\"", reply);
 
-    return new Result(updatedRequirements, missingFields, status, reply);
+    return new Result(updatedRequirements, missingFields, updatedStatus, reply);
   }
 
+  // If required fields are missing we stay in gathering. If the user confirmed (requirements
+  // unchanged after a confirmation prompt) we're done. Otherwise we ask the user to confirm.
   private AlignmentStatus determineStatus(
       List<String> missingFields,
       AlignmentStatus currentStatus,
@@ -105,7 +103,6 @@ public class RequirementsAligner {
           composer.askForMissingField(missingFields.getFirst(), updatedRequirements);
       case CONFIRMING_REQUIREMENTS -> {
         String suggestion = assessor.suggestFollowUp(updatedRequirements);
-        log.info("[Jarvis:Aligner] suggestFollowUp | suggestion=\"{}\"", suggestion);
         yield composer.askForConfirmation(suggestion, updatedRequirements);
       }
       case REQUIREMENTS_CONFIRMED -> composer.acknowledgeConfirmation(updatedRequirements);
