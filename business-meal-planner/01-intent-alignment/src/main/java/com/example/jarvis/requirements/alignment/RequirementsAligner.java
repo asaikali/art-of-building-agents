@@ -24,7 +24,7 @@ public class RequirementsAligner {
   /** The computed outputs of a single alignment turn. */
   public record Result(
       UserRequirements updatedRequirements,
-      List<String> missingCriticalFields,
+      List<String> missingRequiredFields,
       List<String> suggestedFollowUps,
       RequirementStatus status,
       String reply) {}
@@ -58,9 +58,9 @@ public class RequirementsAligner {
         currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
-    List<String> missing = requirementsAssessor.missingCriticalFields(updated.getMeal());
+    List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
     List<String> suggestions = requirementsAssessor.suggestFollowUps(updated);
-    RequirementStatus status = requirementsAssessor.decideStatus(missing, userConfirmed);
+    RequirementStatus status = requirementsAssessor.assessStatus(missing, userConfirmed);
 
     // Step 3: Directive — code picks what the reply must accomplish
     ReplyDirective directive = new ReplyDirective(status, missing, suggestions, updated);

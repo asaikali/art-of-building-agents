@@ -94,7 +94,7 @@ class AlignmentVerificationScenario {
         aligner.processMessage(
             context.getUserRequirements(), context.getStatus(), userMessage, history);
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.missingCriticalFields());
+    context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
     history.add(new AgentMessage(Instant.now(), Role.USER, userMessage));
     history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result.reply()));

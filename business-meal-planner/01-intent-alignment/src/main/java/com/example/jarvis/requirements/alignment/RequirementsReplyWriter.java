@@ -56,9 +56,9 @@ public class RequirementsReplyWriter {
   private String buildClarificationPrompt(
       ReplyDirective directive, String requirementsJson, String recentConversation) {
     String nextField =
-        directive.missingCriticalFields().isEmpty()
+        directive.missingRequiredFields().isEmpty()
             ? "any missing details"
-            : directive.missingCriticalFields().getFirst();
+            : directive.missingRequiredFields().getFirst();
 
     return """
         Directive: Ask the user about %s.

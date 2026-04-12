@@ -68,7 +68,7 @@ class ClientDinnerWalkthrough {
 
   private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.missingCriticalFields());
+    context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
   }
 

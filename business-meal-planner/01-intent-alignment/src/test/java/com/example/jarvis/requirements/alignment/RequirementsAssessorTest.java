@@ -21,30 +21,30 @@ class RequirementsAssessorTest {
     Meal meal = new Meal();
     meal.setDate(LocalDate.of(2026, 4, 11));
 
-    assertThat(assessor.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
+    assertThat(assessor.findMissingRequiredFields(meal)).containsExactly("Time", "Party Size");
   }
 
   @Test
   void waitsForClarificationWhenFieldsAreMissing() {
-    assertThat(assessor.decideStatus(List.of("Time"), false))
+    assertThat(assessor.assessStatus(List.of("Time"), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
   @Test
   void waitsForConfirmationWhenCriticalFieldsArePresent() {
-    assertThat(assessor.decideStatus(List.of(), false))
+    assertThat(assessor.assessStatus(List.of(), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
   }
 
   @Test
   void confirmsWhenUserConfirmedAndNoCriticalFieldsMissing() {
-    assertThat(assessor.decideStatus(List.of(), true))
+    assertThat(assessor.assessStatus(List.of(), true))
         .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
   @Test
   void clarificationOverridesConfirmationWhenFieldsStillMissing() {
-    assertThat(assessor.decideStatus(List.of("Date"), true))
+    assertThat(assessor.assessStatus(List.of("Date"), true))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
