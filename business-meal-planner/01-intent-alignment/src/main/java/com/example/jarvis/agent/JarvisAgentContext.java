@@ -29,12 +29,7 @@ public class JarvisAgentContext implements AgentContext {
 
   public String toMarkdown(List<String> missingRequiredFields) {
     return """
-        ## Meal
-        ```json
-        %s
-        ```
-
-        ## Attendees
+        ## Requirements
         ```json
         %s
         ```
@@ -46,10 +41,7 @@ public class JarvisAgentContext implements AgentContext {
         %s
         """
         .formatted(
-            JsonUtils.toJson(userRequirements.getMeal()),
-            JsonUtils.toJson(userRequirements.getAttendees()),
-            renderList(missingRequiredFields),
-            status.label());
+            JsonUtils.toJson(userRequirements), renderList(missingRequiredFields), status.label());
   }
 
   private static String renderList(List<String> items) {
