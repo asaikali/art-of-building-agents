@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Facade giving an agent a single object to interact with. Created by {@link SessionManager};
@@ -72,6 +73,15 @@ public class Session {
 
   public Optional<AgentContext> getAgentContext() {
     return Optional.ofNullable(agentContext);
+  }
+
+  public <T extends AgentContext> T getOrCreateContext(Class<T> type, Supplier<T> factory) {
+    if (type.isInstance(agentContext)) {
+      return type.cast(agentContext);
+    }
+    T context = factory.get();
+    setAgentContext(context);
+    return context;
   }
 
   public void setAgentContext(AgentContext agentContext) {

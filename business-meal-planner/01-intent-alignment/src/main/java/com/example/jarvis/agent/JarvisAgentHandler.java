@@ -37,7 +37,8 @@ public class JarvisAgentHandler implements AgentHandler {
     long turn = session.getMessages().stream().filter(m -> m.role() == Role.USER).count();
     session.logEvent("user-message-received", Map.of("turn", turn, "text", message.text()));
 
-    JarvisAgentContext context = getOrCreateContext(session);
+    JarvisAgentContext context =
+        session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
     RequirementsAlignmentLoop.TurnResult result =
         requirementsAlignmentLoop.handleTurn(context, message.text(), session.getMessages());
     JarvisAgentContext state = result.state();
@@ -52,18 +53,5 @@ public class JarvisAgentHandler implements AgentHandler {
     session.appendMessage(Role.ASSISTANT, result.assistantReply());
     session.logEvent(
         "assistant-reply-sent", Map.of("turn", turn, "reply", result.assistantReply()));
-  }
-
-  private JarvisAgentContext getOrCreateContext(Session session) {
-    return session
-        .getAgentContext()
-        .filter(JarvisAgentContext.class::isInstance)
-        .map(JarvisAgentContext.class::cast)
-        .orElseGet(
-            () -> {
-              JarvisAgentContext context = new JarvisAgentContext();
-              session.setAgentContext(context);
-              return context;
-            });
   }
 }
