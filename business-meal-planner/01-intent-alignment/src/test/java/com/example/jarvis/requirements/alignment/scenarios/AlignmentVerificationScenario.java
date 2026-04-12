@@ -83,7 +83,6 @@ class AlignmentVerificationScenario {
     var result =
         aligner.processMessage(context.getUserRequirements(), context.getStatus(), userMessage);
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
   }
 

@@ -9,7 +9,6 @@ import java.util.List;
 public class JarvisAgentContext implements AgentContext {
 
   private UserRequirements userRequirements = new UserRequirements();
-  private List<String> missingInformation = List.of();
   private AlignmentStatus status = AlignmentStatus.WAITING_FOR_CLARIFICATION;
 
   public UserRequirements getUserRequirements() {
@@ -20,15 +19,6 @@ public class JarvisAgentContext implements AgentContext {
     this.userRequirements = userRequirements == null ? new UserRequirements() : userRequirements;
   }
 
-  public List<String> getMissingInformation() {
-    return missingInformation;
-  }
-
-  public void setMissingInformation(List<String> missingInformation) {
-    this.missingInformation =
-        missingInformation == null ? List.of() : List.copyOf(missingInformation);
-  }
-
   public AlignmentStatus getStatus() {
     return status;
   }
@@ -37,7 +27,7 @@ public class JarvisAgentContext implements AgentContext {
     this.status = status;
   }
 
-  public String toMarkdown() {
+  public String toMarkdown(List<String> missingRequiredFields) {
     return """
         ## Meal
         ```json
@@ -58,12 +48,12 @@ public class JarvisAgentContext implements AgentContext {
         .formatted(
             JsonUtils.toJson(userRequirements.getMeal()),
             JsonUtils.toJson(userRequirements.getAttendees()),
-            renderList(missingInformation),
+            renderList(missingRequiredFields),
             status.label());
   }
 
   private static String renderList(List<String> items) {
-    if (items.isEmpty()) {
+    if (items == null || items.isEmpty()) {
       return "- None";
     }
     return items.stream()

@@ -35,7 +35,7 @@ class ClientDinnerWalkthrough {
             context.getStatus(),
             "I have a client dinner tomorrow at 7pm for 4 people, one is vegetarian.");
     applyResult(context, result1);
-    printTurn(1, context, result1.reply());
+    printTurn(1, context, result1);
 
     // Turn 2: Add budget and origin
     var result2 =
@@ -44,24 +44,23 @@ class ClientDinnerWalkthrough {
             context.getStatus(),
             "I'm leaving from Union Station. Keep it under 120 CAD per person.");
     applyResult(context, result2);
-    printTurn(2, context, result2.reply());
+    printTurn(2, context, result2);
 
     // Turn 3: Confirm
     var result3 = aligner.processMessage(context.getUserRequirements(), context.getStatus(), "yes");
     applyResult(context, result3);
-    printTurn(3, context, result3.reply());
+    printTurn(3, context, result3);
   }
 
   private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
   }
 
-  private void printTurn(int turn, JarvisAgentContext context, String reply) {
+  private void printTurn(int turn, JarvisAgentContext context, RequirementsAligner.Result result) {
     System.out.println("\n=== Turn " + turn + " ===");
     System.out.println("Status: " + context.getStatus().label());
-    System.out.println("Assistant: " + reply);
-    System.out.println("State:\n" + context.toMarkdown());
+    System.out.println("Assistant: " + result.reply());
+    System.out.println("State:\n" + context.toMarkdown(result.missingRequiredFields()));
   }
 }

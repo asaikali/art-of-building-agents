@@ -43,16 +43,15 @@ public class JarvisAgentHandler implements AgentHandler {
 
     // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
 
     // Send the reply
     session.reply(result.reply());
 
     // Update inspector state and log the outcome
-    session.updateState(context.toMarkdown());
+    session.updateState(context.toMarkdown(result.missingRequiredFields()));
     session.logEvent(
         context.getStatus().label(),
-        Map.of("missingInformationCount", context.getMissingInformation().size()));
+        Map.of("missingFieldCount", result.missingRequiredFields().size()));
   }
 }
