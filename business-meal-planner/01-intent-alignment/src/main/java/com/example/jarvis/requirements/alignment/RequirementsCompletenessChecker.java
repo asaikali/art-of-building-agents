@@ -12,18 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class RequirementsCompletenessChecker {
 
-  public record CompletionResult(
-      List<String> missingCriticalFields,
-      List<String> suggestedFollowUps,
-      RequirementStatus status) {}
-
-  public CompletionResult evaluate(UserRequirements requirements, boolean userConfirmed) {
-    List<String> missing = missingCriticalFields(requirements.getMeal());
-    List<String> suggestions = suggestFollowUps(requirements);
-    RequirementStatus status = decideStatus(missing, userConfirmed);
-    return new CompletionResult(missing, suggestions, status);
-  }
-
   public List<String> missingCriticalFields(Meal meal) {
     List<String> missing = new ArrayList<>();
     if (meal == null || meal.getDate() == null) {

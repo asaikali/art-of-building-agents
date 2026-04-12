@@ -98,20 +98,6 @@ class RequirementsCompletenessCheckerTest {
     assertThat(checker.suggestFollowUps(requirements)).isEmpty();
   }
 
-  @Test
-  void evaluateReturnsCombinedResult() {
-    UserRequirements requirements =
-        requirements(meal(4, MealType.DINNER, "Client dinner"), List.of());
-    requirements.getMeal().setDate(LocalDate.of(2026, 4, 13));
-    requirements.getMeal().setTime(LocalTime.of(19, 0));
-
-    RequirementsCompletenessChecker.CompletionResult result = checker.evaluate(requirements, false);
-
-    assertThat(result.missingCriticalFields()).isEmpty();
-    assertThat(result.suggestedFollowUps()).isNotEmpty();
-    assertThat(result.status()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-  }
-
   private Meal meal(int partySize, MealType mealType, String purpose) {
     Meal meal = new Meal();
     meal.setPartySize(partySize);

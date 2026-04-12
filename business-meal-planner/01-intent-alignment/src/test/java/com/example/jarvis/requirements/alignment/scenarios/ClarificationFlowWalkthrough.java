@@ -73,8 +73,8 @@ class ClarificationFlowWalkthrough {
 
   private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
     context.setUserRequirements(result.updatedRequirements());
-    context.setMissingInformation(result.check().missingCriticalFields());
-    context.setStatus(result.check().status());
+    context.setMissingInformation(result.missingCriticalFields());
+    context.setStatus(result.status());
   }
 
   private void printTurn(int turn, JarvisAgentContext context, String reply) {

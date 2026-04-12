@@ -9,22 +9,24 @@ import org.springframework.stereotype.Service;
 public class RequirementsAligner {
 
   private final RequirementsExtractor requirementsExtractor;
-  private final RequirementsCompletenessChecker requirementsCompletenessChecker;
+  private final RequirementsCompletenessChecker completenessChecker;
   private final RequirementsReplyWriter requirementsReplyWriter;
 
   public RequirementsAligner(
       RequirementsExtractor requirementsExtractor,
-      RequirementsCompletenessChecker requirementsCompletenessChecker,
+      RequirementsCompletenessChecker completenessChecker,
       RequirementsReplyWriter requirementsReplyWriter) {
     this.requirementsExtractor = requirementsExtractor;
-    this.requirementsCompletenessChecker = requirementsCompletenessChecker;
+    this.completenessChecker = completenessChecker;
     this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
   /** The computed outputs of a single alignment turn. */
   public record Result(
       UserRequirements updatedRequirements,
-      RequirementsCompletenessChecker.CompletionResult check,
+      List<String> missingCriticalFields,
+      List<String> suggestedFollowUps,
+      RequirementStatus status,
       String reply) {}
 
   /**
@@ -51,22 +53,21 @@ public class RequirementsAligner {
     // Step 1: Extract — model maps user message into updated requirements
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
 
-    // Step 2: Check — deterministic policy evaluation
+    // Step 2: Check — deterministic completeness evaluation
     boolean userConfirmed =
         currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
-    RequirementsCompletenessChecker.CompletionResult check =
-        requirementsCompletenessChecker.evaluate(updated, userConfirmed);
+    List<String> missing = completenessChecker.missingCriticalFields(updated.getMeal());
+    List<String> suggestions = completenessChecker.suggestFollowUps(updated);
+    RequirementStatus status = completenessChecker.decideStatus(missing, userConfirmed);
 
     // Step 3: Directive — code picks what the reply must accomplish
-    ReplyDirective directive =
-        new ReplyDirective(
-            check.status(), check.missingCriticalFields(), check.suggestedFollowUps(), updated);
+    ReplyDirective directive = new ReplyDirective(status, missing, suggestions, updated);
 
     // Step 4: Reply — model writes a natural response
     String reply = requirementsReplyWriter.writeReply(directive, conversationHistory);
 
-    return new Result(updated, check, reply);
+    return new Result(updated, missing, suggestions, status, reply);
   }
 }
