@@ -12,39 +12,39 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class RequirementsCompletenessCheckerTest {
+class RequirementsAssessorTest {
 
-  private final RequirementsCompletenessChecker checker = new RequirementsCompletenessChecker();
+  private final RequirementsAssessor assessor = new RequirementsAssessor();
 
   @Test
   void returnsMissingCriticalFields() {
     Meal meal = new Meal();
     meal.setDate(LocalDate.of(2026, 4, 11));
 
-    assertThat(checker.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
+    assertThat(assessor.missingCriticalFields(meal)).containsExactly("Time", "Party Size");
   }
 
   @Test
   void waitsForClarificationWhenFieldsAreMissing() {
-    assertThat(checker.decideStatus(List.of("Time"), false))
+    assertThat(assessor.decideStatus(List.of("Time"), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
   @Test
   void waitsForConfirmationWhenCriticalFieldsArePresent() {
-    assertThat(checker.decideStatus(List.of(), false))
+    assertThat(assessor.decideStatus(List.of(), false))
         .isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
   }
 
   @Test
   void confirmsWhenUserConfirmedAndNoCriticalFieldsMissing() {
-    assertThat(checker.decideStatus(List.of(), true))
+    assertThat(assessor.decideStatus(List.of(), true))
         .isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
   @Test
   void clarificationOverridesConfirmationWhenFieldsStillMissing() {
-    assertThat(checker.decideStatus(List.of("Date"), true))
+    assertThat(assessor.decideStatus(List.of("Date"), true))
         .isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
   }
 
@@ -52,7 +52,7 @@ class RequirementsCompletenessCheckerTest {
   void suggestsDietaryForLargeGroupWithoutConstraints() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of());
 
-    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("dietary"));
+    assertThat(assessor.suggestFollowUps(requirements)).anyMatch(s -> s.contains("dietary"));
   }
 
   @Test
@@ -62,7 +62,7 @@ class RequirementsCompletenessCheckerTest {
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of(attendee));
 
-    assertThat(checker.suggestFollowUps(requirements)).noneMatch(s -> s.contains("dietary"));
+    assertThat(assessor.suggestFollowUps(requirements)).noneMatch(s -> s.contains("dietary"));
   }
 
   @Test
@@ -70,21 +70,21 @@ class RequirementsCompletenessCheckerTest {
     UserRequirements requirements =
         requirements(meal(4, MealType.DINNER, "Client dinner"), List.of());
 
-    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("budget"));
+    assertThat(assessor.suggestFollowUps(requirements)).anyMatch(s -> s.contains("budget"));
   }
 
   @Test
   void suggestsNoiseLevelWhenPurposeIsSet() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, "Team lunch"), List.of());
 
-    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("noise"));
+    assertThat(assessor.suggestFollowUps(requirements)).anyMatch(s -> s.contains("noise"));
   }
 
   @Test
   void suggestsAttendeeDetailsWhenListIsEmpty() {
     UserRequirements requirements = requirements(meal(4, MealType.LUNCH, null), List.of());
 
-    assertThat(checker.suggestFollowUps(requirements)).anyMatch(s -> s.contains("attendee"));
+    assertThat(assessor.suggestFollowUps(requirements)).anyMatch(s -> s.contains("attendee"));
   }
 
   @Test
@@ -95,7 +95,7 @@ class RequirementsCompletenessCheckerTest {
     attendee.setDietaryConstraints(List.of(DietaryConstraint.VEGETARIAN));
     UserRequirements requirements = requirements(meal, List.of(attendee));
 
-    assertThat(checker.suggestFollowUps(requirements)).isEmpty();
+    assertThat(assessor.suggestFollowUps(requirements)).isEmpty();
   }
 
   private Meal meal(int partySize, MealType mealType, String purpose) {

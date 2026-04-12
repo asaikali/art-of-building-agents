@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
 public class RequirementsAligner {
 
   private final RequirementsExtractor requirementsExtractor;
-  private final RequirementsCompletenessChecker completenessChecker;
+  private final RequirementsAssessor requirementsAssessor;
   private final RequirementsReplyWriter requirementsReplyWriter;
 
   public RequirementsAligner(
       RequirementsExtractor requirementsExtractor,
-      RequirementsCompletenessChecker completenessChecker,
+      RequirementsAssessor requirementsAssessor,
       RequirementsReplyWriter requirementsReplyWriter) {
     this.requirementsExtractor = requirementsExtractor;
-    this.completenessChecker = completenessChecker;
+    this.requirementsAssessor = requirementsAssessor;
     this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
@@ -58,9 +58,9 @@ public class RequirementsAligner {
         currentStatus == RequirementStatus.WAITING_FOR_CONFIRMATION
             && updated.equals(currentRequirements);
 
-    List<String> missing = completenessChecker.missingCriticalFields(updated.getMeal());
-    List<String> suggestions = completenessChecker.suggestFollowUps(updated);
-    RequirementStatus status = completenessChecker.decideStatus(missing, userConfirmed);
+    List<String> missing = requirementsAssessor.missingCriticalFields(updated.getMeal());
+    List<String> suggestions = requirementsAssessor.suggestFollowUps(updated);
+    RequirementStatus status = requirementsAssessor.decideStatus(missing, userConfirmed);
 
     // Step 3: Directive — code picks what the reply must accomplish
     ReplyDirective directive = new ReplyDirective(status, missing, suggestions, updated);

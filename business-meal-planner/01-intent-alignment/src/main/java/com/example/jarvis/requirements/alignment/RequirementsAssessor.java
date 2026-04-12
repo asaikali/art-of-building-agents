@@ -10,7 +10,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequirementsCompletenessChecker {
+public class RequirementsAssessor {
 
   public List<String> missingCriticalFields(Meal meal) {
     List<String> missing = new ArrayList<>();
