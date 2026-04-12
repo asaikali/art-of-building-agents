@@ -29,17 +29,15 @@ public class RequirementsAligner {
 
   private static final Logger log = LoggerFactory.getLogger(RequirementsAligner.class);
 
-  private final RequirementsExtractor requirementsExtractor;
-  private final RequirementsAssessor requirementsAssessor;
-  private final ReplyComposer replyComposer;
+  private final RequirementsExtractor extractor;
+  private final RequirementsAssessor assessor;
+  private final ReplyComposer composer;
 
   public RequirementsAligner(
-      RequirementsExtractor requirementsExtractor,
-      RequirementsAssessor requirementsAssessor,
-      ReplyComposer replyComposer) {
-    this.requirementsExtractor = requirementsExtractor;
-    this.requirementsAssessor = requirementsAssessor;
-    this.replyComposer = replyComposer;
+      RequirementsExtractor extractor, RequirementsAssessor assessor, ReplyComposer composer) {
+    this.extractor = extractor;
+    this.assessor = assessor;
+    this.composer = composer;
   }
 
   /** The computed outputs of a single alignment turn. */
@@ -59,27 +57,30 @@ public class RequirementsAligner {
       UserRequirements currentRequirements, AlignmentStatus currentStatus, String userMessage) {
 
     // Step 1: Extract — model merges the user message into the current requirements
-    UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
-    log.info("[Jarvis:Aligner] step1-extract | updatedRequirements={}", JsonUtils.toJson(updated));
+    UserRequirements updatedRequirements = extractor.extract(currentRequirements, userMessage);
+    log.info(
+        "[Jarvis:Aligner] step1-extract | updatedRequirements={}",
+        JsonUtils.toJson(updatedRequirements));
 
     // Step 2: Determine status — all status logic in one place
-    List<String> missing = requirementsAssessor.findMissingRequiredFields(updated.getMeal());
-    AlignmentStatus status = determineStatus(missing, currentStatus, currentRequirements, updated);
+    List<String> missingFields = assessor.findMissingRequiredFields(updatedRequirements.getMeal());
+    AlignmentStatus status =
+        determineStatus(missingFields, currentStatus, currentRequirements, updatedRequirements);
     log.info("[Jarvis:Aligner] step2-status | {} → {}", currentStatus.label(), status.label());
 
     // Step 3: Compose reply — model writes a response appropriate to the status
-    String reply = composeReply(status, missing, updated);
+    String reply = composeReply(status, missingFields, updatedRequirements);
     log.info("[Jarvis:Aligner] step3-reply | reply=\"{}\"", reply);
 
-    return new Result(updated, missing, status, reply);
+    return new Result(updatedRequirements, missingFields, status, reply);
   }
 
   private AlignmentStatus determineStatus(
-      List<String> missing,
+      List<String> missingFields,
       AlignmentStatus currentStatus,
       UserRequirements before,
       UserRequirements after) {
-    if (!missing.isEmpty()) {
+    if (!missingFields.isEmpty()) {
       return AlignmentStatus.GATHERING_REQUIREMENTS;
     }
     if (isConfirmation(currentStatus, before, after)) {
@@ -98,15 +99,16 @@ public class RequirementsAligner {
   }
 
   private String composeReply(
-      AlignmentStatus status, List<String> missing, UserRequirements updated) {
+      AlignmentStatus status, List<String> missingFields, UserRequirements updatedRequirements) {
     return switch (status) {
-      case GATHERING_REQUIREMENTS -> replyComposer.askForMissingField(missing.getFirst(), updated);
+      case GATHERING_REQUIREMENTS ->
+          composer.askForMissingField(missingFields.getFirst(), updatedRequirements);
       case CONFIRMING_REQUIREMENTS -> {
-        String suggestion = requirementsAssessor.suggestFollowUp(updated);
+        String suggestion = assessor.suggestFollowUp(updatedRequirements);
         log.info("[Jarvis:Aligner] suggestFollowUp | suggestion=\"{}\"", suggestion);
-        yield replyComposer.askForConfirmation(suggestion, updated);
+        yield composer.askForConfirmation(suggestion, updatedRequirements);
       }
-      case REQUIREMENTS_CONFIRMED -> replyComposer.acknowledgeConfirmation(updated);
+      case REQUIREMENTS_CONFIRMED -> composer.acknowledgeConfirmation(updatedRequirements);
     };
   }
 }
