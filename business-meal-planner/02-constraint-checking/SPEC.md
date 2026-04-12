@@ -20,6 +20,16 @@ The detailed design for `NoiseLevelCheck`, including:
 
 is documented in [noiselevelcheck.md](noiselevelcheck.md).
 
+The detailed design for `BudgetPerPersonCheck`, including:
+
+- structured price-range data
+- comparison rule
+- validation behavior
+- service API
+- suggested integration tests
+
+is documented in [budgetperpersoncheck.md](budgetperpersoncheck.md).
+
 ## Hybrid Checks
 
 - `DietarySuitabilityCheck`
