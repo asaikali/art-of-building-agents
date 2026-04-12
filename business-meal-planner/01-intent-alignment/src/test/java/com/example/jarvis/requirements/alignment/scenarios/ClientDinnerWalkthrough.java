@@ -1,12 +1,8 @@
 package com.example.jarvis.requirements.alignment.scenarios;
 
-import com.example.agent.core.chat.AgentMessage;
-import com.example.agent.core.chat.Role;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
-import java.time.Instant;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +27,14 @@ class ClientDinnerWalkthrough {
   @Test
   void clientDinnerForFour() {
     var context = new JarvisAgentContext();
-    var history = new ArrayList<AgentMessage>();
 
     // Turn 1: Describe the meal
     var result1 =
         aligner.processMessage(
             context.getUserRequirements(),
             context.getStatus(),
-            "I have a client dinner tomorrow at 7pm for 4 people, one is vegetarian.",
-            history);
+            "I have a client dinner tomorrow at 7pm for 4 people, one is vegetarian.");
     applyResult(context, result1);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "I have a client dinner..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result1.reply()));
     printTurn(1, context, result1.reply());
 
     // Turn 2: Add budget and origin
@@ -50,19 +42,13 @@ class ClientDinnerWalkthrough {
         aligner.processMessage(
             context.getUserRequirements(),
             context.getStatus(),
-            "I'm leaving from Union Station. Keep it under 120 CAD per person.",
-            history);
+            "I'm leaving from Union Station. Keep it under 120 CAD per person.");
     applyResult(context, result2);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "I'm leaving from Union Station..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result2.reply()));
     printTurn(2, context, result2.reply());
 
     // Turn 3: Confirm
-    var result3 =
-        aligner.processMessage(context.getUserRequirements(), context.getStatus(), "yes", history);
+    var result3 = aligner.processMessage(context.getUserRequirements(), context.getStatus(), "yes");
     applyResult(context, result3);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "yes"));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result3.reply()));
     printTurn(3, context, result3.reply());
   }
 

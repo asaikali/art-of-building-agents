@@ -1,6 +1,5 @@
 package com.example.jarvis.requirements.alignment;
 
-import com.example.agent.core.chat.AgentMessage;
 import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -44,10 +43,7 @@ public class RequirementsAligner {
    * </ol>
    */
   public Result processMessage(
-      UserRequirements currentRequirements,
-      RequirementStatus currentStatus,
-      String userMessage,
-      List<AgentMessage> conversationHistory) {
+      UserRequirements currentRequirements, RequirementStatus currentStatus, String userMessage) {
 
     // Step 1: Extract — model maps user message into updated requirements
     UserRequirements updated = requirementsExtractor.extract(currentRequirements, userMessage);
@@ -66,12 +62,10 @@ public class RequirementsAligner {
     String reply =
         switch (status) {
           case WAITING_FOR_CLARIFICATION ->
-              replyComposer.composeClarificationReply(
-                  missing.getFirst(), updated, conversationHistory);
+              replyComposer.composeClarificationReply(missing.getFirst(), updated);
           case WAITING_FOR_CONFIRMATION ->
-              replyComposer.composeConfirmationReply(suggestion, updated, conversationHistory);
-          case REQUIREMENTS_CONFIRMED ->
-              replyComposer.composeConfirmedReply(updated, conversationHistory);
+              replyComposer.composeConfirmationReply(suggestion, updated);
+          case REQUIREMENTS_CONFIRMED -> replyComposer.composeConfirmedReply(updated);
         };
 
     return new Result(updated, missing, status, reply);

@@ -2,16 +2,11 @@ package com.example.jarvis.requirements.alignment.scenarios;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.agent.core.chat.AgentMessage;
-import com.example.agent.core.chat.Role;
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.alignment.RequirementStatus;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -39,13 +34,11 @@ class AlignmentVerificationScenario {
   @DisplayName("Initial request, then correction, then confirmation")
   void initialRequestThenCorrectionThenConfirmation() {
     var context = new JarvisAgentContext();
-    var history = new ArrayList<AgentMessage>();
 
     // User provides a detailed initial request with enough info (date, time, party size)
     // for the aligner to move straight to confirmation
     sendMessage(
         context,
-        history,
         """
         I have a client dinner tomorrow at 7 pm for 4 people.
         One guest is vegetarian. I want somewhere quiet.
@@ -55,13 +48,13 @@ class AlignmentVerificationScenario {
 
     // User corrects the meal type and adds budget — the aligner should update
     // the requirements and ask for confirmation again (not confirm automatically)
-    sendMessage(context, history, "Actually make it lunch, not dinner. Budget is 80 per person.");
+    sendMessage(context, "Actually make it lunch, not dinner. Budget is 80 per person.");
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(stateJson(context)).contains("lunch", "80");
 
     // User confirms — the aligner detects that the requirements are unchanged
     // from the previous turn and marks them as confirmed
-    sendMessage(context, history, "yes");
+    sendMessage(context, "yes");
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
@@ -69,35 +62,29 @@ class AlignmentVerificationScenario {
   @DisplayName("Vague start, then clarification, then confirmation")
   void vagueStartThenClarificationThenConfirmation() {
     var context = new JarvisAgentContext();
-    var history = new ArrayList<AgentMessage>();
 
     // User starts with a vague request that lacks required fields (date, time, party size).
     // The aligner should ask for clarification instead of moving to confirmation.
-    sendMessage(context, history, "Help me plan a business meal.");
+    sendMessage(context, "Help me plan a business meal.");
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
 
     // User provides the missing details. The aligner should now have enough
     // information to move to confirmation.
-    sendMessage(
-        context, history, "Team lunch on April 20th at noon for 6 people, one gluten-free.");
+    sendMessage(context, "Team lunch on April 20th at noon for 6 people, one gluten-free.");
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
     assertThat(stateJson(context)).contains("lunch", "6");
 
     // User confirms the requirements
-    sendMessage(context, history, "looks good");
+    sendMessage(context, "looks good");
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
   }
 
-  private void sendMessage(
-      JarvisAgentContext context, List<AgentMessage> history, String userMessage) {
+  private void sendMessage(JarvisAgentContext context, String userMessage) {
     var result =
-        aligner.processMessage(
-            context.getUserRequirements(), context.getStatus(), userMessage, history);
+        aligner.processMessage(context.getUserRequirements(), context.getStatus(), userMessage);
     context.setUserRequirements(result.updatedRequirements());
     context.setMissingInformation(result.missingRequiredFields());
     context.setStatus(result.status());
-    history.add(new AgentMessage(Instant.now(), Role.USER, userMessage));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result.reply()));
   }
 
   private String stateJson(JarvisAgentContext context) {

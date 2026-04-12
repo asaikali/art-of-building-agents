@@ -39,10 +39,7 @@ public class JarvisAgentHandler implements AgentHandler {
     // Run the alignment pipeline: extract → check → directive → reply
     var result =
         requirementsAligner.processMessage(
-            context.getUserRequirements(),
-            context.getStatus(),
-            message.text(),
-            session.getMessages());
+            context.getUserRequirements(), context.getStatus(), message.text());
 
     // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());

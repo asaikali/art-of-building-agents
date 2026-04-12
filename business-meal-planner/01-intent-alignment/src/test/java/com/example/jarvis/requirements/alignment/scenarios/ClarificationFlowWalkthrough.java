@@ -1,12 +1,8 @@
 package com.example.jarvis.requirements.alignment.scenarios;
 
-import com.example.agent.core.chat.AgentMessage;
-import com.example.agent.core.chat.Role;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
-import java.time.Instant;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +28,12 @@ class ClarificationFlowWalkthrough {
   @Test
   void vagueRequestToClarificationToConfirmation() {
     var context = new JarvisAgentContext();
-    var history = new ArrayList<AgentMessage>();
 
     // Turn 1: Vague request — agent should ask for missing details
     var result1 =
         aligner.processMessage(
-            context.getUserRequirements(),
-            context.getStatus(),
-            "Help me plan a business meal.",
-            history);
+            context.getUserRequirements(), context.getStatus(), "Help me plan a business meal.");
     applyResult(context, result1);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "Help me plan a business meal."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result1.reply()));
     printTurn(1, context, result1.reply());
 
     // Turn 2: Provide the details the agent asked about
@@ -54,20 +44,14 @@ class ClarificationFlowWalkthrough {
             """
             It's an internal team lunch on April 20th at noon for 6 people.
             One person is gluten-free. I only want recommendations, no booking.
-            """,
-            history);
+            """);
     applyResult(context, result2);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "It's an internal team lunch..."));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result2.reply()));
     printTurn(2, context, result2.reply());
 
     // Turn 3: Confirm
     var result3 =
-        aligner.processMessage(
-            context.getUserRequirements(), context.getStatus(), "exactly", history);
+        aligner.processMessage(context.getUserRequirements(), context.getStatus(), "exactly");
     applyResult(context, result3);
-    history.add(new AgentMessage(Instant.now(), Role.USER, "exactly"));
-    history.add(new AgentMessage(Instant.now(), Role.ASSISTANT, result3.reply()));
     printTurn(3, context, result3.reply());
   }
 
