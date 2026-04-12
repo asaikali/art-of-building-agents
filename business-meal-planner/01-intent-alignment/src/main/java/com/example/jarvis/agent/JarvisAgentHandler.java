@@ -51,8 +51,19 @@ public class JarvisAgentHandler implements AgentHandler {
 
     // Update inspector state and log the outcome
     session.updateState(
-        JsonUtils.toJson(
-            Map.of("requirements", context.getUserRequirements(), "status", context.getStatus())));
+        """
+        # Agent Context
+
+        ## Requirements
+        ```json
+        %s
+        ```
+
+        ## Status
+        %s
+        """
+            .formatted(
+                JsonUtils.toJson(context.getUserRequirements()), context.getStatus().label()));
     session.logEvent(
         context.getStatus().label(),
         Map.of("missingFieldCount", result.missingRequiredFields().size()));
