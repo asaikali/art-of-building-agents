@@ -24,9 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest;
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 @EnabledIfSystemProperty(named = "jarvis.openai.integration", matches = "true")
-class RequirementsAlignmentLoopIntegrationTest {
+class RequirementsAlignerIntegrationTest {
 
-  @Autowired private RequirementsAlignmentLoop alignmentLoop;
+  @Autowired private RequirementsAligner aligner;
 
   @Test
   void supportsLongBackAndForthTranscriptAgainstConfiguredModel() {
@@ -106,8 +106,7 @@ class RequirementsAlignmentLoopIntegrationTest {
     private final List<AgentMessage> conversationHistory = new ArrayList<>();
 
     private TranscriptTurn user(String text) {
-      RequirementsAlignmentLoop.TurnResult result =
-          alignmentLoop.handleTurn(state, text, conversationHistory);
+      RequirementsAligner.Result result = aligner.processMessage(state, text, conversationHistory);
       conversationHistory.add(new AgentMessage(java.time.Instant.now(), Role.USER, text));
       conversationHistory.add(
           new AgentMessage(java.time.Instant.now(), Role.ASSISTANT, result.assistantReply()));
@@ -117,9 +116,9 @@ class RequirementsAlignmentLoopIntegrationTest {
 
   private final class TranscriptTurn {
 
-    private final RequirementsAlignmentLoop.TurnResult result;
+    private final RequirementsAligner.Result result;
 
-    private TranscriptTurn(RequirementsAlignmentLoop.TurnResult result) {
+    private TranscriptTurn(RequirementsAligner.Result result) {
       this.result = result;
     }
 

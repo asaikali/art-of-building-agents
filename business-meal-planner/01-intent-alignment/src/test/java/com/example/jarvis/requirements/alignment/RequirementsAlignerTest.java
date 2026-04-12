@@ -18,18 +18,18 @@ import java.util.Queue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class RequirementsAlignmentLoopTest {
+class RequirementsAlignerTest {
 
   private FakeRequirementsExtractor requirementsExtractor;
   private FakeRequirementsReplyWriter replyWriter;
-  private RequirementsAlignmentLoop alignmentLoop;
+  private RequirementsAligner aligner;
 
   @BeforeEach
   void setUp() {
     requirementsExtractor = new FakeRequirementsExtractor();
     replyWriter = new FakeRequirementsReplyWriter();
-    alignmentLoop =
-        new RequirementsAlignmentLoop(
+    aligner =
+        new RequirementsAligner(
             requirementsExtractor, new RequirementsCompletionPolicy(), replyWriter);
   }
 
@@ -46,8 +46,8 @@ class RequirementsAlignmentLoopTest {
                 "Client dinner"),
             List.of(attendee("Alex", "100 King St W"))));
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "Client dinner tomorrow at 7 for 4 people.", List.of());
+    RequirementsAligner.Result result =
+        aligner.processMessage(context, "Client dinner tomorrow at 7 for 4 people.", List.of());
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
@@ -62,8 +62,8 @@ class RequirementsAlignmentLoopTest {
     requirementsExtractor.enqueue(
         requirements(meal(null, null, null, null, "Business meal"), List.of()));
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "Help me plan something.", List.of());
+    RequirementsAligner.Result result =
+        aligner.processMessage(context, "Help me plan something.", List.of());
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
@@ -77,8 +77,7 @@ class RequirementsAlignmentLoopTest {
     // Extractor sees "hello" against empty state and returns empty state unchanged
     requirementsExtractor.enqueue(new UserRequirements());
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "hello", List.of());
+    RequirementsAligner.Result result = aligner.processMessage(context, "hello", List.of());
 
     assertThat(result.eventName()).isEqualTo("clarification-requested");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CLARIFICATION);
@@ -98,7 +97,7 @@ class RequirementsAlignmentLoopTest {
                 MealType.DINNER,
                 "Business dinner"),
             List.of()));
-    alignmentLoop.handleTurn(context, "Business dinner tomorrow at 7 for 4 people.", List.of());
+    aligner.processMessage(context, "Business dinner tomorrow at 7 for 4 people.", List.of());
 
     // Second turn: correction to lunch
     requirementsExtractor.enqueue(
@@ -111,8 +110,8 @@ class RequirementsAlignmentLoopTest {
                 "Business lunch"),
             List.of(attendee("Alex", "Union Station"))));
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "Not dinner, it's lunch tomorrow.", List.of());
+    RequirementsAligner.Result result =
+        aligner.processMessage(context, "Not dinner, it's lunch tomorrow.", List.of());
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
     assertThat(result.state().getUserRequirements().getMeal().getMealType())
@@ -136,7 +135,7 @@ class RequirementsAlignmentLoopTest {
 
     // First turn: set up complete requirements and WAITING_FOR_CONFIRMATION status
     requirementsExtractor.enqueue(completeRequirements);
-    alignmentLoop.handleTurn(context, "Client dinner tomorrow at 7 for 4.", List.of());
+    aligner.processMessage(context, "Client dinner tomorrow at 7 for 4.", List.of());
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
     // Second turn: user says "yes" — extractor returns identical requirements
@@ -150,8 +149,7 @@ class RequirementsAlignmentLoopTest {
                 "Client dinner"),
             List.of()));
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "yes", List.of());
+    RequirementsAligner.Result result = aligner.processMessage(context, "yes", List.of());
 
     assertThat(result.eventName()).isEqualTo("requirements-confirmed");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.REQUIREMENTS_CONFIRMED);
@@ -170,7 +168,7 @@ class RequirementsAlignmentLoopTest {
                 MealType.DINNER,
                 "Client dinner"),
             List.of()));
-    alignmentLoop.handleTurn(context, "Client dinner tomorrow at 7 for 4.", List.of());
+    aligner.processMessage(context, "Client dinner tomorrow at 7 for 4.", List.of());
     assertThat(context.getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
 
     // Second turn: "yes but change to lunch" — extractor returns different requirements
@@ -179,8 +177,8 @@ class RequirementsAlignmentLoopTest {
             meal(LocalDate.of(2026, 4, 13), LocalTime.of(12, 0), 4, MealType.LUNCH, "Client lunch"),
             List.of()));
 
-    RequirementsAlignmentLoop.TurnResult result =
-        alignmentLoop.handleTurn(context, "yes but make it lunch", List.of());
+    RequirementsAligner.Result result =
+        aligner.processMessage(context, "yes but make it lunch", List.of());
 
     assertThat(result.eventName()).isEqualTo("plan-updated");
     assertThat(result.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);

@@ -7,13 +7,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RequirementsAlignmentLoop {
+public class RequirementsAligner {
 
   private final RequirementsExtractor requirementsExtractor;
   private final RequirementsCompletionPolicy requirementsCompletionPolicy;
   private final RequirementsReplyWriter requirementsReplyWriter;
 
-  public RequirementsAlignmentLoop(
+  public RequirementsAligner(
       RequirementsExtractor requirementsExtractor,
       RequirementsCompletionPolicy requirementsCompletionPolicy,
       RequirementsReplyWriter requirementsReplyWriter) {
@@ -22,7 +22,7 @@ public class RequirementsAlignmentLoop {
     this.requirementsReplyWriter = requirementsReplyWriter;
   }
 
-  public TurnResult handleTurn(
+  public Result processMessage(
       JarvisAgentContext context, String userMessage, List<AgentMessage> conversationHistory) {
 
     // Step 1: Extract — model maps user message into updated requirements
@@ -50,7 +50,7 @@ public class RequirementsAlignmentLoop {
     context.setMissingInformation(check.missingCriticalFields());
     context.setStatus(check.status());
 
-    return new TurnResult(context, reply, chooseEventName(check.status()));
+    return new Result(context, reply, chooseEventName(check.status()));
   }
 
   private String chooseEventName(RequirementStatus status) {
@@ -61,5 +61,5 @@ public class RequirementsAlignmentLoop {
     };
   }
 
-  public record TurnResult(JarvisAgentContext state, String assistantReply, String eventName) {}
+  public record Result(JarvisAgentContext state, String assistantReply, String eventName) {}
 }
