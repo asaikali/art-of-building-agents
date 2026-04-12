@@ -1,4 +1,4 @@
-package com.example.jarvis.constraints.llmjudge.businessmeal;
+package com.example.jarvis.constraints.llmjudge.suitability;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,9 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
     classes = ConstraintCheckingApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Tag("integration")
-class BusinessMealSuitabilityCheckIntegrationTest {
+class MealSuitabilityCheckIntegrationTest {
 
-  @Autowired private BusinessMealSuitabilityCheck check;
+  @Autowired private MealSuitabilityCheck check;
 
   @Test
   @DisplayName("Returns PASS or UNSURE for a polished client dinner venue")
@@ -33,8 +33,7 @@ class BusinessMealSuitabilityCheckIntegrationTest {
 
     var result = check.check(meal, "canoe");
 
-    assertThat(result.status())
-        .isIn(BusinessMealSuitabilityStatus.PASS, BusinessMealSuitabilityStatus.UNSURE);
+    assertThat(result.status()).isIn(MealSuitabilityStatus.PASS, MealSuitabilityStatus.UNSURE);
   }
 
   @Test
@@ -48,8 +47,7 @@ class BusinessMealSuitabilityCheckIntegrationTest {
 
     var result = check.check(meal, "baro");
 
-    assertThat(result.status())
-        .isIn(BusinessMealSuitabilityStatus.FAIL, BusinessMealSuitabilityStatus.UNSURE);
+    assertThat(result.status()).isIn(MealSuitabilityStatus.FAIL, MealSuitabilityStatus.UNSURE);
   }
 
   @Test

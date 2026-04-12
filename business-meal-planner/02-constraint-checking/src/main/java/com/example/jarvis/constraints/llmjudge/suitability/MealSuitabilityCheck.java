@@ -1,4 +1,4 @@
-package com.example.jarvis.constraints.llmjudge.businessmeal;
+package com.example.jarvis.constraints.llmjudge.suitability;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.Meal;
@@ -7,18 +7,18 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BusinessMealSuitabilityCheck {
+public class MealSuitabilityCheck {
 
   private final RestaurantService restaurantService;
   private final ChatClient chatClient;
 
-  public BusinessMealSuitabilityCheck(
+  public MealSuitabilityCheck(
       RestaurantService restaurantService, ChatClient.Builder chatClientBuilder) {
     this.restaurantService = restaurantService;
     this.chatClient = chatClientBuilder.build();
   }
 
-  public BusinessMealSuitabilityResult check(Meal meal, String restaurantId) {
+  public MealSuitabilityResult check(Meal meal, String restaurantId) {
     if (restaurantId == null || restaurantId.isBlank()) {
       throw new IllegalArgumentException("restaurantId must be provided");
     }
@@ -76,7 +76,7 @@ public class BusinessMealSuitabilityCheck {
                     .param("mealContext", JsonUtils.toJson(mealContext))
                     .param("restaurantContext", JsonUtils.toJson(restaurantContext)))
         .call()
-        .entity(BusinessMealSuitabilityResult.class);
+        .entity(MealSuitabilityResult.class);
   }
 
   private record MealContext(
