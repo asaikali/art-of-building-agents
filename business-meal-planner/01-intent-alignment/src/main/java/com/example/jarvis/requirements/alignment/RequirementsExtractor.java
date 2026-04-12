@@ -9,8 +9,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 /**
- * Extracts structured {@link UserRequirements} from a user message using the model. This is step 1
- * of the alignment pipeline in {@link RequirementsAligner}.
+ * Extracts structured {@link UserRequirements} from a user message using the model. Used by {@link
+ * RequirementsAligner} in the extract step of the alignment pipeline.
  *
  * <p>Each call takes the current requirements and a new user message, and returns an updated {@link
  * UserRequirements} with the new information merged in. The model preserves existing data unless
@@ -21,10 +21,10 @@ public class RequirementsExtractor {
 
   private static final Logger log = LoggerFactory.getLogger(RequirementsExtractor.class);
 
-  private final ChatClient extractionClient;
+  private final ChatClient chatClient;
 
   public RequirementsExtractor(ChatClient.Builder chatClientBuilder) {
-    this.extractionClient =
+    this.chatClient =
         chatClientBuilder
             .defaultSystem(
                 """
@@ -64,7 +64,7 @@ public class RequirementsExtractor {
         userMessage.trim());
 
     UserRequirements result =
-        extractionClient
+        chatClient
             .prompt()
             .user(
                 u ->

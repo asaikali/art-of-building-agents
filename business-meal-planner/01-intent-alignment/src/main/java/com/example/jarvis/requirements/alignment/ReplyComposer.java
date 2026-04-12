@@ -8,8 +8,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 /**
- * Composes natural-language replies using the model. This is step 4 of the alignment pipeline in
- * {@link RequirementsAligner}.
+ * Composes natural-language replies using the model. Used by {@link RequirementsAligner} in the
+ * compose reply step of the alignment pipeline.
  *
  * <p>The aligner decides which kind of reply is needed based on the {@link AlignmentStatus}, then
  * calls the corresponding method here:

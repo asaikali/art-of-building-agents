@@ -62,7 +62,7 @@ class GatheringFlowWalkthrough {
 
   private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
     context.setUserRequirements(result.updatedRequirements());
-    context.setAlignmentStatus(result.status());
+    context.setAlignmentStatus(result.updatedStatus());
   }
 
   private void printTurn(int turn, JarvisAgentContext context, RequirementsAligner.Result result) {

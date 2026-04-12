@@ -43,7 +43,7 @@ public class RequirementsAligner {
   public record Result(
       UserRequirements updatedRequirements,
       List<String> missingRequiredFields,
-      AlignmentStatus status,
+      AlignmentStatus updatedStatus,
       String reply) {}
 
   /**
@@ -102,8 +102,10 @@ public class RequirementsAligner {
   }
 
   private String composeReply(
-      AlignmentStatus status, List<String> missingFields, UserRequirements updatedRequirements) {
-    return switch (status) {
+      AlignmentStatus updatedStatus,
+      List<String> missingFields,
+      UserRequirements updatedRequirements) {
+    return switch (updatedStatus) {
       case GATHERING_REQUIREMENTS ->
           composer.askForMissingField(missingFields.getFirst(), updatedRequirements);
       case CONFIRMING_REQUIREMENTS -> {

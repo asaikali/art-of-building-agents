@@ -11,8 +11,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 /**
- * Assesses {@link UserRequirements} against hard and soft criteria. This is step 2 of the alignment
- * pipeline in {@link RequirementsAligner}.
+ * Assesses {@link UserRequirements} against hard and soft criteria. Used by {@link
+ * RequirementsAligner} in the determine status and compose reply steps of the alignment pipeline.
  *
  * <p>Hard criteria ({@link #findMissingRequiredFields}) are checked deterministically — date, time,
  * and party size must be present before the workflow can move to confirming. Soft criteria ({@link
@@ -27,6 +27,8 @@ public class RequirementsAssessor {
   private final ChatClient chatClient;
 
   public RequirementsAssessor(ChatClient.Builder chatClientBuilder) {
+    // TODO: null check exists so RequirementsAssessorTest can test findMissingRequiredFields
+    // without a model. We'll clean this up when we revisit testability.
     this.chatClient = chatClientBuilder == null ? null : chatClientBuilder.build();
   }
 

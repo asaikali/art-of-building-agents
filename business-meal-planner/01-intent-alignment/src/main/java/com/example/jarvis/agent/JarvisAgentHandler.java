@@ -53,11 +53,11 @@ public class JarvisAgentHandler implements AgentHandler {
 
     // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());
-    context.setAlignmentStatus(result.status());
+    context.setAlignmentStatus(result.updatedStatus());
 
     log.info(
         "done | status={} | missingFields={}",
-        result.status().label(),
+        result.updatedStatus().label(),
         result.missingRequiredFields().size());
 
     // Send the reply

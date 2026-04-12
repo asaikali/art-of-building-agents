@@ -84,7 +84,7 @@ class AlignmentVerificationScenario {
         aligner.processMessage(
             context.getUserRequirements(), context.getAlignmentStatus(), userMessage);
     context.setUserRequirements(result.updatedRequirements());
-    context.setAlignmentStatus(result.status());
+    context.setAlignmentStatus(result.updatedStatus());
   }
 
   private String stateJson(JarvisAgentContext context) {
