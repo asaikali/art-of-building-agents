@@ -149,7 +149,7 @@ constraints before any restaurant search or booking happens.
 
 ### Output
 
-Phase 1 uses a Markdown string as the inspector artifact, but the underlying captured input is now
+Phase 1 uses a Markdown string as the inspector artifact, but the underlying captured input is
 structured as:
 
 - `UserRequirements`
@@ -160,24 +160,22 @@ Phase 1 workflow state is kept separately in agent context:
 
 - `JarvisAgentContext`
   - `UserRequirements`
-  - `missingInformation`
   - `AlignmentStatus`
 
-The Markdown must contain these sections:
+The inspector state is rendered as a Markdown string with two sections:
 
 ```md
-## Meal
-## Additional Requirements
-## Cuisine Preferences
-## Attendees
-## Missing Information
+## Requirements
+(JSON representation of UserRequirements)
+
 ## Status
+(AlignmentStatus label)
 ```
 
-The `Status` section must end with one of:
+The `Status` section shows one of:
 
-- `Waiting for confirmation`
-- `Waiting for clarification`
+- `Gathering requirements`
+- `Confirming requirements`
 - `Requirements confirmed`
 
 This phase should not store inferred defaults, assumptions, validation output, or search/planning
@@ -240,7 +238,7 @@ Current code behavior in `01-intent-alignment` treats these as the required comp
 - party size
 
 The current code does **not** require origin address before Phase 1 can move to
-`Waiting for confirmation`.
+`Confirming requirements`.
 
 The written product intent above still says Phase 1 search-ready requirements should include:
 
@@ -255,24 +253,25 @@ with the user first.
 
 ### Alignment Pipeline
 
-Each user message runs through a four-step pipeline orchestrated by `RequirementsAligner`:
+Each user message runs through a three-step pipeline orchestrated by `RequirementsAligner`:
 
 1. **Extract** — `RequirementsExtractor` uses the model to merge the user message into the
    current `UserRequirements`. The model preserves existing data unless the user explicitly
    corrects it, so requirements accumulate over multiple turns.
-2. **Assess** — `RequirementsAssessor` checks hard gates deterministically (date, time, party
-   size) and uses the model to suggest one optional follow-up question.
-3. **Status** — The aligner decides the `AlignmentStatus` based on whether required fields
-   are present and whether the user confirmed (detected by equality of requirements before
-   and after extraction).
-4. **Reply** — `ReplyComposer` uses the model to write a natural response. The aligner picks
-   which composer method to call based on the status: `askForMissingField`,
-   `askForConfirmation`, or `acknowledgeConfirmation`.
+2. **Determine status** — `RequirementsAssessor.findMissingRequiredFields` checks hard gates
+   deterministically (date, time, party size). The aligner then decides the `AlignmentStatus`
+   based on whether required fields are present and whether the user confirmed (detected by
+   equality of requirements before and after extraction).
+3. **Compose reply** — `ReplyComposer` uses the model to write a natural response. The aligner
+   picks which composer method to call based on the status: `askForMissingField`,
+   `askForConfirmation`, or `acknowledgeConfirmation`. `RequirementsAssessor.suggestFollowUp`
+   is called only when the status is `CONFIRMING_REQUIREMENTS`, to avoid a wasted model call
+   during gathering.
 
 ### Confirmation Behavior
 
 Confirmation is detected by comparing the `UserRequirements` before and after extraction. If
-the status was `WAITING_FOR_CONFIRMATION` and the extractor returns identical requirements
+the status was `CONFIRMING_REQUIREMENTS` and the extractor returns identical requirements
 (the user said "yes" or "looks good" without changing anything), the aligner marks the
 requirements as confirmed.
 
@@ -307,9 +306,9 @@ See `Open Product Decision: Origin As A Required Phase 1 Field`.
 
 These are requirement-completeness checks, not restaurant-candidate validators.
 
-### Near-Term Implementation Plan
+### Implementation Conventions
 
-The current implementation direction should follow these conventions:
+The current implementation follows these conventions:
 
 1. `agent-core` owns shared session runtime concerns: chat, events, rendered state, and a
    session-backed `AgentContext`.
@@ -322,34 +321,39 @@ The current implementation direction should follow these conventions:
 6. Phase 1 should keep the captured requirements model separate from workflow status and other
    agent-runtime concerns.
 
-### Example Phase 1 Output
+### Example Phase 1 Inspector State
 
 ```md
-## Meal
-- Date: 2026-04-11
-- Time: 18:00
-- Party Size: 4
-- Meal Type: dinner
-- Purpose: Client dinner
-- Budget Per Person: 120
-- Noise Level: quiet
+# Agent Context
 
-## Additional Requirements
-- Professional setting
-
-## Cuisine Preferences
-- Italian
-
-## Attendees
-- Name: Alex | Origin: Union Station | Departure Time: 17:30 | Travel Mode: transit | Max Travel Time: Missing | Max Distance: Missing | Dietary Constraints: vegetarian
-
-## Missing Information
-- Date
-- Time
-- Party Size
+## Requirements
+​```json
+{
+  "meal": {
+    "date": "2026-04-11",
+    "time": "18:00:00",
+    "partySize": 4,
+    "mealType": "DINNER",
+    "purpose": "Client dinner",
+    "budgetPerPerson": 120,
+    "noiseLevel": "QUIET",
+    "additionalRequirements": ["Professional setting"],
+    "cuisinePreferences": ["Italian"]
+  },
+  "attendees": [
+    {
+      "name": "Alex",
+      "origin": "Union Station",
+      "departureTime": "17:30:00",
+      "travelMode": "TRANSIT",
+      "dietaryConstraints": ["VEGETARIAN"]
+    }
+  ]
+}
+​```
 
 ## Status
-Waiting for confirmation
+Confirming requirements
 ```
 
 ## Phase 2: Constraint Checking
