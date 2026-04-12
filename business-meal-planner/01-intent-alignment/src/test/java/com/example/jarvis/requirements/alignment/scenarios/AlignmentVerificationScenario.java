@@ -4,11 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.chat.Role;
+import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.IntentAlignmentApplication;
 import com.example.jarvis.agent.JarvisAgentContext;
-import com.example.jarvis.requirements.Attendee;
-import com.example.jarvis.requirements.Meal;
-import com.example.jarvis.requirements.UserRequirements;
 import com.example.jarvis.requirements.alignment.RequirementStatus;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
 import java.time.Instant;
@@ -51,13 +49,13 @@ class AlignmentVerificationScenario {
             One guest is vegetarian. I want somewhere quiet.
             """);
     assertThat(turn1.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(flattenedState(turn1)).contains("dinner", "vegetarian");
+    assertThat(stateJson(turn1)).contains("dinner", "vegetarian");
 
     // Turn 2: Correction — change to lunch, add budget
     var turn2 =
         process(context, history, "Actually make it lunch, not dinner. Budget is 80 per person.");
     assertThat(turn2.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(flattenedState(turn2)).contains("lunch", "80");
+    assertThat(stateJson(turn2)).contains("lunch", "80");
 
     // Turn 3: Confirm
     var turn3 = process(context, history, "yes");
@@ -78,7 +76,7 @@ class AlignmentVerificationScenario {
         process(
             context, history, "Team lunch on April 20th at noon for 6 people, one gluten-free.");
     assertThat(turn2.state().getStatus()).isEqualTo(RequirementStatus.WAITING_FOR_CONFIRMATION);
-    assertThat(flattenedState(turn2)).contains("lunch", "6");
+    assertThat(stateJson(turn2)).contains("lunch", "6");
 
     // Turn 3: Confirm
     var turn3 = process(context, history, "looks good");
@@ -93,36 +91,7 @@ class AlignmentVerificationScenario {
     return result;
   }
 
-  private String flattenedState(RequirementsAligner.Result result) {
-    JarvisAgentContext state = result.state();
-    UserRequirements req = state.getUserRequirements();
-    Meal meal = req.getMeal();
-    String attendees =
-        req.getAttendees().stream()
-            .map(this::flattenAttendee)
-            .collect(java.util.stream.Collectors.joining("\n"));
-    return String.join(
-            "\n",
-            String.valueOf(meal.getDate()),
-            String.valueOf(meal.getTime()),
-            String.valueOf(meal.getPartySize()),
-            String.valueOf(meal.getMealType()),
-            String.valueOf(meal.getPurpose()),
-            String.valueOf(meal.getBudgetPerPerson()),
-            String.valueOf(meal.getNoiseLevel()),
-            String.join("\n", meal.getAdditionalRequirements()),
-            String.join("\n", meal.getCuisinePreferences()),
-            attendees)
-        .toLowerCase(Locale.ROOT);
-  }
-
-  private String flattenAttendee(Attendee attendee) {
-    return String.join(
-        "\n",
-        String.valueOf(attendee.getName()),
-        String.valueOf(attendee.getOrigin()),
-        attendee.getDietaryConstraints().stream()
-            .map(Enum::name)
-            .collect(java.util.stream.Collectors.joining("\n")));
+  private String stateJson(RequirementsAligner.Result result) {
+    return JsonUtils.toJson(result.state().getUserRequirements()).toLowerCase(Locale.ROOT);
   }
 }
