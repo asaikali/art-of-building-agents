@@ -18,6 +18,5 @@
     <module>02-constraint-checking</module>
     <module>03-restaurant-planning</module>
     <module>04-decision-support</module>
-    <module>05-booking</module>
   </modules>
 </project>
