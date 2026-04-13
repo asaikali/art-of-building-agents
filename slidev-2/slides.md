@@ -458,26 +458,26 @@ layout: default
 
 # What is Journal.run()?
 
-<div class="grid grid-cols-2 gap-6 mt-6">
+<div class="grid grid-cols-2 gap-8 mt-8">
 
-<div class="p-5 rounded-lg" style="background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);">
-<div class="text-xl font-bold" style="color: #f59e0b;">W&B analogy</div>
-<div class="mt-3 text-base opacity-80">
+<div class="p-8 rounded-lg" style="background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);">
+<div class="text-2xl font-bold" style="color: #f59e0b;">W&B analogy</div>
+<div class="mt-4 text-lg leading-relaxed opacity-80">
 
 `Journal.run()` is like **`wandb.init()`** — it opens a recording scope for an experiment run
 
 </div>
-<div class="text-sm opacity-60 mt-2">Everything inside the scope is recorded. When it closes, the run is finalized.</div>
+<div class="text-base opacity-60 mt-4">Everything inside the scope is recorded. When it closes, the run is finalized.</div>
 </div>
 
-<div class="p-5 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
-<div class="text-xl font-bold" style="color: #3b82f6;">Java analogy</div>
-<div class="mt-3 text-base opacity-80">
+<div class="p-8 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
+<div class="text-2xl font-bold" style="color: #3b82f6;">Java analogy</div>
+<div class="mt-4 text-lg leading-relaxed opacity-80">
 
 Think **transaction scope** — same pattern as `try (Connection conn = ds.getConnection())`
 
 </div>
-<div class="text-sm opacity-60 mt-2">The Run is AutoCloseable — try-with-resources guarantees clean boundaries.</div>
+<div class="text-base opacity-60 mt-4">The Run is AutoCloseable — try-with-resources guarantees clean boundaries.</div>
 </div>
 
 </div>
@@ -513,9 +513,9 @@ layout: default
 
 # Journal — JournalHandler
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/05-journal/.../JournalHandler.java` — configure + create run + wire listener
+`agents/05-journal/.../JournalHandler.java`
 
 </div>
 
@@ -584,9 +584,9 @@ layout: default
 
 # Journal — JournalLoopListener
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/05-journal/.../JournalLoopListener.java` — bridges advisor events to journal
+`agents/05-journal/.../JournalLoopListener.java`
 
 </div>
 
@@ -657,7 +657,7 @@ layout: default
 
 # Journal — Architecture
 
-<div class="mt-8 text-center font-mono text-sm">
+<div class="mt-8 text-center font-mono text-xs">
 
 ```
 User: "Find a restaurant in Eixample for 4, under €50"
@@ -667,12 +667,12 @@ JournalHandler.onMessage()
   ├─ AgentLoopAdvisor
   │   └─ JournalLoopListener(run)
   │       ├─ onLoopStarted()
-  │       ├─ onTurnStarted()         ← Turn 1: searchRestaurants
-  │       ├─ onTurnCompleted()       ← Turn 2: checkExpensePolicy
-  │       ├─ onTurnStarted()         ← Turn 3: checkDietaryOptions
-  │       └─ onLoopCompleted()       ← 3 turns, 847 tokens, $0.02
+  │       ├─ onTurnStarted()       ← Turn 1: searchRestaurants
+  │       ├─ onTurnCompleted()     ← Turn 2: checkExpensePolicy
+  │       ├─ onTurnStarted()       ← Turn 3: checkDietaryOptions
+  │       └─ onLoopCompleted()     ← 3 turns, 847 tokens, $0.02
   ↓
-.agent-journal/experiments/jarvis-restaurant-agent/runs/<run-id>/events.jsonl
+.agent-journal/.../jarvis-restaurant-agent/runs/<id>/events.jsonl
 ```
 
 </div>
@@ -811,9 +811,9 @@ layout: default
 
 # Workflow — Step 1: gather-context
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/13-workflow/.../DinnerPlanningWorkflow.java` — deterministic filtering
+`agents/13-workflow/.../DinnerPlanningWorkflow.java`
 
 </div>
 
@@ -871,9 +871,9 @@ layout: default
 
 # Workflow — Step 2: recommend
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/13-workflow/.../DinnerPlanningWorkflow.java` — LLM picks from filtered set
+`agents/13-workflow/.../DinnerPlanningWorkflow.java`
 
 </div>
 
@@ -939,9 +939,9 @@ layout: default
 
 # Workflow — Step 3: validate
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/13-workflow/.../DinnerPlanningWorkflow.java` — catches hallucinations + constraint violations
+`agents/13-workflow/.../DinnerPlanningWorkflow.java`
 
 </div>
 
@@ -1289,13 +1289,13 @@ layout: default
 
 # ExpensePolicyJudge — T0 Deterministic
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
 `agents/14-judge/.../ExpensePolicyJudge.java`
 
 </div>
 
-<div class="code-small">
+<div class="code-xs">
 
 ```java {1-7|9-29|31-49}
 public class ExpensePolicyJudge extends DeterministicJudge {
@@ -1367,13 +1367,13 @@ layout: default
 
 # RecommendationQualityJudge — T2 LLM
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/14-judge/.../RecommendationQualityJudge.java` — only fires if T0+T1 pass
+`agents/14-judge/.../RecommendationQualityJudge.java`
 
 </div>
 
-<div class="code-small">
+<div class="code-xs">
 
 ```java {1-6|8-29|31-44}
 public class RecommendationQualityJudge extends LLMJudge {
@@ -1440,9 +1440,9 @@ layout: default
 
 # Wiring the Cascade — JudgeHandler
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/14-judge/.../JudgeHandler.java` — three tiers, three policies
+`agents/14-judge/.../JudgeHandler.java`
 
 </div>
 
@@ -1495,9 +1495,9 @@ layout: default
 
 # Verdict in the Inspector
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`JudgeHandler.buildState()` — renders the verdict as Markdown in the state panel
+`JudgeHandler.buildState()`
 
 </div>
 
@@ -1521,9 +1521,23 @@ if (verdict != null) {
 
 </div>
 
-<v-click>
+<!--
+SPEAKER (≈20s):
+[CLICK: header + table setup]
+"The verdict renders as a Markdown table in the Inspector."
+[CLICK: iteration loop]
+"Every judge, its status, its reasoning. You see exactly what passed, what failed, and why."
+-->
 
-<div class="mt-4 p-4 rounded-lg font-mono text-sm" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
+---
+layout: default
+---
+
+# Verdict — Example Output
+
+<div class="mt-6 text-lg opacity-70 mb-4">What the Inspector shows after Jarvis recommends Cervecería Catalana:</div>
+
+<div class="p-6 rounded-lg font-mono" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
 
 | Judge | Status | Reasoning |
 |-------|--------|-----------|
@@ -1533,14 +1547,18 @@ if (verdict != null) {
 
 </div>
 
+<v-click>
+
+<div class="mt-6 p-3 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6;">
+<div class="text-lg">You see exactly what passed, what failed, and why — <strong>without reading the agent output yourself.</strong></div>
+</div>
+
 </v-click>
 
 <!--
-SPEAKER (≈20s):
-[CLICK: header + table setup]
-"The verdict renders as a Markdown table in the Inspector."
-[CLICK: iteration loop]
-"Every judge, its status, its reasoning. You see exactly what passed, what failed, and why — without reading the agent output yourself."
+SPEAKER (≈15s):
+"Here's what the Inspector shows. Three judges, three passes. ExpensePolicy checks price, DietaryCompliance checks vegetarian options, RecommendationQuality — the LLM judge — confirms the reasoning is solid."
+[CLICK] "You see exactly what passed, what failed, and why — without reading the output."
 -->
 
 ---
@@ -1580,7 +1598,7 @@ layout: default
 
 # ToolCallTracker — Recording the Sequence
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
 `agents/15-diagnose/.../ToolCallTracker.java` + `RestaurantTools.java`
 
@@ -1730,7 +1748,7 @@ layout: default
 
 # TrajectoryClassifier — Semantic States
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
 `agents/15-diagnose/.../TrajectoryClassifier.java`
 
@@ -1796,7 +1814,7 @@ layout: default
 
 # Loop Detection + Efficiency
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
 `TrajectoryClassifier.classify()` — continued
 
@@ -1916,9 +1934,9 @@ layout: default
 
 # DiagnoseHandler — Three Signals in One
 
-<div class="mt-2 text-sm opacity-60">
+<div class="mt-1 text-xs opacity-60">
 
-`agents/15-diagnose/.../DiagnoseHandler.java` — journal + trajectory + verdict
+`agents/15-diagnose/.../DiagnoseHandler.java`
 
 </div>
 

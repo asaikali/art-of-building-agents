@@ -56,9 +56,45 @@ strong {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Tighter slide padding for code-heavy deck */
+.slidev-layout {
+  padding: 24px 40px !important;
+}
+
 /* Small code blocks for space-constrained slides */
-.code-small .slidev-code {
-  font-size: 0.78rem !important;
+.code-small .slidev-code,
+.code-small .slidev-code pre,
+.code-small .slidev-code code,
+.code-small .slidev-code .line,
+.code-small .shiki,
+.code-small .shiki .line {
+  font-size: 0.55rem !important;
+  line-height: 1.2 !important;
+}
+
+.code-small .slidev-code pre,
+.code-small .shiki {
+  padding: 0.4rem 0.6rem !important;
+}
+
+/* Extra-small code for very long blocks (40+ lines) */
+.code-xs .slidev-code,
+.code-xs .slidev-code pre,
+.code-xs .slidev-code code,
+.code-xs .slidev-code .line,
+.code-xs .shiki,
+.code-xs .shiki .line {
+  font-size: 0.45rem !important;
+  line-height: 1.15 !important;
+}
+
+.code-xs .slidev-code pre,
+.code-xs .shiki {
+  padding: 0.3rem 0.5rem !important;
+}
+
+.code-xs .slidev-code {
+  border-width: 2px;
 }
 
 /* Inline code */
