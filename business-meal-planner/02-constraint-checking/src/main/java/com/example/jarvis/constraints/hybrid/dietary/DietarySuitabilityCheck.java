@@ -2,8 +2,12 @@ package com.example.jarvis.constraints.hybrid.dietary;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.DietaryConstraint;
+import com.example.restaurant.MenuSection;
 import com.example.restaurant.MenuService;
+import com.example.restaurant.RestaurantMenu;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -44,15 +48,21 @@ public class DietarySuitabilityCheck {
           DietarySuitabilityStatus.UNSURE, "No menu data is available for this restaurant.");
     }
 
+    var mainCourseSections = filterToMainCourses(menu.get());
+    if (mainCourseSections.isEmpty()) {
+      return new DietarySuitabilityResult(
+          DietarySuitabilityStatus.UNSURE,
+          "No main course sections found in the menu to evaluate.");
+    }
+
     return chatClient
         .prompt()
         .system(
             """
-            You are judging whether a restaurant menu appears suitable for a group's dietary needs.
+            You are judging whether a restaurant's main courses appear suitable for a
+            group's dietary needs.
 
             Rules:
-            - Focus on whether the menu offers substantive main courses that satisfy
-              the dietary constraints. Appetizers, sides, and desserts alone are not enough.
             - Judge the restaurant overall, not each item individually.
             - Use only the dietary constraints and menu evidence provided.
             - Do not invent menu items or dietary accommodations.
@@ -67,13 +77,41 @@ public class DietarySuitabilityCheck {
                     {dietaryConstraints}
                     </dietaryConstraints>
 
-                    <menuJson>
-                    {menuJson}
-                    </menuJson>
+                    <mainCourseMenu>
+                    {mainCourseMenu}
+                    </mainCourseMenu>
                     """)
                     .param("dietaryConstraints", JsonUtils.toJson(normalizedConstraints))
-                    .param("menuJson", JsonUtils.toJson(menu.get())))
+                    .param("mainCourseMenu", JsonUtils.toJson(mainCourseSections)))
         .call()
         .entity(DietarySuitabilityResult.class);
+  }
+
+  private static final Set<String> NON_MAIN_KEYWORDS =
+      Set.of(
+          "appetizer",
+          "starter",
+          "dessert",
+          "side",
+          "snack",
+          "drink",
+          "beverage",
+          "cocktail",
+          "wine",
+          "beer",
+          "sauce",
+          "add-on",
+          "enhancement",
+          "spread");
+
+  private List<MenuSection> filterToMainCourses(RestaurantMenu menu) {
+    return menu.menuSections().stream()
+        .filter(section -> !isNonMainSection(section.name()))
+        .toList();
+  }
+
+  private boolean isNonMainSection(String sectionName) {
+    var lower = sectionName.toLowerCase(Locale.ROOT);
+    return NON_MAIN_KEYWORDS.stream().anyMatch(lower::contains);
   }
 }
