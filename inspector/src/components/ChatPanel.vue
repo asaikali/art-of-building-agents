@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
+import MarkdownIt from 'markdown-it'
+import DOMPurify from 'dompurify'
 import { useChat } from '@/composables/useChat'
+
+const md = new MarkdownIt({ html: false })
 
 const props = defineProps<{
   sessionId: string
@@ -62,6 +66,10 @@ function scrollToBottom() {
 
 watch(messages, scrollToBottom)
 watch(waiting, scrollToBottom)
+
+function renderMarkdown(text: string): string {
+  return DOMPurify.sanitize(md.render(text))
+}
 
 function formatTime(ts: string): string {
   return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
@@ -128,7 +136,8 @@ defineExpose({ refreshMessages: refresh })
               : 'bg-gray-100 text-gray-900'
           "
         >
-          <p class="whitespace-pre-wrap">{{ msg.text }}</p>
+          <p v-if="msg.role === 'USER'" class="whitespace-pre-wrap">{{ msg.text }}</p>
+          <div v-else class="prose prose-sm max-w-none" v-html="renderMarkdown(msg.text)" />
           <p
             class="text-xs mt-1"
             :class="msg.role === 'USER' ? 'text-blue-200' : 'text-gray-400'"
