@@ -1,31 +1,40 @@
 # 01 Intent Alignment
 
-Phase 1 of the business meal planner. This sample turns a messy user request into a
-confirmed planning artifact before any restaurant search or booking happens.
+Turn a messy natural-language request into confirmed, structured meal requirements.
 
-## Purpose
+## What this module teaches
 
-This module now demonstrates:
+- **Structured extraction** — use `ChatClient.entity()` to extract typed data from free text
+- **Multi-turn conversation** — requirements accumulate across turns, the model preserves
+  existing data unless the user explicitly corrects it
+- **Deterministic status transitions** — Java code (not the model) decides whether to
+  gather more info, ask for confirmation, or proceed
+- **Separation of concerns** — the extractor, assessor, and composer each have one job
 
-- turning a messy request into structured event requirements and attendee inputs
-- storing that artifact in session state
-- using deterministic rules to decide whether to clarify or confirm
-- rendering the artifact into markdown for the inspector
-- looping on confirmation, correction, or clarification
+## Architecture
 
-## What's here
+```
+User message
+  → RequirementsExtractor (LLM: merge message into UserRequirements)
+  → RequirementsAssessor  (Java: check hard gates — date, time, party size)
+  → determineStatus       (Java: gathering → confirming → confirmed)
+  → ReplyComposer         (LLM: write a natural response for the current status)
+```
 
-| File | Purpose |
-|------|---------|
-| `IntentAlignmentApplication.java` | Spring Boot entry point in `com.example.jarvis` |
-| `JarvisAgentHandler.java` | Single agent handler wired into `agent-core` |
-| `RequirementsAlignmentLoop.java` | Main phase-one loop: opener handling, one model call, deterministic status, deterministic reply |
-| `RequirementsExtractor.java` | Single `ChatClient` call that extracts or updates the planning context JSON |
-| `JarvisAgentContext.java` | The session context object for this module |
-| `UserRequirements.java` | The captured user requirements aggregate for this module |
-| `Meal.java` | Shared meal facts captured during intent alignment |
-| `Attendee.java` | Per-person constraints captured during intent alignment |
-| `application.yml` | Local app and model configuration |
+Key classes:
+- `RequirementsAligner` — orchestrates the 3-step pipeline
+- `RequirementsExtractor` — LLM call that returns `UserRequirements` via `.entity()`
+- `RequirementsAssessor` — deterministic missing-field check + LLM follow-up suggestion
+- `ReplyComposer` — LLM call that writes the reply based on alignment status
+- `JarvisAgentHandler` — wires the pipeline into the agent-core session
+
+## Key design decisions
+
+- **Confirmation is deterministic.** The model doesn't decide if the user confirmed — Java
+  detects that requirements are unchanged after extraction (`isUnchanged`).
+- **Hard gates are code, soft suggestions are model.** Date, time, and party size are
+  checked with Java. Follow-up questions ("ask about cuisine?") are model-generated.
+- **JSON is the context format.** `UserRequirements` is serialized to JSON for the model.
 
 ## Run it
 
@@ -33,4 +42,14 @@ This module now demonstrates:
 cd business-meal-planner/01-intent-alignment
 ../../mvnw spring-boot:run
 # Open http://localhost:8080
+```
+
+## Tests
+
+```bash
+# Unit tests (no API key needed)
+../../mvnw test
+
+# Integration tests (requires API key)
+../../mvnw test -Dgroups=integration
 ```
