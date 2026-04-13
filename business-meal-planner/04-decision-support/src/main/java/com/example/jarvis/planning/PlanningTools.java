@@ -12,6 +12,7 @@ import com.example.restaurant.RestaurantService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -87,15 +88,15 @@ public class PlanningTools {
       Get detailed information about a specific restaurant including description,
       noise level, price range, and neighborhood.""")
   public String getRestaurantDetails(
-      @ToolParam(description = "The restaurant ID to look up") String restaurantId) {
+      @ToolParam(description = "The restaurant ID or name") String restaurantId) {
 
-    log.info("getRestaurantDetails | restaurantId={}", restaurantId);
+    var resolvedId = resolveRestaurantId(restaurantId);
+    log.info("getRestaurantDetails | input={} resolvedId={}", restaurantId, resolvedId);
 
     var restaurant =
         restaurantService
-            .findById(restaurantId)
-            .orElseThrow(
-                () -> new IllegalArgumentException("Unknown restaurant id: " + restaurantId));
+            .findById(resolvedId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown restaurant: " + restaurantId));
 
     return JsonUtils.toJson(restaurant);
   }
@@ -107,13 +108,14 @@ public class PlanningTools {
       and dietary tags. Use this when the user asks about menu options, specific
       dishes, or dietary suitability details.""")
   public String getRestaurantMenu(
-      @ToolParam(description = "The restaurant ID to look up the menu for") String restaurantId) {
+      @ToolParam(description = "The restaurant ID or name") String restaurantId) {
 
-    log.info("getRestaurantMenu | restaurantId={}", restaurantId);
+    var resolvedId = resolveRestaurantId(restaurantId);
+    log.info("getRestaurantMenu | input={} resolvedId={}", restaurantId, resolvedId);
 
     var menu =
         menuService
-            .findById(restaurantId)
+            .findById(resolvedId)
             .orElseThrow(
                 () ->
                     new IllegalArgumentException(
@@ -130,9 +132,10 @@ public class PlanningTools {
       FAIL = hard violation (deal-breaker). MAYBE/UNSURE = soft (worth noting).
       PASS = constraint satisfied.""")
   public String checkRestaurantCandidate(
-      @ToolParam(description = "The restaurant ID to evaluate") String restaurantId) {
+      @ToolParam(description = "The restaurant ID or name") String restaurantId) {
 
-    log.info("checkRestaurantCandidate | restaurantId={}", restaurantId);
+    var resolvedId = resolveRestaurantId(restaurantId);
+    log.info("checkRestaurantCandidate | input={} resolvedId={}", restaurantId, resolvedId);
 
     if (currentRequirements == null) {
       throw new IllegalStateException(
@@ -141,15 +144,28 @@ public class PlanningTools {
 
     var restaurant =
         restaurantService
-            .findById(restaurantId)
-            .orElseThrow(
-                () -> new IllegalArgumentException("Unknown restaurant id: " + restaurantId));
+            .findById(resolvedId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown restaurant: " + restaurantId));
 
     var candidate = new RestaurantCandidate(restaurant.id(), restaurant.name());
     RestaurantCheckResult result = checkService.check(currentRequirements, candidate);
 
     log.info("checkRestaurantCandidate | result={}", JsonUtils.toJson(result));
     return JsonUtils.toJson(result);
+  }
+
+  private String resolveRestaurantId(String restaurantIdOrName) {
+    // Try exact ID match first
+    if (restaurantService.findById(restaurantIdOrName).isPresent()) {
+      return restaurantIdOrName;
+    }
+    // Fall back to name match
+    var lower = restaurantIdOrName.toLowerCase(Locale.ROOT);
+    return restaurantService.findAll().stream()
+        .filter(r -> r.name().toLowerCase(Locale.ROOT).contains(lower))
+        .map(Restaurant::id)
+        .findFirst()
+        .orElse(restaurantIdOrName);
   }
 
   private record RestaurantSummary(
