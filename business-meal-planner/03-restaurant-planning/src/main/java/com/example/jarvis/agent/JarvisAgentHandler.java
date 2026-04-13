@@ -4,6 +4,8 @@ import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.json.JsonUtils;
 import com.example.agent.core.session.Session;
+import com.example.jarvis.planning.RestaurantPlanner;
+import com.example.jarvis.requirements.alignment.AlignmentStatus;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -16,9 +18,12 @@ public class JarvisAgentHandler implements AgentHandler {
   private static final Logger log = LoggerFactory.getLogger(JarvisAgentHandler.class);
 
   private final RequirementsAligner requirementsAligner;
+  private final RestaurantPlanner restaurantPlanner;
 
-  public JarvisAgentHandler(RequirementsAligner requirementsAligner) {
+  public JarvisAgentHandler(
+      RequirementsAligner requirementsAligner, RestaurantPlanner restaurantPlanner) {
     this.requirementsAligner = requirementsAligner;
+    this.restaurantPlanner = restaurantPlanner;
   }
 
   @Override
@@ -38,7 +43,6 @@ public class JarvisAgentHandler implements AgentHandler {
 
   @Override
   public void onMessage(Session session, AgentMessage message) {
-    // Retrieve or initialize the workflow state for this session
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
     log.info(
@@ -46,24 +50,53 @@ public class JarvisAgentHandler implements AgentHandler {
         context.getAlignmentStatus().label(),
         message.text());
 
-    // Run the alignment pipeline: extract → determine status → compose reply
+    handleAlignment(session, context, message);
+
+    // If alignment just confirmed, immediately start planning
+    if (context.getAlignmentStatus() == AlignmentStatus.REQUIREMENTS_CONFIRMED) {
+      handlePlanning(session, context);
+    }
+  }
+
+  private void handleAlignment(Session session, JarvisAgentContext context, AgentMessage message) {
     var result =
         requirementsAligner.processMessage(
             context.getUserRequirements(), context.getAlignmentStatus(), message.text());
 
-    // Update workflow state with the computed outputs
     context.setUserRequirements(result.updatedRequirements());
     context.setAlignmentStatus(result.updatedStatus());
 
     log.info(
-        "done | status={} | missingFields={}",
+        "alignment done | status={} | missingFields={}",
         result.updatedStatus().label(),
         result.missingRequiredFields().size());
 
-    // Send the reply
     session.reply(result.reply());
+    updateInspectorState(session, context);
+    session.logEvent(
+        context.getAlignmentStatus().label(),
+        Map.of("missingFieldCount", result.missingRequiredFields().size()));
+  }
 
-    // Update inspector state and log the outcome
+  private void handlePlanning(Session session, JarvisAgentContext context) {
+    log.info("planning | starting restaurant search");
+    session.logEvent("planning-started", Map.of());
+    session.updateState(buildPlanningState(context, "Searching for restaurants..."));
+
+    String reply = restaurantPlanner.plan(context.getUserRequirements());
+
+    // Reset to gathering so the next message goes through alignment
+    // (user might want to relax constraints and try again)
+    context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
+
+    log.info("planning done | reply length={}", reply.length());
+
+    session.reply(reply);
+    updateInspectorState(session, context);
+    session.logEvent("planning-completed", Map.of());
+  }
+
+  private void updateInspectorState(Session session, JarvisAgentContext context) {
     session.updateState(
         """
         # Agent Context
@@ -79,8 +112,20 @@ public class JarvisAgentHandler implements AgentHandler {
             .formatted(
                 JsonUtils.toJson(context.getUserRequirements()),
                 context.getAlignmentStatus().label()));
-    session.logEvent(
-        context.getAlignmentStatus().label(),
-        Map.of("missingFieldCount", result.missingRequiredFields().size()));
+  }
+
+  private String buildPlanningState(JarvisAgentContext context, String planningStatus) {
+    return """
+        # Agent Context
+
+        ## Requirements
+        ```json
+        %s
+        ```
+
+        ## Status
+        Planning: %s
+        """
+        .formatted(JsonUtils.toJson(context.getUserRequirements()), planningStatus);
   }
 }
