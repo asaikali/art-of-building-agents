@@ -44,10 +44,12 @@ public class RestaurantPlanner {
                    - FAIL on noise, budget, or dietary = hard violation, do not recommend
                    - MAYBE or UNSURE = soft concern, mention it but don't disqualify
                    - PASS = constraint satisfied
-                4. Produce a ranked shortlist of restaurants that pass all hard constraints,
-                   noting any soft concerns. If no restaurant passes all hard constraints,
-                   explain which constraints blocked each candidate and suggest which
-                   constraint the user might relax.
+                4. Only present restaurants that pass all hard constraints. Do not mention
+                   restaurants that failed — the user doesn't need to know about them.
+                   Note any soft concerns for the restaurants you do recommend.
+                   If no restaurant passes all hard constraints, explain what made it
+                   difficult to find a match and suggest which constraint the user might
+                   relax.
 
                 Tone:
                 - Write like a helpful concierge, not a constraint checker.
