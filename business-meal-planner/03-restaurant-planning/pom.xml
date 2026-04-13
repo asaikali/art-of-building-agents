@@ -13,10 +13,19 @@
   <packaging>jar</packaging>
   <description>Business meal planner phase 3 scaffold: restaurant planning</description>
 
+  <properties>
+    <excludedGroups>integration</excludedGroups>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.example</groupId>
       <artifactId>agent-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>restaurant-data</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -39,6 +48,13 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludedGroups>${excludedGroups}</excludedGroups>
+        </configuration>
       </plugin>
     </plugins>
   </build>

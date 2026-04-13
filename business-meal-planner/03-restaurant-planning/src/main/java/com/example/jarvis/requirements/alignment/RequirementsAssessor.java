@@ -1,0 +1,97 @@
+package com.example.jarvis.requirements.alignment;
+
+import com.example.agent.core.json.JsonUtils;
+import com.example.jarvis.requirements.Meal;
+import com.example.jarvis.requirements.UserRequirements;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Component;
+
+/**
+ * Assesses {@link UserRequirements} against hard and soft criteria. Used by {@link
+ * RequirementsAligner} in the determine status and compose reply steps of the alignment pipeline.
+ *
+ * <p>Hard criteria ({@link #findMissingRequiredFields}) are checked deterministically — date, time,
+ * and party size must be present before the workflow can move to confirming. Soft criteria ({@link
+ * #suggestFollowUp}) use the model to suggest one useful follow-up question based on the specific
+ * meal context.
+ */
+@Component
+public class RequirementsAssessor {
+
+  private static final Logger log = LoggerFactory.getLogger(RequirementsAssessor.class);
+
+  private final ChatClient chatClient;
+
+  public RequirementsAssessor(ChatClient.Builder chatClientBuilder) {
+    // TODO: null check exists so RequirementsAssessorTest can test findMissingRequiredFields
+    // without a model. We'll clean this up when we revisit testability.
+    this.chatClient = chatClientBuilder == null ? null : chatClientBuilder.build();
+  }
+
+  /**
+   * Identifies the required fields that must be present before the alignment phase can move to
+   * confirming. These are the hard gates: date, time, and party size. Returns an empty list when
+   * all required fields are present.
+   */
+  public List<String> findMissingRequiredFields(Meal meal) {
+    List<String> missing = new ArrayList<>();
+    if (meal == null || meal.getDate() == null) {
+      missing.add("Date");
+    }
+    if (meal == null || meal.getTime() == null) {
+      missing.add("Time");
+    }
+    if (meal == null || meal.getPartySize() == null || meal.getPartySize() <= 0) {
+      missing.add("Party Size");
+    }
+    log.info(
+        "missing | fields={}", missing.isEmpty() ? "none — all required fields present" : missing);
+    return missing;
+  }
+
+  /**
+   * Uses the model to suggest one optional follow-up question that a good executive assistant would
+   * ask given the current requirements. The {@link ReplyComposer} handles the output naturally — if
+   * the model has no suggestion it will say so and the composer will ignore it.
+   */
+  public String suggestFollowUp(UserRequirements requirements) {
+    String result =
+        chatClient
+            .prompt()
+            .system(
+                """
+            You are an executive assistant assessing business meal planning requirements.
+
+            Given the current requirements, suggest ONE thing that would be most useful
+            to ask about next. Think about what a thoughtful assistant would want to know
+            given the specific context of this meal.
+
+            Rules:
+            - Return a single short suggestion (under 15 words).
+            - If the requirements look complete enough, say so briefly.
+            - Do not suggest things that are already captured in the requirements.
+            - Prioritize what matters most for this specific meal context.
+            - For example, a client dinner for 20 might need dress code or parking info,
+              while a casual team lunch for 3 probably doesn't.
+            """)
+            .user(
+                u ->
+                    u.text(
+                            """
+                    <requirements>
+                    {requirements}
+                    </requirements>
+
+                    What is the single most useful thing to ask about next?
+                    """)
+                        .param("requirements", JsonUtils.toJson(requirements)))
+            .call()
+            .content();
+    log.info("followUp | suggestion=\"{}\"", result);
+    return result;
+  }
+}
