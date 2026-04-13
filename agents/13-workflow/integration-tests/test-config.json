@@ -1,0 +1,6 @@
+{
+  "description": "Step 13: Workflow DSL — deterministic-AI-validate sandwich (Stripe pattern)",
+  "mode": "cli",
+  "timeoutSec": 60,
+  "successPatterns": ["Teresa Carles", "PASS"]
+}

@@ -94,6 +94,65 @@ wait_for_port() {
   return 1
 }
 
+# Run a CLI-mode test: build, run jar, check stdout for success patterns
+run_cli_test() {
+  local step_name="$1"
+  local config_file="$2"
+  local log_file="$3"
+  local timeout="$4"
+  local step_dir="$REPO_ROOT/agents/$step_name"
+
+  # Build
+  echo "  Building..."
+  if ! (cd "$REPO_ROOT" && ./mvnw package -pl "agents/$step_name" -am -DskipTests -q) >> "$log_file" 2>&1; then
+    echo -e "  ${RED}FAIL: Build failed${NC} (see $log_file)"
+    return 1
+  fi
+
+  # Find jar
+  local jar=$(find "$step_dir/target" -name "*.jar" -not -name "*-sources*" -not -name "*-javadoc*" | head -1)
+  if [ -z "$jar" ]; then
+    echo -e "  ${RED}FAIL: No JAR found in target/${NC}"
+    return 1
+  fi
+
+  # Run jar and capture output
+  echo "  Running..."
+  local output
+  output=$(timeout "${timeout}s" java -jar "$jar" 2>&1) || true
+  echo "$output" >> "$log_file"
+
+  # Check success patterns
+  local patterns=$(jq -r '.successPatterns[]' "$config_file" 2>/dev/null)
+  local all_matched=true
+
+  if [ -n "$patterns" ]; then
+    while IFS= read -r pattern; do
+      if echo "$output" | grep -qi "$pattern"; then
+        echo -e "  ${GREEN}✓${NC} Found: \"$pattern\""
+      else
+        echo -e "  ${RED}✗${NC} Missing: \"$pattern\""
+        all_matched=false
+      fi
+    done <<< "$patterns"
+  else
+    if [ -n "$output" ]; then
+      echo -e "  ${GREEN}✓${NC} Got output (${#output} chars)"
+    else
+      echo -e "  ${RED}FAIL: No output${NC}"
+      return 1
+    fi
+  fi
+
+  if [ "$all_matched" = true ]; then
+    echo -e "  ${GREEN}PASS${NC}"
+    return 0
+  else
+    echo -e "  ${RED}FAIL: Not all patterns matched${NC}"
+    return 1
+  fi
+}
+
 # Run a single step's test
 run_step_test() {
   local step_name="$1"
@@ -105,12 +164,19 @@ run_step_test() {
   echo -e "\n${YELLOW}━━━ Testing: $step_name ━━━${NC}"
 
   # Read test config
-  local test_message=$(jq -r '.testMessage' "$config_file")
+  local test_message=$(jq -r '.testMessage // ""' "$config_file")
   local timeout=$(jq -r '.timeoutSec // 120' "$config_file")
   local description=$(jq -r '.description // ""' "$config_file")
+  local mode=$(jq -r '.mode // "web"' "$config_file")
 
   if [ -n "$description" ]; then
     echo "  $description"
+  fi
+
+  # CLI mode: run jar, check stdout for success patterns, done
+  if [ "$mode" = "cli" ]; then
+    run_cli_test "$step_name" "$config_file" "$log_file" "$timeout"
+    return $?
   fi
 
   # Check for dependency (e.g. MCP server that must be running first)
