@@ -657,23 +657,35 @@ layout: default
 
 # Journal — Architecture
 
-<div class="mt-8 text-center font-mono text-xs">
+<div class="mt-4 flex flex-col items-center gap-1 text-sm">
 
-```
-User: "Find a restaurant in Eixample for 4, under €50"
-  ↓
-JournalHandler.onMessage()
-  ├─ Journal.run("jarvis-restaurant-agent").start()
-  ├─ AgentLoopAdvisor
-  │   └─ JournalLoopListener(run)
-  │       ├─ onLoopStarted()
-  │       ├─ onTurnStarted()       ← Turn 1: searchRestaurants
-  │       ├─ onTurnCompleted()     ← Turn 2: checkExpensePolicy
-  │       ├─ onTurnStarted()       ← Turn 3: checkDietaryOptions
-  │       └─ onLoopCompleted()     ← 3 turns, 847 tokens, $0.02
-  ↓
-.agent-journal/.../jarvis-restaurant-agent/runs/<id>/events.jsonl
-```
+<div class="p-2 px-4 rounded" style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4);">
+<span class="font-mono opacity-90">User: "Find a restaurant in Eixample for 4, under €50"</span>
+</div>
+
+<div class="opacity-50">↓</div>
+
+<div class="p-3 px-5 rounded-lg w-full max-w-2xl" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
+<div class="font-mono font-bold text-sm" style="color: #6DB33F;">JournalHandler.onMessage()</div>
+<div class="ml-4 mt-2 space-y-1 font-mono text-xs opacity-80">
+<div>├─ <code>Journal.run("jarvis-restaurant-agent").start()</code></div>
+<div>├─ <strong>AgentLoopAdvisor</strong></div>
+<div class="ml-6">└─ <strong style="color: #f59e0b;">JournalLoopListener(run)</strong></div>
+<div class="ml-12 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
+<div>├─ onLoopStarted()</div><div></div>
+<div>├─ onTurnStarted()</div><div style="color: #6DB33F;">← Turn 1: searchRestaurants</div>
+<div>├─ onTurnCompleted()</div><div style="color: #6DB33F;">← Turn 2: checkExpensePolicy</div>
+<div>├─ onTurnStarted()</div><div style="color: #6DB33F;">← Turn 3: checkDietaryOptions</div>
+<div>└─ onLoopCompleted()</div><div style="color: #f59e0b;">← 3 turns, 847 tokens, $0.02</div>
+</div>
+</div>
+</div>
+
+<div class="opacity-50">↓</div>
+
+<div class="p-2 px-4 rounded font-mono text-xs" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+<code>.agent-journal/.../jarvis-restaurant-agent/runs/&lt;id&gt;/events.jsonl</code>
+</div>
 
 </div>
 
@@ -1246,26 +1258,18 @@ layout: default
 
 # The Key Insight — Same Data, Both Sides
 
-<div class="grid grid-cols-2 gap-6 mt-6">
+<div class="grid grid-cols-2 gap-8 mt-8">
 
-<div class="p-5 rounded-lg" style="background: rgba(139, 92, 246, 0.08); border: 2px solid rgba(139, 92, 246, 0.3);">
+<div class="p-6 rounded-lg" style="background: rgba(139, 92, 246, 0.08); border: 2px solid rgba(139, 92, 246, 0.3);">
 <div class="text-xl font-bold" style="color: #8b5cf6;">Agent Tool (Step 03)</div>
-<div class="mt-3 text-base opacity-80">
-
-`checkExpensePolicy(28, 4)` → `withinPolicy: true`
-
-</div>
-<div class="text-sm opacity-60 mt-2">Agent calls this while working</div>
+<div class="mt-4 font-mono text-sm opacity-90">checkExpensePolicy(28, 4) → withinPolicy: true</div>
+<div class="text-sm opacity-50 mt-3">Agent calls this while working</div>
 </div>
 
-<div class="p-5 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
+<div class="p-6 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
 <div class="text-xl font-bold" style="color: #3b82f6;">Judge (Step 14)</div>
-<div class="mt-3 text-base opacity-80">
-
-`ExpensePolicyJudge` uses `RestaurantTools.RESTAURANTS`
-
-</div>
-<div class="text-sm opacity-60 mt-2">Same data evaluates the output</div>
+<div class="mt-4 font-mono text-sm opacity-90">ExpensePolicyJudge uses RestaurantTools.RESTAURANTS</div>
+<div class="text-sm opacity-50 mt-3">Same data evaluates the output</div>
 </div>
 
 </div>
