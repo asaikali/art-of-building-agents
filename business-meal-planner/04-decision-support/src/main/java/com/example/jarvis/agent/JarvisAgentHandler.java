@@ -4,6 +4,7 @@ import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.json.JsonUtils;
 import com.example.agent.core.session.Session;
+import com.example.jarvis.decisionsupport.DecisionSupport;
 import com.example.jarvis.planning.RestaurantPlanner;
 import com.example.jarvis.requirements.alignment.AlignmentStatus;
 import com.example.jarvis.requirements.alignment.RequirementsAligner;
@@ -19,11 +20,15 @@ public class JarvisAgentHandler implements AgentHandler {
 
   private final RequirementsAligner requirementsAligner;
   private final RestaurantPlanner restaurantPlanner;
+  private final DecisionSupport decisionSupport;
 
   public JarvisAgentHandler(
-      RequirementsAligner requirementsAligner, RestaurantPlanner restaurantPlanner) {
+      RequirementsAligner requirementsAligner,
+      RestaurantPlanner restaurantPlanner,
+      DecisionSupport decisionSupport) {
     this.requirementsAligner = requirementsAligner;
     this.restaurantPlanner = restaurantPlanner;
+    this.decisionSupport = decisionSupport;
   }
 
   @Override
@@ -46,15 +51,20 @@ public class JarvisAgentHandler implements AgentHandler {
     var context = session.getOrCreateContext(JarvisAgentContext.class, JarvisAgentContext::new);
 
     log.info(
-        "onMessage | status={} | user=\"{}\"",
+        "onMessage | phase={} | status={} | user=\"{}\"",
+        context.getPhase(),
         context.getAlignmentStatus().label(),
         message.text());
 
-    handleAlignment(session, context, message);
+    if (context.getPhase() == WorkflowPhase.EXPLORING_OPTIONS) {
+      handleDecisionSupport(session, context, message);
+    } else {
+      handleAlignment(session, context, message);
 
-    // If alignment just confirmed, immediately start planning
-    if (context.getAlignmentStatus() == AlignmentStatus.REQUIREMENTS_CONFIRMED) {
-      handlePlanning(session, context);
+      // If alignment just confirmed, immediately start planning
+      if (context.getAlignmentStatus() == AlignmentStatus.REQUIREMENTS_CONFIRMED) {
+        handlePlanning(session, context);
+      }
     }
   }
 
@@ -83,17 +93,49 @@ public class JarvisAgentHandler implements AgentHandler {
     session.logEvent("planning-started", Map.of());
     updateInspectorState(session, context, "Planning: Searching for restaurants...", null);
 
-    String reply = restaurantPlanner.plan(context.getUserRequirements());
+    String shortlist = restaurantPlanner.plan(context.getUserRequirements());
 
-    // Reset to gathering so the next message goes through alignment
-    // (user might want to relax constraints and try again)
-    context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
+    // Store shortlist and move to exploring options
+    context.setShortlist(shortlist);
+    context.setPhase(WorkflowPhase.EXPLORING_OPTIONS);
 
-    log.info("planning done | reply length={}", reply.length());
+    log.info("planning done | moving to EXPLORING_OPTIONS");
 
-    session.reply(reply);
-    updateInspectorState(session, context, "Planning complete", reply);
+    session.reply(shortlist);
+    updateInspectorState(session, context, "Exploring options", shortlist);
     session.logEvent("planning-completed", Map.of());
+  }
+
+  private void handleDecisionSupport(
+      Session session, JarvisAgentContext context, AgentMessage message) {
+    log.info("decision support | answering question");
+    session.logEvent("decision-support-query", Map.of("text", message.text()));
+
+    var response =
+        decisionSupport.ask(context.getUserRequirements(), context.getShortlist(), message.text());
+
+    session.reply(response.reply());
+
+    switch (response.action()) {
+      case "restart" -> {
+        // User wants to change requirements — go back to alignment
+        log.info("decision support | restart requested, resetting to alignment");
+        context.setPhase(WorkflowPhase.ALIGNMENT);
+        context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
+        context.setShortlist(null);
+        updateInspectorState(session, context, "Restarting: " + response.action(), null);
+      }
+      case "selected" -> {
+        log.info("decision support | restaurant selected");
+        updateInspectorState(session, context, "Restaurant selected", context.getShortlist());
+      }
+      default -> {
+        // "answer" or any other action — stay in exploring options
+        updateInspectorState(session, context, "Exploring options", context.getShortlist());
+      }
+    }
+
+    session.logEvent("decision-support-response", Map.of("action", response.action()));
   }
 
   private void updateInspectorState(

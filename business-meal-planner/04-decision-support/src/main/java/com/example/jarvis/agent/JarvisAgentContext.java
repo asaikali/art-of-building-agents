@@ -8,6 +8,8 @@ public class JarvisAgentContext implements AgentContext {
 
   private UserRequirements userRequirements = new UserRequirements();
   private AlignmentStatus alignmentStatus = AlignmentStatus.GATHERING_REQUIREMENTS;
+  private WorkflowPhase phase = WorkflowPhase.ALIGNMENT;
+  private String shortlist;
 
   public UserRequirements getUserRequirements() {
     return userRequirements;
@@ -23,5 +25,21 @@ public class JarvisAgentContext implements AgentContext {
 
   public void setAlignmentStatus(AlignmentStatus alignmentStatus) {
     this.alignmentStatus = alignmentStatus;
+  }
+
+  public WorkflowPhase getPhase() {
+    return phase;
+  }
+
+  public void setPhase(WorkflowPhase phase) {
+    this.phase = phase;
+  }
+
+  public String getShortlist() {
+    return shortlist;
+  }
+
+  public void setShortlist(String shortlist) {
+    this.shortlist = shortlist;
   }
 }
