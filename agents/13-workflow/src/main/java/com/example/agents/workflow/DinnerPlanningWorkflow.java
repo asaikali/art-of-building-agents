@@ -1,5 +1,6 @@
 package com.example.agents.workflow;
 
+import com.example.agents.common.BarcelonaRestaurants;
 import io.github.markpollack.workflow.flows.Step;
 import io.github.markpollack.workflow.flows.workflow.Workflow;
 import java.util.List;
@@ -16,43 +17,7 @@ public class DinnerPlanningWorkflow {
 
   private static final double CORPORATE_EXPENSE_LIMIT = 50.0;
 
-  private static final List<Map<String, Object>> RESTAURANTS =
-      List.of(
-          Map.of(
-              "name", "Can Culleretes",
-              "neighborhood", "Gothic Quarter",
-              "cuisine", "Catalan",
-              "pricePerPerson", 35,
-              "vegetarianOptions", true,
-              "noiseLevel", "moderate"),
-          Map.of(
-              "name", "Cervecería Catalana",
-              "neighborhood", "Eixample",
-              "cuisine", "Tapas",
-              "pricePerPerson", 28,
-              "vegetarianOptions", true,
-              "noiseLevel", "lively"),
-          Map.of(
-              "name", "El Nacional",
-              "neighborhood", "Passeig de Gràcia",
-              "cuisine", "Mediterranean",
-              "pricePerPerson", 55,
-              "vegetarianOptions", true,
-              "noiseLevel", "moderate"),
-          Map.of(
-              "name", "Tickets Bar",
-              "neighborhood", "Paral·lel",
-              "cuisine", "Modern Spanish",
-              "pricePerPerson", 75,
-              "vegetarianOptions", false,
-              "noiseLevel", "lively"),
-          Map.of(
-              "name", "Teresa Carles",
-              "neighborhood", "Eixample",
-              "cuisine", "Vegetarian",
-              "pricePerPerson", 22,
-              "vegetarianOptions", true,
-              "noiseLevel", "quiet"));
+  private static final List<Map<String, Object>> RESTAURANTS = BarcelonaRestaurants.ALL;
 
   private final ChatClient chatClient;
 

@@ -16,6 +16,11 @@
   <dependencies>
     <dependency>
       <groupId>com.example</groupId>
+      <artifactId>agents-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.example</groupId>
       <artifactId>agent-core</artifactId>
       <version>${project.version}</version>
     </dependency>

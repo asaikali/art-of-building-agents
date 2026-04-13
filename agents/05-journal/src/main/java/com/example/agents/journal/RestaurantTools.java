@@ -1,5 +1,8 @@
 package com.example.agents.journal;
 
+import static com.example.agents.common.BarcelonaRestaurants.CORPORATE_EXPENSE_LIMIT_PER_PERSON;
+
+import com.example.agents.common.BarcelonaRestaurants;
 import java.util.List;
 import java.util.Map;
 import org.springframework.ai.tool.annotation.Tool;
@@ -16,50 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RestaurantTools {
 
-  private static final double CORPORATE_EXPENSE_LIMIT_PER_PERSON = 50.0;
-
-  private static final List<Map<String, Object>> RESTAURANTS =
-      List.of(
-          Map.of(
-              "id", "rest-001",
-              "name", "Can Culleretes",
-              "neighborhood", "Gothic Quarter",
-              "cuisine", "Catalan",
-              "pricePerPerson", 35,
-              "vegetarianOptions", true,
-              "noiseLevel", "moderate"),
-          Map.of(
-              "id", "rest-002",
-              "name", "Cervecería Catalana",
-              "neighborhood", "Eixample",
-              "cuisine", "Tapas",
-              "pricePerPerson", 28,
-              "vegetarianOptions", true,
-              "noiseLevel", "lively"),
-          Map.of(
-              "id", "rest-003",
-              "name", "El Nacional",
-              "neighborhood", "Passeig de Gràcia",
-              "cuisine", "Mediterranean",
-              "pricePerPerson", 55,
-              "vegetarianOptions", true,
-              "noiseLevel", "moderate"),
-          Map.of(
-              "id", "rest-004",
-              "name", "Tickets Bar",
-              "neighborhood", "Paral·lel",
-              "cuisine", "Modern Spanish",
-              "pricePerPerson", 75,
-              "vegetarianOptions", false,
-              "noiseLevel", "lively"),
-          Map.of(
-              "id", "rest-005",
-              "name", "Teresa Carles",
-              "neighborhood", "Eixample",
-              "cuisine", "Vegetarian",
-              "pricePerPerson", 22,
-              "vegetarianOptions", true,
-              "noiseLevel", "quiet"));
+  private static final List<Map<String, Object>> RESTAURANTS = BarcelonaRestaurants.ALL;
 
   @Tool(description = "Search for restaurants in Barcelona by neighborhood or cuisine type")
   public List<Map<String, Object>> searchRestaurants(
