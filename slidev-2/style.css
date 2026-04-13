@@ -113,8 +113,8 @@ strong {
   border-width: 2px;
 }
 
-/* Inline code */
-code {
+/* Inline code (not Shiki code blocks) */
+:not(pre) > code {
   background: rgba(109, 179, 63, 0.15);
   color: var(--spring-green);
   padding: 0.2em 0.5em;
@@ -319,7 +319,7 @@ tr:hover {
   background-clip: text;
 }
 
-.dark code {
+.dark :not(pre) > code {
   background: rgba(109, 179, 63, 0.2);
 }
 
