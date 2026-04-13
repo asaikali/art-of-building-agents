@@ -1,0 +1,6 @@
+{
+  "description": "Step 15: Diagnose — Journal + Judge + ToolCallTracker + TrajectoryClassifier",
+  "testMessage": "I need a restaurant in Eixample for 4 people, budget is 30 euros per person, one guest is vegetarian",
+  "timeoutSec": 180,
+  "successPatterns": ["Teresa Carles"]
+}
