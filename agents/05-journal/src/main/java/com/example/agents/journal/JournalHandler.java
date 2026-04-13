@@ -99,11 +99,10 @@ public class JournalHandler implements AgentHandler {
 
     // Create a journal run for this interaction
     try (Run run =
-        Journal.run("jarvis-dinner-planning")
-            .config("model", "gpt-4o")
-            .config("maxTurns", 15)
-            .tag("step", "05-journal")
-            .tag("turn", String.valueOf(turn))
+        Journal.run("jarvis-restaurant-agent")
+            .name("turn-" + turn)
+            .task("dinner-recommendation")
+            .agent("jarvis")
             .start()) {
 
       // Wire the journal listener into AgentLoopAdvisor
