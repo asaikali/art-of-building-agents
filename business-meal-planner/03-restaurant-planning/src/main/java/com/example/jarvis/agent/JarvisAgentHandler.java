@@ -72,7 +72,7 @@ public class JarvisAgentHandler implements AgentHandler {
         result.missingRequiredFields().size());
 
     session.reply(result.reply());
-    updateInspectorState(session, context);
+    updateInspectorState(session, context, context.getAlignmentStatus().label(), null);
     session.logEvent(
         context.getAlignmentStatus().label(),
         Map.of("missingFieldCount", result.missingRequiredFields().size()));
@@ -81,7 +81,7 @@ public class JarvisAgentHandler implements AgentHandler {
   private void handlePlanning(Session session, JarvisAgentContext context) {
     log.info("planning | starting restaurant search");
     session.logEvent("planning-started", Map.of());
-    session.updateState(buildPlanningState(context, "Searching for restaurants..."));
+    updateInspectorState(session, context, "Planning: Searching for restaurants...", null);
 
     String reply = restaurantPlanner.plan(context.getUserRequirements());
 
@@ -92,12 +92,13 @@ public class JarvisAgentHandler implements AgentHandler {
     log.info("planning done | reply length={}", reply.length());
 
     session.reply(reply);
-    updateInspectorState(session, context);
+    updateInspectorState(session, context, "Planning complete", reply);
     session.logEvent("planning-completed", Map.of());
   }
 
-  private void updateInspectorState(Session session, JarvisAgentContext context) {
-    session.updateState(
+  private void updateInspectorState(
+      Session session, JarvisAgentContext context, String status, String planningResult) {
+    var state =
         """
         # Agent Context
 
@@ -109,23 +110,12 @@ public class JarvisAgentHandler implements AgentHandler {
         ## Status
         %s
         """
-            .formatted(
-                JsonUtils.toJson(context.getUserRequirements()),
-                context.getAlignmentStatus().label()));
-  }
+            .formatted(JsonUtils.toJson(context.getUserRequirements()), status);
 
-  private String buildPlanningState(JarvisAgentContext context, String planningStatus) {
-    return """
-        # Agent Context
+    if (planningResult != null) {
+      state += "\n## Planning Result\n\n" + planningResult;
+    }
 
-        ## Requirements
-        ```json
-        %s
-        ```
-
-        ## Status
-        Planning: %s
-        """
-        .formatted(JsonUtils.toJson(context.getUserRequirements()), planningStatus);
+    session.updateState(state);
   }
 }
