@@ -127,7 +127,12 @@ public class JarvisAgentHandler implements AgentHandler {
       }
       case "selected" -> {
         log.info("decision support | restaurant selected");
-        updateInspectorState(session, context, "Restaurant selected", context.getShortlist());
+        session.logEvent("restaurant-booked", Map.of("reply", response.reply()));
+        // Reset to alignment so the user can plan another meal
+        context.setPhase(WorkflowPhase.ALIGNMENT);
+        context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
+        context.setShortlist(null);
+        updateInspectorState(session, context, "Restaurant booked", null);
       }
       default -> {
         // "answer" or any other action — stay in exploring options
