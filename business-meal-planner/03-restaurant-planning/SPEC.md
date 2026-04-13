@@ -119,6 +119,7 @@ The current expected tool set is:
 - `findAvailableRestaurants`
   - find restaurants available for a specific date, time, and party size
   - optionally narrow by neighborhood
+  - delegates to `RestaurantAvailabilityService` in `components/restaurant-data`
 - `getRestaurantDetails`
   - load the details for one restaurant candidate
 - `checkRestaurantCandidate`
