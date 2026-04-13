@@ -1,8 +1,5 @@
 package com.example.restaurant;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 public record Restaurant(
     String id,
     String name,
