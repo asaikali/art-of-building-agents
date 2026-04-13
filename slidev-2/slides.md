@@ -1069,13 +1069,13 @@ layout: default
 
 # How Type Safety Works
 
-<div class="mt-4 text-sm opacity-60">
+<div class="mt-2 text-sm opacity-60">
 
 `Workflow.define().step(A).step(B)` — how does B know A's output type?
 
 </div>
 
-<div class="mt-4 grid grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-2 items-center text-center text-sm">
+<div class="mt-3 grid grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-2 items-center text-center text-sm">
   <div class="p-2 rounded border border-blue-500 bg-blue-900/30">
     <div class="font-bold">DinnerRequest</div>
   </div>
@@ -1098,17 +1098,9 @@ layout: default
 
 <v-click>
 
-<div class="mt-4 grid grid-cols-2 gap-4">
+<div class="mt-3 text-lg">
 
-<div class="p-3 rounded-lg" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
-<div class="text-sm font-bold" style="color: #6DB33F;">DSL level</div>
-<div class="text-sm opacity-80 mt-1">Builder accepts <code>Step&lt;?, ?&gt;</code> — Java erases generics. Any step chains with any other.</div>
-</div>
-
-<div class="p-3 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
-<div class="text-sm font-bold" style="color: #3b82f6;">Graph compilation</div>
-<div class="text-sm opacity-80 mt-1"><code>.compile()</code> builds an intermediate representation. Steps declare <code>inputType()</code> / <code>outputType()</code>.</div>
-</div>
+**Problem:** Java erases generics — the builder stores `Step<?, ?>`. The IR has no type info.
 
 </div>
 
@@ -1116,14 +1108,71 @@ layout: default
 
 <v-click>
 
-<div class="mt-3 code-small">
+<div class="mt-2 text-lg">
+
+**Solution:** Each step returns its `Class<?>` — the IR stores it alongside the step.
+
+</div>
+
+<div class="mt-2 code-small">
 
 ```java
-// In your test — catches type mismatches BEFORE runtime
-WorkflowGraph<String, Object> graph = Workflow.<String, Object>define("pipeline")
-    .step(new StringToInt())    // outputs Integer
-    .then(new DoubleToString()) // expects Double — MISMATCH!
-    .compile();
+@FunctionalInterface
+public interface Step<I, O> {
+    O execute(AgentContext ctx, I input);
+
+    // Each step declares its Class<?> — stored in the IR
+    default Class<?> inputType()  { return Object.class; }
+    default Class<?> outputType() { return Object.class; }
+}
+```
+
+</div>
+
+</v-click>
+
+<v-click>
+
+<div class="mt-2 text-sm opacity-80">
+
+Default `Object.class` = opt out. Override to opt in → `GatherResult.class`
+
+</div>
+
+</v-click>
+
+<!--
+SPEAKER (≈30s):
+"How does type safety work when Java erases generics?"
+[CLICK: reveal problem]
+"The builder stores Step wildcard. Generics gone. The IR has nothing to check."
+[CLICK: reveal Step interface]
+"So each step returns its Class. inputType, outputType — plain Class objects. The IR stores these alongside the step instance. Simple. No reflection tricks, no TypeReference magic."
+[CLICK: reveal opt-in]
+"Default is Object — you're opted out. Override to return GatherResult.class — you're opted in. The graph now knows the types. Next slide — who actually checks them."
+-->
+
+---
+layout: default
+---
+
+# Type Safety — Verification
+
+<div class="mt-1 text-xs opacity-60">
+
+The compiled graph walks adjacent steps and checks `isAssignableFrom`
+
+</div>
+
+<div class="mt-3 code-small">
+
+```java {1-4|6-7|all}
+// In your test — catches type mismatches BEFORE production
+WorkflowGraph<String, Object> graph =
+    Workflow.<String, Object>define("pipeline")
+        .step(new StringToInt())    // outputs Integer
+        .then(new DoubleToString()) // expects Double — MISMATCH!
+        .compile();
 
 WorkflowGraphAssert.assertTypeCompatible(graph);
 // → TypeIncompatibleException: step 'StringToInt' outputs Integer
@@ -1132,15 +1181,36 @@ WorkflowGraphAssert.assertTypeCompatible(graph);
 
 </div>
 
+<v-click>
+
+<div class="mt-4 grid grid-cols-3 gap-4 text-center text-sm">
+
+<div class="p-3 rounded-lg" style="background: rgba(239, 68, 68, 0.08); border: 2px solid rgba(239, 68, 68, 0.3);">
+<div class="font-bold" style="color: #ef4444;">Compile time</div>
+<div class="mt-1 opacity-70">Generics erased<br/><code>Step&lt;?, ?&gt;</code> — no safety</div>
+</div>
+
+<div class="p-3 rounded-lg" style="background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);">
+<div class="font-bold" style="color: #f59e0b;">Graph compile</div>
+<div class="mt-1 opacity-70">IR captures type tokens<br/>from each Step</div>
+</div>
+
+<div class="p-3 rounded-lg" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
+<div class="font-bold" style="color: #6DB33F;">Test time</div>
+<div class="mt-1 opacity-70"><code>assertTypeCompatible()</code><br/>walks edges, checks pairs</div>
+</div>
+
+</div>
+
 </v-click>
 
 <!--
-SPEAKER (≈30s):
-"How does type safety work? Each step carries a typed record forward."
-[CLICK: reveal how it works]
-"The DSL accepts Step wildcard — Java erases generics. But compile() builds an IR. Steps can declare their input and output types."
-[CLICK: reveal test]
-"In your test, WorkflowGraphAssert walks the compiled graph and checks isAssignableFrom between adjacent steps. Type mismatches caught at test time, not at 2am in production."
+SPEAKER (≈25s):
+"Here's the payoff. You compile the graph and run assertTypeCompatible in your test."
+[CLICK through code: show definition, then compile, then full]
+"StringToInt outputs Integer. DoubleToString expects Double. The assertion walks the IR, checks isAssignableFrom — caught at test time, not 2am in production."
+[CLICK: reveal three-phase boxes]
+"Three phases. Java compile time gives you nothing — generics erased. Graph compilation captures the runtime type tokens into the IR. Your test asserts compatibility. Pragmatic type safety without fighting the type system."
 -->
 
 ---
