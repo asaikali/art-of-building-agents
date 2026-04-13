@@ -51,6 +51,8 @@ public class DietarySuitabilityCheck {
             You are judging whether a restaurant menu appears suitable for a group's dietary needs.
 
             Rules:
+            - Focus on whether the menu offers substantive main courses that satisfy
+              the dietary constraints. Appetizers, sides, and desserts alone are not enough.
             - Judge the restaurant overall, not each item individually.
             - Use only the dietary constraints and menu evidence provided.
             - Do not invent menu items or dietary accommodations.
