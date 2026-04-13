@@ -5,6 +5,7 @@ import com.example.jarvis.constraints.RestaurantCandidate;
 import com.example.jarvis.constraints.RestaurantCandidateCheckService;
 import com.example.jarvis.constraints.RestaurantCheckResult;
 import com.example.jarvis.requirements.UserRequirements;
+import com.example.restaurant.MenuService;
 import com.example.restaurant.Restaurant;
 import com.example.restaurant.RestaurantAvailabilityService;
 import com.example.restaurant.RestaurantService;
@@ -24,6 +25,7 @@ public class PlanningTools {
 
   private final RestaurantAvailabilityService availabilityService;
   private final RestaurantService restaurantService;
+  private final MenuService menuService;
   private final RestaurantCandidateCheckService checkService;
 
   // Set by the handler before each planning call. Not thread-safe — fine for a workshop.
@@ -32,9 +34,11 @@ public class PlanningTools {
   public PlanningTools(
       RestaurantAvailabilityService availabilityService,
       RestaurantService restaurantService,
+      MenuService menuService,
       RestaurantCandidateCheckService checkService) {
     this.availabilityService = availabilityService;
     this.restaurantService = restaurantService;
+    this.menuService = menuService;
     this.checkService = checkService;
   }
 
@@ -94,6 +98,28 @@ public class PlanningTools {
                 () -> new IllegalArgumentException("Unknown restaurant id: " + restaurantId));
 
     return JsonUtils.toJson(restaurant);
+  }
+
+  @Tool(
+      description =
+          """
+      Get the full menu for a restaurant, including all sections, items, prices,
+      and dietary tags. Use this when the user asks about menu options, specific
+      dishes, or dietary suitability details.""")
+  public String getRestaurantMenu(
+      @ToolParam(description = "The restaurant ID to look up the menu for") String restaurantId) {
+
+    log.info("getRestaurantMenu | restaurantId={}", restaurantId);
+
+    var menu =
+        menuService
+            .findById(restaurantId)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "No menu data available for restaurant: " + restaurantId));
+
+    return JsonUtils.toJson(menu);
   }
 
   @Tool(
