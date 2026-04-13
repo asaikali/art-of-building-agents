@@ -303,8 +303,8 @@ layout: default
   </div>
   <div class="p-4 rounded-lg border-2 border-orange-500 bg-orange-900/30">
     <div class="text-2xl font-bold">15</div>
-    <div class="text-lg mt-1">Trajectory</div>
-    <div class="text-xs mt-2 opacity-75">Understand behavior</div>
+    <div class="text-lg mt-1">Diagnose</div>
+    <div class="text-xs mt-2 opacity-75">Record + analyze behavior</div>
   </div>
 </div>
 
@@ -317,7 +317,7 @@ layout: default
 | Journal | Visibility | Flying blind |
 | Workflow | Determinism | Hoping the prompt works |
 | Judge | Verification | Silent failures ship |
-| Trajectory | Diagnosis | Failures stay opaque |
+| Diagnose | Diagnosis | Failures stay opaque |
 
 </div>
 
@@ -327,7 +327,7 @@ layout: default
 SPEAKER (≈30s):
 "Four steps."
 [CLICK: reveal table]
-"Journal gives you visibility — without it, you're flying blind. Workflow gives you determinism — without it, you're hoping the prompt works. Judge gives you verification — without it, silent failures ship. Trajectory gives you diagnosis — without it, failures stay opaque."
+"Journal gives you visibility — without it, you're flying blind. Workflow gives you determinism — without it, you're hoping the prompt works. Judge gives you verification — without it, silent failures ship. Diagnose gives you diagnosis — without it, failures stay opaque."
 -->
 
 ---
@@ -1552,7 +1552,7 @@ class: text-center
 Step 15
 </div>
 
-# Trajectory
+# Diagnose
 
 <div class="text-3xl mt-8 opacity-75">
 Why did it fail that way?
@@ -1562,16 +1562,16 @@ Why did it fail that way?
 
 <div class="mt-6 p-3 rounded-lg text-lg" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3);">
 Same free-form agent + same CascadedJury as Step 14.<br/>
-<strong style="color: #f59e0b;">New: record tool call sequences, classify into semantic states.</strong>
+<strong style="color: #f59e0b;">New: journal recording + tool call classification into semantic states.</strong>
 </div>
 
 </v-click>
 
 <!--
 SPEAKER (≈15s):
-"Step 15 goes beyond pass/fail. The judge tells you WHAT failed. Trajectory tells you WHY."
+"Step 15 is diagnose. The judge tells you WHAT failed. Now we find out WHY."
 [CLICK: reveal context]
-"Same agent, same jury. We add tool call recording and a classifier that maps tool names to domain concepts — SEARCH, CHECK_BUDGET, BOOK. Pure Java, zero tokens."
+"Same agent, same jury. We add journal recording for every loop event, plus a classifier that maps tool names to domain concepts — SEARCH, CHECK_BUDGET, BOOK. Three feedback signals in one handler."
 -->
 
 ---
@@ -1582,7 +1582,7 @@ layout: default
 
 <div class="mt-2 text-sm opacity-60">
 
-`agents/15-trajectory/.../ToolCallTracker.java` + `RestaurantTools.java`
+`agents/15-diagnose/.../ToolCallTracker.java` + `RestaurantTools.java`
 
 </div>
 
@@ -1732,7 +1732,7 @@ layout: default
 
 <div class="mt-2 text-sm opacity-60">
 
-`agents/15-trajectory/.../TrajectoryClassifier.java`
+`agents/15-diagnose/.../TrajectoryClassifier.java`
 
 </div>
 
@@ -1914,42 +1914,41 @@ SPEAKER (≈30s):
 layout: default
 ---
 
-# TrajectoryHandler — Combined View
+# DiagnoseHandler — Three Signals in One
 
 <div class="mt-2 text-sm opacity-60">
 
-`agents/15-trajectory/.../TrajectoryHandler.java` — trajectory + verdict side-by-side
+`agents/15-diagnose/.../DiagnoseHandler.java` — journal + trajectory + verdict
 
 </div>
 
 <div class="code-small">
 
-```java {1-8|10-15|17-25}
-@Override
-public void onMessage(Session session, AgentMessage message) {
-  // Clear any previous tool call records
-  ToolCallTracker.getAndClear();
+```java {1-8|10-17|19-27}
+ToolCallTracker.getAndClear();
 
-  Instant start = Instant.now();
+// Journal run wraps the entire interaction
+try (Run run = Journal.run("jarvis-restaurant-agent")
+        .name("turn-" + turn).task("dinner-recommendation")
+        .agent("jarvis").start()) {
+
+  var advisor = AgentLoopAdvisor.builder()
+      .toolCallingManager(ToolCallingManager.builder().build())
+      .maxTurns(15)
+      .listener(new JournalLoopListener(run))  // records every turn
+      .build();
+
+  ChatClient chatClient = chatClientBuilder.defaultSystem(SYSTEM_PROMPT)
+      .defaultTools(restaurantTools).defaultAdvisors(advisor).build();
   String reply = chatClient.prompt().messages(history).call().content();
-  Duration elapsed = Duration.between(start, Instant.now());
 
-  // Capture tool calls
   List<String> toolCalls = ToolCallTracker.getAndClear();
-  log.info("Tool calls recorded: {}", toolCalls);
-
-  // Trajectory analysis
   TrajectoryClassifier.TrajectoryAnalysis trajectory = classifier.classify(toolCalls);
-
-  // Evaluate with CascadedJury (same 3-tier cascade as Step 14)
-  JudgmentContext judgmentCtx = JudgmentContext.builder()
-      .goal(goal).agentOutput(reply)
-      .executionTime(elapsed).startedAt(start).build();
   Verdict verdict = jury.vote(judgmentCtx);
 
-  // Combined display in Inspector state panel
   session.updateState(buildAnalysisState(turn, trajectory, verdict));
 }
+// Journal JSONL written, trajectory classified, verdict rendered
 ```
 
 </div>
@@ -1957,19 +1956,19 @@ public void onMessage(Session session, AgentMessage message) {
 <v-click>
 
 <div class="mt-3 p-3 rounded-lg" style="background: rgba(109, 179, 63, 0.08); border-left: 4px solid #6DB33F;">
-<div class="text-lg"><strong>One handler, two feedback signals.</strong> Trajectory shows WHERE the agent went. Verdict shows WHETHER it got the right answer. Both in the same state panel.</div>
+<div class="text-lg"><strong>One handler, three feedback signals.</strong> Journal records WHAT happened. Trajectory shows WHERE it went. Verdict shows WHETHER the answer is correct.</div>
 </div>
 
 </v-click>
 
 <!--
 SPEAKER (≈20s):
-[CLICK: agent run + timing]
-"TrajectoryHandler runs the agent, captures timing."
-[CLICK: tool calls + trajectory]
-"Captures tool calls, classifies the trajectory."
-[CLICK: jury + combined display]
-"Evaluates with the same CascadedJury from Step 14, renders both side-by-side in the Inspector. One handler, two feedback signals."
+[CLICK: Journal.run scope + ToolCallTracker]
+"Everything wrapped in a Journal run. ToolCallTracker cleared before we start."
+[CLICK: advisor + JournalLoopListener + ChatClient call]
+"JournalLoopListener wired into the advisor — records every turn to JSONL. Then the agent runs."
+[CLICK: trajectory + verdict + state]
+"After the run: classify tool calls into semantic states, evaluate with the same CascadedJury, render all three signals in the Inspector. One handler, three feedback signals."
 -->
 
 ---
@@ -2063,9 +2062,9 @@ layout: default
     <div class="text-xs opacity-50">agent-judge-core/llm</div>
   </div>
   <div class="p-3 rounded-lg border-2 border-orange-500 bg-orange-900/30">
-    <div class="font-bold">15 Trajectory</div>
-    <div class="text-xs mt-1">TrajectoryClassifier</div>
-    <div class="text-xs opacity-50">agent-judge-core</div>
+    <div class="font-bold">15 Diagnose</div>
+    <div class="text-xs mt-1">Journal + Trajectory + Judge</div>
+    <div class="text-xs opacity-50">journal-core + agent-judge</div>
   </div>
 </div>
 
@@ -2078,7 +2077,7 @@ layout: default
 | 05 | What happened? | `JournalLoopListener` | `agents/05-journal` |
 | 13 | Can I control the LLM? | `DinnerPlanningWorkflow` | `agents/13-workflow` |
 | 14 | Is the output correct? | `JudgeHandler` + `CascadedJury` | `agents/14-judge` |
-| 15 | Why did it behave that way? | `TrajectoryHandler` + `TrajectoryClassifier` | `agents/15-trajectory` |
+| 15 | Why did it behave that way? | `DiagnoseHandler` + `TrajectoryClassifier` | `agents/15-diagnose` |
 
 </div>
 
@@ -2172,7 +2171,7 @@ class: text-center
 # Let's Build
 
 <div class="text-3xl mt-8 opacity-75">
-05-journal → 13-workflow → 14-judge → 15-trajectory
+14-judge → 05-journal → 15-diagnose → 13-workflow
 </div>
 
 <div class="mt-8 text-lg">

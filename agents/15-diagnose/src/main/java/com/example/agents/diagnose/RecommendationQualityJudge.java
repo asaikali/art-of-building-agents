@@ -1,4 +1,4 @@
-package com.example.agents.trajectory;
+package com.example.agents.diagnose;
 
 import org.springaicommunity.judge.context.JudgmentContext;
 import org.springaicommunity.judge.llm.LLMJudge;

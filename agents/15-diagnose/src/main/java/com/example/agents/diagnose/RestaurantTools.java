@@ -1,4 +1,4 @@
-package com.example.agents.trajectory;
+package com.example.agents.diagnose;
 
 import java.util.List;
 import java.util.Map;

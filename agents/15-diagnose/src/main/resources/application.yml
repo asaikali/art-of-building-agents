@@ -1,6 +1,6 @@
 spring:
   application:
-    name: 15-trajectory
+    name: 15-diagnose
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}

@@ -1,10 +1,16 @@
-package com.example.agents.trajectory;
+package com.example.agents.diagnose;
 
 import com.example.agent.core.chat.AgentHandler;
 import com.example.agent.core.chat.AgentMessage;
 import com.example.agent.core.chat.Role;
 import com.example.agent.core.session.Session;
+import io.github.markpollack.journal.Journal;
+import io.github.markpollack.journal.Run;
+import io.github.markpollack.journal.event.CustomEvent;
+import io.github.markpollack.journal.storage.JsonFileStorage;
 import io.github.markpollack.workflow.patterns.advisor.AgentLoopAdvisor;
+import jakarta.annotation.PostConstruct;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,13 +33,24 @@ import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs Jarvis with tool call recording, then shows combined trajectory analysis + verdict in the
- * Inspector state panel.
+ * Step 15: Diagnose — record, evaluate, and analyze agent behavior.
+ *
+ * <p>Combines three feedback signals in one handler:
+ *
+ * <ol>
+ *   <li><b>Journal</b> — records every loop event (turns, tokens, cost) to JSONL via {@link
+ *       JournalLoopListener}
+ *   <li><b>Judge</b> — evaluates output correctness with a 3-tier {@link CascadedJury}
+ *   <li><b>Trajectory</b> — classifies tool calls into semantic states, detects loops and hotspots
+ * </ol>
+ *
+ * <p>The agent is free-form (ChatClient + AgentLoopAdvisor). After it runs, the three signals show
+ * WHAT happened (journal), WHETHER it's correct (judge), and WHERE it wasted time (trajectory).
  */
 @Component
-public class TrajectoryHandler implements AgentHandler {
+public class DiagnoseHandler implements AgentHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(TrajectoryHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(DiagnoseHandler.class);
 
   private static final String SYSTEM_PROMPT =
       """
@@ -62,25 +79,15 @@ public class TrajectoryHandler implements AgentHandler {
       Never recommend a restaurant without checking expense policy first.
       """;
 
-  private final ChatClient chatClient;
+  private final ChatClient.Builder chatClientBuilder;
+  private final RestaurantTools restaurantTools;
   private final CascadedJury jury;
   private final TrajectoryClassifier classifier = new TrajectoryClassifier();
   private final AtomicInteger turnCounter = new AtomicInteger(0);
 
-  public TrajectoryHandler(ChatClient.Builder chatClientBuilder, RestaurantTools restaurantTools) {
-
-    var advisor =
-        AgentLoopAdvisor.builder()
-            .toolCallingManager(ToolCallingManager.builder().build())
-            .maxTurns(15)
-            .build();
-
-    this.chatClient =
-        chatClientBuilder
-            .defaultSystem(SYSTEM_PROMPT)
-            .defaultTools(restaurantTools)
-            .defaultAdvisors(advisor)
-            .build();
+  public DiagnoseHandler(ChatClient.Builder chatClientBuilder, RestaurantTools restaurantTools) {
+    this.chatClientBuilder = chatClientBuilder;
+    this.restaurantTools = restaurantTools;
 
     // Same 3-tier jury as Step 14
     SimpleJury tier0 =
@@ -109,9 +116,15 @@ public class TrajectoryHandler implements AgentHandler {
             .build();
   }
 
+  @PostConstruct
+  void configureJournal() {
+    Journal.configure(new JsonFileStorage(Path.of(".agent-journal")));
+    log.info("Journal configured — output in .agent-journal/");
+  }
+
   @Override
   public String getName() {
-    return "15 \u2014 Trajectory";
+    return "15 \u2014 Diagnose";
   }
 
   @Override
@@ -125,68 +138,98 @@ public class TrajectoryHandler implements AgentHandler {
     // Clear any previous tool call records
     ToolCallTracker.getAndClear();
 
-    List<Message> history =
-        session.getMessages().stream()
-            .map(
-                m ->
-                    (Message)
-                        (m.role() == Role.USER
-                            ? new UserMessage(m.text())
-                            : new AssistantMessage(m.text())))
-            .toList();
+    // Create a journal run for this interaction
+    try (Run run =
+        Journal.run("jarvis-restaurant-agent")
+            .name("turn-" + turn)
+            .task("dinner-recommendation")
+            .agent("jarvis")
+            .start()) {
 
-    Instant start = Instant.now();
-    String reply = chatClient.prompt().messages(history).call().content();
-    Duration elapsed = Duration.between(start, Instant.now());
+      // Wire journal listener into AgentLoopAdvisor
+      var advisor =
+          AgentLoopAdvisor.builder()
+              .toolCallingManager(ToolCallingManager.builder().build())
+              .maxTurns(15)
+              .listener(new JournalLoopListener(run))
+              .build();
 
-    // Capture tool calls
-    List<String> toolCalls = ToolCallTracker.getAndClear();
-    log.info("Tool calls recorded: {}", toolCalls);
+      ChatClient chatClient =
+          chatClientBuilder
+              .defaultSystem(SYSTEM_PROMPT)
+              .defaultTools(restaurantTools)
+              .defaultAdvisors(advisor)
+              .build();
 
-    session.appendMessage(Role.ASSISTANT, reply);
+      List<Message> history =
+          session.getMessages().stream()
+              .map(
+                  m ->
+                      (Message)
+                          (m.role() == Role.USER
+                              ? new UserMessage(m.text())
+                              : new AssistantMessage(m.text())))
+              .toList();
 
-    // Trajectory analysis
-    TrajectoryClassifier.TrajectoryAnalysis trajectory = classifier.classify(toolCalls);
+      Instant start = Instant.now();
+      String reply = chatClient.prompt().messages(history).call().content();
+      Duration elapsed = Duration.between(start, Instant.now());
 
-    // Evaluate with CascadedJury
-    JudgmentContext judgmentCtx =
-        JudgmentContext.builder()
-            .goal(goal)
-            .agentOutput(reply)
-            .executionTime(elapsed)
-            .startedAt(start)
-            .build();
+      // Capture tool calls for trajectory analysis
+      List<String> toolCalls = ToolCallTracker.getAndClear();
+      log.info("Tool calls recorded: {}", toolCalls);
 
-    Verdict verdict = jury.vote(judgmentCtx);
+      run.logEvent(CustomEvent.of("assistant_reply", Map.of("turn", turn, "reply", reply)));
 
-    log.info(
-        "Trajectory: {} states, {} loops, {:.0f}% efficiency | Verdict: {}",
-        trajectory.sequence().size(),
-        trajectory.loops().size(),
-        trajectory.efficiency() * 100,
-        verdict.aggregated().status());
+      session.appendMessage(Role.ASSISTANT, reply);
 
-    session.updateState(buildAnalysisState(turn, trajectory, verdict));
+      // Trajectory analysis
+      TrajectoryClassifier.TrajectoryAnalysis trajectory = classifier.classify(toolCalls);
+
+      // Evaluate with CascadedJury
+      JudgmentContext judgmentCtx =
+          JudgmentContext.builder()
+              .goal(goal)
+              .agentOutput(reply)
+              .executionTime(elapsed)
+              .startedAt(start)
+              .build();
+
+      Verdict verdict = jury.vote(judgmentCtx);
+
+      log.info(
+          "Trajectory: {} states, {} loops, {:.0f}% efficiency | Verdict: {}",
+          trajectory.sequence().size(),
+          trajectory.loops().size(),
+          trajectory.efficiency() * 100,
+          verdict.aggregated().status());
+
+      session.updateState(buildAnalysisState(turn, trajectory, verdict));
+
+      log.info("Journal run {} completed for turn {}", run.id(), turn);
+    }
   }
 
   private String buildRunningState(int turn) {
-    return "## Jarvis \u2014 Trajectory-Analyzed Agent\n\n"
+    return "## Jarvis \u2014 Diagnose Agent\n\n"
         + "| Field | Value |\n|-------|-------|\n"
         + "| Turn | "
         + turn
         + " |\n"
-        + "| Status | Running agent + recording tool calls... |\n"
+        + "| Status | Running agent + recording... |\n"
         + "| Tools | search, expensePolicy, dietary, book |\n"
-        + "| Loop | AgentLoopAdvisor (max 15 turns) |\n";
+        + "| Loop | AgentLoopAdvisor (max 15 turns) |\n"
+        + "| Journal | .agent-journal/ (JSONL) |\n";
   }
 
   private String buildAnalysisState(
       int turn, TrajectoryClassifier.TrajectoryAnalysis trajectory, Verdict verdict) {
     StringBuilder sb = new StringBuilder();
-    sb.append("## Jarvis \u2014 Trajectory-Analyzed Agent\n\n");
+    sb.append("## Jarvis \u2014 Diagnose Agent\n\n");
     sb.append("| Field | Value |\n|-------|-------|\n");
     sb.append("| Turn | ").append(turn).append(" |\n");
-    sb.append("| Status | Idle |\n\n");
+    sb.append("| Status | Idle |\n");
+    sb.append("| Journal | .agent-journal/ (JSONL) |\n\n");
 
     // Trajectory section
     sb.append(classifier.formatMarkdown(trajectory));

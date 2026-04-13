@@ -9,9 +9,9 @@
     <artifactId>agents</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>15-trajectory</artifactId>
+  <artifactId>15-diagnose</artifactId>
   <packaging>jar</packaging>
-  <description>Step 15 — Analyze: trajectory classification, loop detection, hotspot analysis</description>
+  <description>Step 15 — Diagnose: journal recording, trajectory classification, judge evaluation</description>
 
   <dependencies>
     <dependency>
@@ -32,7 +32,12 @@
       <groupId>io.github.markpollack</groupId>
       <artifactId>workflow-core</artifactId>
     </dependency>
-    <!-- Judge framework (reuse judges from Step 14) -->
+    <!-- Journal recording -->
+    <dependency>
+      <groupId>io.github.markpollack</groupId>
+      <artifactId>journal-core</artifactId>
+    </dependency>
+    <!-- Judge framework -->
     <dependency>
       <groupId>org.springaicommunity</groupId>
       <artifactId>agent-judge-core</artifactId>

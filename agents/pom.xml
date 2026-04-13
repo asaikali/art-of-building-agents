@@ -31,7 +31,7 @@
     <module>12-wrap-path</module>
     <module>13-workflow</module>
     <module>14-judge</module>
-    <module>15-trajectory</module>
+    <module>15-diagnose</module>
     <module>16-quality-gate</module>
   </modules>
 </project>

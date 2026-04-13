@@ -1,4 +1,4 @@
-package com.example.agents.trajectory;
+package com.example.agents.diagnose;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,26 +9,19 @@ import org.springaicommunity.judge.result.Check;
 import org.springaicommunity.judge.result.Judgment;
 import org.springaicommunity.judge.result.JudgmentStatus;
 
-/** T1 deterministic judge: verifies dietary compliance. Abstains if no dietary requirement. */
-public class DietaryComplianceJudge extends DeterministicJudge {
+/** T0 deterministic judge: verifies the recommended restaurant is within expense policy. */
+public class ExpensePolicyJudge extends DeterministicJudge {
 
-  public DietaryComplianceJudge() {
-    super("DietaryCompliance", "Checks restaurant dietary options against user requirements");
+  private static final double EXPENSE_LIMIT = 50.0;
+
+  public ExpensePolicyJudge() {
+    super("ExpensePolicy", "Checks restaurant price against corporate expense limit");
   }
 
   @Override
   public Judgment judge(JudgmentContext context) {
-    String goal = context.goal();
     String output = context.agentOutput().orElse("");
     List<Check> checks = new ArrayList<>();
-
-    boolean vegetarianRequested = goal != null && goal.toLowerCase().contains("vegetarian");
-
-    if (!vegetarianRequested) {
-      return Judgment.abstain("No dietary requirements specified in goal");
-    }
-
-    checks.add(Check.pass("dietary-requested", "Vegetarian requirement detected in goal"));
 
     Map<String, Object> matched = null;
     for (Map<String, Object> r : RestaurantTools.RESTAURANTS) {
@@ -48,20 +41,29 @@ public class DietaryComplianceJudge extends DeterministicJudge {
     }
 
     String name = matched.get("name").toString();
-    boolean hasVegetarian = (boolean) matched.get("vegetarianOptions");
+    int price = (int) matched.get("pricePerPerson");
+    checks.add(Check.pass("restaurant-identified", "Found: " + name));
 
-    if (hasVegetarian) {
-      checks.add(Check.pass("dietary-met", name + " has vegetarian options"));
+    if (price <= EXPENSE_LIMIT) {
+      checks.add(
+          Check.pass(
+              "within-budget",
+              String.format(
+                  "%s at \u20ac%d/person within \u20ac%.0f limit", name, price, EXPENSE_LIMIT)));
       return Judgment.builder()
           .status(JudgmentStatus.PASS)
-          .reasoning(name + " has vegetarian options")
+          .reasoning(String.format("Price \u20ac%d within \u20ac%.0f limit", price, EXPENSE_LIMIT))
           .checks(checks)
           .build();
     } else {
-      checks.add(Check.fail("dietary-met", name + " does NOT have vegetarian options"));
+      checks.add(
+          Check.fail(
+              "within-budget",
+              String.format(
+                  "%s at \u20ac%d/person exceeds \u20ac%.0f limit", name, price, EXPENSE_LIMIT)));
       return Judgment.builder()
           .status(JudgmentStatus.FAIL)
-          .reasoning(name + " lacks vegetarian options")
+          .reasoning(String.format("Price \u20ac%d exceeds \u20ac%.0f limit", price, EXPENSE_LIMIT))
           .checks(checks)
           .build();
     }
