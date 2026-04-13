@@ -48,12 +48,28 @@ strong {
   font-weight: 700;
 }
 
-/* Code blocks - professional with Spring green accent */
+/* Code blocks - neutral border, clean look */
 .slidev-code {
   font-size: 1.2rem !important;
-  border-radius: 12px;
-  border: 3px solid var(--spring-green);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Aggressive dimming for non-highlighted lines */
+.slidev-code .line:not(.highlighted) {
+  opacity: 0.25 !important;
+  transition: opacity 0.3s ease;
+}
+
+/* When no lines are highlighted yet (initial state), show all */
+.slidev-code:not(:has(.line.highlighted)) .line {
+  opacity: 1 !important;
+}
+
+/* Highlighted lines: full brightness */
+.slidev-code .line.highlighted {
+  opacity: 1 !important;
 }
 
 /* Tighter slide padding for code-heavy deck */
