@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dompurify": "^3.2.4",
+    "dompurify": "^3.4.0",
     "markdown-it": "^14.1.0",
     "splitpanes": "^3.1.7",
     "vue": "^3.5.13",
