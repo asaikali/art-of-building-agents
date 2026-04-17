@@ -28,6 +28,7 @@
   </properties>
 
   <modules>
+    <module>scaffold</module>
     <module>components</module>
     <module>agents</module>
     <module>business-meal-planner</module>

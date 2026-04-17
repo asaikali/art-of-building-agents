@@ -6,7 +6,7 @@ The Inspector is the workshop's observability tool — a Vue 3 frontend that tal
 
 These 5 stages build the frontend incrementally. Each stage teaches a specific Vue/frontend concept. We use hardcoded mock data so no backend is needed to follow along. Later, when the backend exists, the frontend will just work.
 
-All work happens in `inspector/inspector-frontend/`.
+All work happens in `scaffold/inspector/`.
 
 ---
 

@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>components</artifactId>
+    <artifactId>scaffold</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>agent-core</artifactId>

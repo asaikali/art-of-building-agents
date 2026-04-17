@@ -6,7 +6,7 @@
 
 ## The Idea
 
-Each module in `agents/` is a standalone Spring Boot app that adds exactly ONE concept to the previous step. Participants `cd` into any step and run it independently. The Inspector (agent-core) stays fixed throughout — only the `AgentHandler` implementation evolves.
+Each module in `agents/` is a standalone Spring Boot app that adds exactly ONE concept to the previous step. Participants `cd` into any step and run it independently. The scaffold (`scaffold/agent-core` + `scaffold/inspector`) stays fixed throughout — only the `AgentHandler` implementation evolves.
 
 Every step uses the same Jarvis restaurant domain: search restaurants, check expense policy, verify dietary requirements, book a table.
 
@@ -63,10 +63,10 @@ cd agents/02-tool-calling
 
 ```
 ┌─────────────────────────────────────┐
-│  Inspector UI (Vue.js — from agent-core)    │
+│  Inspector UI (Vue.js — from scaffold/inspector) │
 │  Chat Panel  │  State Viewer  │  Events     │
 ├──────────────┴────────────────┴─────────────┤
-│  agent-core (fixed scaffold)                 │
+│  scaffold/agent-core (fixed scaffold)        │
 │  Session, ChatService, EventService,         │
 │  StateService, SSE Broadcasting              │
 ├──────────────────────────────────────────────┤

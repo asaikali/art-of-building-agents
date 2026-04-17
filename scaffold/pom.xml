@@ -9,11 +9,11 @@
     <artifactId>art-of-building-agents</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>components</artifactId>
+  <artifactId>scaffold</artifactId>
   <packaging>pom</packaging>
-  <description>Shared domain components for agent applications</description>
+  <description>Shared scaffold for agent applications</description>
 
   <modules>
-    <module>restaurant-data</module>
+    <module>agent-core</module>
   </modules>
 </project>

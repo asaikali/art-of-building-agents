@@ -40,7 +40,7 @@ cd business-meal-planner/01-intent-alignment
 
 ## Shared infrastructure
 
-- **`components/agent-core`** — session management, chat, state, events, SSE streaming
+- **`scaffold/agent-core`** — session management, chat, state, events, SSE streaming
 - **`components/restaurant-data`** — fake restaurant data, menus, travel time matrix,
   availability service
-- **`inspector/`** — Vue 3 frontend for observing agent behavior in real time
+- **`scaffold/inspector/`** — Vue 3 frontend for observing agent behavior in real time

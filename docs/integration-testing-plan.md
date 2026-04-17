@@ -96,7 +96,7 @@ A top-level script runs all steps sequentially:
 
 | Aspect | spring-ai-examples | This repo |
 |--------|-------------------|-----------|
-| App type | Various Spring Boot apps | All use agent-core Inspector scaffold |
+| App type | Various Spring Boot apps | All use the scaffold (`scaffold/agent-core` + `scaffold/inspector`) |
 | API | Various (REST, CLI, etc.) | Unified: `POST /sessions/{id}/messages`, `GET /sessions/{id}/events/stream` |
 | Validation | Regex + AI validation | Regex on response + events API for tool call verification |
 | Build | Each module independent | Shared parent POM, agent-core dependency |

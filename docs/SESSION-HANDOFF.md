@@ -31,7 +31,7 @@ Adding SLF4J logging to handlers so integration tests can grep stdout. Started o
 
 - Each step is a standalone Spring Boot app with `agent-core` dependency
 - `AgentHandler` interface: `void onMessage(Session session, AgentMessage message)`
-- Inspector UI (Vue.js from agent-core) shows Chat/State/Events panels
+- Inspector UI (Vue.js from `scaffold/inspector`) shows Chat/State/Events panels
 - API: `POST /api/sessions` → `POST /api/sessions/{id}/messages` → `GET /api/sessions/{id}/messages`
 - Steps 01-03: pure Spring AI. Step 04+: AgentWorks libraries via BOM.
 - Spotless (Google Java Format) enforced — run `./mvnw spotless:apply` before committing
