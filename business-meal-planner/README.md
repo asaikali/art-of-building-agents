@@ -6,6 +6,15 @@ through them in order, building up a complete agent one concept at a time.
 
 ## Modules
 
+Modules `01`–`04` teach the **first-principles agent** — the minimum set of Spring AI
+features (`ChatClient`, structured output, tool calling) needed for an end-to-end agent.
+Modules `05`+ are **variants**: each one takes the first-principles agent and rebuilds
+part of it using a different Spring AI feature (memory, MCP, human-in-the-loop, etc.)
+to show the feature in a real agent context. Variants follow the `NN-with-{feature}`
+naming convention.
+
+### First-principles core
+
 | Module | What it teaches |
 |--------|----------------|
 | `01-intent-alignment` | Structured extraction, confirmation loops, deterministic status transitions |
@@ -41,6 +50,6 @@ cd business-meal-planner/01-intent-alignment
 ## Shared infrastructure
 
 - **`scaffold/agent-core`** — session management, chat, state, events, SSE streaming
-- **`components/restaurant-data`** — fake restaurant data, menus, travel time matrix,
-  availability service
+- **`business-meal-planner/restaurant-data`** — fake restaurant data, menus, travel time
+  matrix, availability service (lives here because only meal-planner modules use it)
 - **`scaffold/inspector/`** — Vue 3 frontend for observing agent behavior in real time
