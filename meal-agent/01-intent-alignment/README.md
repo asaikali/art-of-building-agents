@@ -39,7 +39,7 @@ Key classes:
 ## Run it
 
 ```bash
-cd business-meal-planner/01-intent-alignment
+cd meal-agent/01-intent-alignment
 ../../mvnw spring-boot:run
 # Open http://localhost:8080
 ```

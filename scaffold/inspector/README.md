@@ -16,7 +16,7 @@ on `http://localhost:8080`.
 
 ## Usage
 
-1. Start any business-meal-planner module (e.g. `01-intent-alignment`)
+1. Start any meal-agent module (e.g. `01-intent-alignment`)
 2. Start the inspector with `npm run dev`
 3. Open **Chrome** at `http://localhost:5173`
 4. Create a new session and start chatting

@@ -41,7 +41,7 @@ RestaurantCandidateCheckService          — runs all 5 checks, returns aggregat
 ## Run it
 
 ```bash
-cd business-meal-planner/02-constraint-checking
+cd meal-agent/02-constraint-checking
 ../../mvnw spring-boot:run
 # Open http://localhost:8080
 ```

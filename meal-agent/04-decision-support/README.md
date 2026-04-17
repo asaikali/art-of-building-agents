@@ -50,7 +50,7 @@ The decision support flow:
 ## Run it
 
 ```bash
-cd business-meal-planner/04-decision-support
+cd meal-agent/04-decision-support
 ../../mvnw spring-boot:run
 # Open http://localhost:8080
 ```

@@ -9,9 +9,9 @@
     <artifactId>art-of-building-agents</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>business-meal-planner</artifactId>
+  <artifactId>meal-agent</artifactId>
   <packaging>pom</packaging>
-  <description>Business meal planner teaching modules</description>
+  <description>Meal agent teaching modules — each numbered module is a variation of the agent built with a different set of Spring AI features</description>
 
   <modules>
     <module>restaurant-data</module>

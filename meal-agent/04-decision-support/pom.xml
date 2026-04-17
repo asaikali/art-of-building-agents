@@ -6,12 +6,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>business-meal-planner</artifactId>
+    <artifactId>meal-agent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>03-restaurant-planning</artifactId>
+  <artifactId>04-decision-support</artifactId>
   <packaging>jar</packaging>
-  <description>Business meal planner phase 3 scaffold: restaurant planning</description>
+  <description>Business meal planner phase 4 scaffold: decision support</description>
 
   <properties>
     <excludedGroups>integration</excludedGroups>

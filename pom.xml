@@ -30,7 +30,7 @@
   <modules>
     <module>scaffold</module>
     <module>agents</module>
-    <module>business-meal-planner</module>
+    <module>meal-agent</module>
   </modules>
 
   <dependencyManagement>

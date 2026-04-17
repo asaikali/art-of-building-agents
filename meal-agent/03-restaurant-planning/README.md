@@ -45,7 +45,7 @@ The planning flow:
 ## Run it
 
 ```bash
-cd business-meal-planner/03-restaurant-planning
+cd meal-agent/03-restaurant-planning
 ../../mvnw spring-boot:run
 # Open http://localhost:8080
 ```
