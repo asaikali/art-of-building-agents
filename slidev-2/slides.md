@@ -213,6 +213,7 @@ layout: default
 <div class="text-sm opacity-50 mt-1">OUTCOME-ORIENTED</div>
 <div class="text-lg opacity-80 mt-4">"Did Jarvis pick the right restaurant?"</div>
 <div class="text-base opacity-60 mt-2">Price within budget? Dietary met? Good reasoning?</div>
+<a href="https://lab.pollack.ai/projects/agent-judge" target="_blank" class="text-sm mt-3 inline-block" style="color: #3b82f6;">lab.pollack.ai/projects/agent-judge</a>
 </div>
 
 <div class="p-6 rounded-lg" style="background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);">
@@ -220,6 +221,7 @@ layout: default
 <div class="text-sm opacity-50 mt-1">BEHAVIOR-ORIENTED</div>
 <div class="text-lg opacity-80 mt-4">"How did Jarvis get there?"</div>
 <div class="text-base opacity-60 mt-2">Tool calls, loops, decisions, timing</div>
+<a href="https://lab.pollack.ai/projects/agent-journal" target="_blank" class="text-sm mt-3 inline-block" style="color: #f59e0b;">lab.pollack.ai/projects/agent-journal</a>
 </div>
 
 </div>
@@ -1670,6 +1672,60 @@ SPEAKER (≈15s):
 layout: default
 ---
 
+# From Events to Behavior
+
+<div class="grid grid-cols-3 gap-4 mt-8 text-center">
+
+<div class="p-5 rounded-lg" style="background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);">
+<div class="text-xl font-bold" style="color: #f59e0b;">Journal</div>
+<div class="text-sm opacity-50 mt-1">Step 05</div>
+<div class="text-base opacity-80 mt-3">Records <strong>everything</strong></div>
+<div class="text-sm opacity-60 mt-2">Loop events, tokens, cost, timing</div>
+<div class="mt-3 font-mono text-xs opacity-50">JSONL audit trail</div>
+</div>
+
+<div class="p-5 rounded-lg" style="background: rgba(109, 179, 63, 0.08); border: 2px solid rgba(109, 179, 63, 0.3);">
+<div class="text-xl font-bold" style="color: #6DB33F;">ToolCallTracker</div>
+<div class="text-sm opacity-50 mt-1">Step 15</div>
+<div class="text-base opacity-80 mt-3">Records the <strong>sequence</strong></div>
+<div class="text-sm opacity-60 mt-2">Which tools, in what order</div>
+<div class="mt-3 font-mono text-xs opacity-50">List&lt;String&gt;</div>
+</div>
+
+<div class="p-5 rounded-lg" style="background: rgba(59, 130, 246, 0.08); border: 2px solid rgba(59, 130, 246, 0.3);">
+<div class="text-xl font-bold" style="color: #3b82f6;">TrajectoryClassifier</div>
+<div class="text-sm opacity-50 mt-1">Step 15</div>
+<div class="text-base opacity-80 mt-3">Lifts to <strong>semantic states</strong></div>
+<div class="text-sm opacity-60 mt-2">SEARCH, CHECK_BUDGET, BOOK</div>
+<div class="mt-3 font-mono text-xs opacity-50">Loops, hotspots, efficiency</div>
+</div>
+
+</div>
+
+<v-click>
+
+<div class="mt-8 flex items-center justify-center gap-3 font-mono text-sm">
+<span class="opacity-50">searchRestaurants</span>
+<span class="opacity-30">→</span>
+<span style="color: #6DB33F;">["searchRestaurants", "searchRestaurants", "checkExpensePolicy"]</span>
+<span class="opacity-30">→</span>
+<span style="color: #3b82f6;">SEARCH → SEARCH → CHECK_BUDGET</span>
+</div>
+
+</v-click>
+
+<v-click>
+
+<div class="mt-4 p-3 rounded-lg" style="background: rgba(59, 130, 246, 0.05); border-left: 4px solid #3b82f6;">
+<div class="text-lg">Journal tells you <strong>what happened</strong>. Semantic states tell you <strong>what the agent was trying to do</strong> — in your domain's language.</div>
+</div>
+
+</v-click>
+
+---
+layout: default
+---
+
 # ToolCallTracker — Recording the Sequence
 
 <div class="mt-1 text-xs opacity-60">
@@ -2284,3 +2340,10 @@ cd agents/05-journal && ./mvnw spring-boot:run
 SPEAKER (≈10s):
 "Enough slides. Let's build. Start with the journal — once you can record, everything else has data to work with."
 -->
+
+---
+layout: none
+---
+
+<img src="/closing-lab.svg" style="position: absolute; inset: 0; width: 100%; height: 100%;" />
+
