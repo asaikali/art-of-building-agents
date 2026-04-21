@@ -16,6 +16,7 @@
   <modules>
     <module>agents-common</module>
     <module>basic-chatbot</module>
+<!--    <module>greeting-api</module>-->
     <module>02-tool-calling</module>
     <module>03-guardrails</module>
     <module>03b-hooks</module>
@@ -34,5 +35,6 @@
     <module>14-judge</module>
     <module>15-diagnose</module>
     <module>16-quality-gate</module>
+    <module>customer-management</module>
   </modules>
 </project>
