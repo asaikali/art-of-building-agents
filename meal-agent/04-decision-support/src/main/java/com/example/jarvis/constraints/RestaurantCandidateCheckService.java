@@ -11,6 +11,24 @@ import com.example.jarvis.requirements.UserRequirements;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * Runs every Phase 2 constraint check against one {@link RestaurantCandidate} and returns a
+ * strongly typed {@link RestaurantCheckResult} aggregating the verdicts.
+ *
+ * <p>This service is an orchestration and adapter layer. It invokes the underlying checks and
+ * adapts the higher-level {@link UserRequirements} into the narrower input shapes those checks
+ * expect — for example, flattening per-attendee dietary constraints into a single {@code
+ * List<DietaryConstraint>} for {@link DietarySuitabilityCheck}, or picking the first attendee with
+ * travel info for {@link TravelTimeCheck}.
+ *
+ * <p>The flattening and traveler-selection are the real adapter responsibility of this layer: the
+ * lower-level checks deliberately do not depend on {@code UserRequirements}, which keeps them
+ * narrow and reusable.
+ *
+ * <p>This service does not score the candidate, classify any check as hard vs soft, decide whether
+ * the candidate should be rejected, or rank candidates against each other. Those interpretations
+ * belong to the planning layer in later phases.
+ */
 @Service
 public class RestaurantCandidateCheckService {
 

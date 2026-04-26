@@ -11,6 +11,31 @@ import java.util.Set;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Hybrid check that judges whether a restaurant's main courses appear suitable for the party's
+ * dietary needs.
+ *
+ * <p>The Java half does deterministic preparation:
+ *
+ * <ul>
+ *   <li>de-duplicates dietary constraints and ignores {@link
+ *       com.example.jarvis.requirements.DietaryConstraint#NONE}
+ *   <li>loads the menu and filters out non-main sections (appetizers, desserts, sides, drinks,
+ *       sauces, …) so the model focuses on what people will actually order as a main
+ * </ul>
+ *
+ * <p>The LLM half then judges restaurant-level suitability from the filtered evidence and returns
+ * PASS, FAIL, or UNSURE.
+ *
+ * <p>Two short-circuits avoid the model call entirely:
+ *
+ * <ul>
+ *   <li>If the normalized constraint list is empty, return {@link DietarySuitabilityStatus#PASS} —
+ *       there is nothing to check.
+ *   <li>If no menu data exists for the restaurant, return {@link DietarySuitabilityStatus#UNSURE} —
+ *       there is nothing to judge.
+ * </ul>
+ */
 @Component
 public class DietarySuitabilityCheck {
 

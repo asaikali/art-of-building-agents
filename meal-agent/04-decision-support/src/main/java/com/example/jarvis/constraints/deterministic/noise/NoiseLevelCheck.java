@@ -4,6 +4,19 @@ import com.example.jarvis.requirements.NoiseLevel;
 import com.example.restaurant.RestaurantService;
 import org.springframework.stereotype.Component;
 
+/**
+ * Deterministic check comparing the user's requested noise tolerance to the restaurant's stored
+ * noise level.
+ *
+ * <p>The requested level is treated as the <em>maximum acceptable</em> noise. Levels are ranked
+ * {@code QUIET = 1}, {@code MODERATE = 2}, {@code LOUD = 3}, and the check passes when {@code
+ * actualRank <= requestedRank}. So requesting {@code MODERATE} accepts a quiet or moderate
+ * restaurant but not a loud one.
+ *
+ * <p>If no preference is provided, the check returns {@link NoiseLevelCheckStatus#PASS} — there is
+ * no constraint to violate. There is no MAYBE status here: noise either fits the tolerance or it
+ * does not.
+ */
 @Component
 public class NoiseLevelCheck {
 

@@ -4,6 +4,25 @@ import com.example.restaurant.RestaurantService;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
+/**
+ * Deterministic check comparing the user's per-person budget to the restaurant's published price
+ * range.
+ *
+ * <p>Three outcomes are possible:
+ *
+ * <ul>
+ *   <li>{@link BudgetPerPersonCheckStatus#PASS} — budget is at or above the restaurant's upper
+ *       bound (clearly affordable)
+ *   <li>{@link BudgetPerPersonCheckStatus#FAIL} — budget is below the restaurant's lower bound
+ *       (clearly out of reach)
+ *   <li>{@link BudgetPerPersonCheckStatus#MAYBE} — budget falls inside the published range (could
+ *       go either way once specific dishes are picked)
+ * </ul>
+ *
+ * <p>The MAYBE status exists because the fake pricing data is coarse: a budget that lands inside
+ * the published range is informative but not conclusive. If no budget is provided the check returns
+ * PASS, since there is no constraint to violate.
+ */
 @Component
 public class BudgetPerPersonCheck {
 
