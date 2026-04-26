@@ -18,7 +18,7 @@ Use Spring AI tool calling to search for restaurants and evaluate them against c
 ```
 planning/
   PlanningTools.java       — @Tool methods: findAvailableRestaurants, getRestaurantDetails,
-                             getRestaurantMenu, checkRestaurantCandidate
+                             checkRestaurantCandidate
   RestaurantPlanner.java   — builds ChatClient with tools, makes single planning call
 
 agent/
@@ -34,9 +34,6 @@ The planning flow:
 
 ## Key design decisions
 
-- **Tools accept name or ID.** The `resolveRestaurantId` helper tries exact ID match first,
-  then falls back to name matching. This prevents failures when the model passes display
-  names instead of IDs.
 - **No while loop.** Spring AI's `ToolCallAdvisor` handles the multi-turn tool calling
   automatically. The Java code makes one call.
 - **Tone rules in the prompt.** The model writes like a concierge — no PASS/FAIL jargon

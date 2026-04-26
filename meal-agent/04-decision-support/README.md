@@ -4,13 +4,14 @@ Let the user explore the shortlist, compare restaurants, ask questions, and pick
 
 ## What this module teaches
 
-- **Workflow phases** — the agent tracks whether it's in alignment, exploring options, or
-  done. Not every message restarts the pipeline.
+- **Workflow phases** — the agent tracks whether it's in alignment or exploring options.
+  Not every message restarts the pipeline.
 - **Structured output for routing** — the model returns a typed `DecisionSupportResponse`
   with an `action` field ("answer", "restart", "selected") that the handler uses to decide
   what happens next.
-- **Cached context + on-demand tools** — the shortlist is in the system prompt for quick
-  comparison questions. Tools are available for deeper lookups (menus, details).
+- **Cached context + on-demand tools** — the shortlist is included in the user prompt on
+  every turn for quick comparison questions. Tools are available for deeper lookups
+  (menus, details).
 - **Graceful state transitions** — "restart" goes back to alignment, "selected" logs a
   booking event and resets for a new meal.
 

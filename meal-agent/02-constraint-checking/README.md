@@ -35,8 +35,10 @@ RestaurantCandidateCheckService          — runs all 5 checks, returns aggregat
   higher-level model.
 - **Menu filtering is Java, not prompt.** The dietary check strips appetizer/dessert/side
   sections before sending to the LLM, so the model focuses on main courses.
-- **PASS/FAIL/MAYBE/UNSURE** — each status has clear meaning. FAIL is a hard stop. MAYBE
-  means the value falls in a range. UNSURE means not enough evidence.
+- **PASS/FAIL/MAYBE/UNSURE** — a shared status vocabulary; each check uses only the subset
+  that fits its semantics. FAIL is a hard stop. MAYBE means the value falls in a range
+  (used by the budget check). UNSURE means not enough evidence (used by the hybrid and
+  LLM-judge checks when inputs or context are missing).
 
 ## Run it
 

@@ -16,7 +16,7 @@ so on).
 |--------|-------------------------|
 | `01-intent-alignment` | `ChatClient`, structured output (`.entity()`) |
 | `02-constraint-checking` | adds deterministic/hybrid/LLM-as-judge checks |
-| `03-restaurant-planning` | adds `@Tool` + `ToolCallingAdvisor` |
+| `03-restaurant-planning` | adds `@Tool` + `ToolCallAdvisor` |
 | `04-decision-support` | adds structured output for action routing + workflow phases |
 
 Later modules (05+) follow the convention `NN-with-{feature}` — e.g.
