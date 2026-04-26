@@ -44,15 +44,13 @@ demonstrates the capability being taught.
 └──────────────────────────┘         └──────────────────────────┘         └──────────────────────────┘
 ```
 
-**scaffold** is the reusable platform — agent runtime + observation UI. It knows
-nothing about meals.
+**scaffold** is the reusable platform — the [agent runtime](../scaffold/agent-core/)
+plus the [observation UI](../scaffold/inspector/README.md). It knows nothing about
+meals.
 
 **meal-agent** is one agent built on that platform. Each numbered module wires a
 `JarvisAgentHandler` into agent-core; that handler is where all the
 agent-specific work lives.
-
-For the platform itself, see [`../scaffold/inspector/README.md`](../scaffold/inspector/README.md)
-and [`../scaffold/agent-core/`](../scaffold/agent-core/).
 
 ## Suggested study order
 
