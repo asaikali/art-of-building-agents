@@ -30,12 +30,6 @@ a vendor selection — only the candidates and the requirements change.
 Spring AI features are the vehicle: each module uses whichever feature best
 demonstrates the capability being taught.
 
-## What's in this directory
-
-- `01-intent-alignment/` … `04-decision-support/` — the four progressive modules
-- `restaurant-data/` — fake restaurant data, menus, travel-time matrix, and
-  availability service used by every module from 02 onward
-
 ## How this fits together
 
 ```
@@ -60,20 +54,7 @@ agent-specific work lives.
 For the platform itself, see [`../scaffold/inspector/README.md`](../scaffold/inspector/README.md)
 and [`../scaffold/agent-core/`](../scaffold/agent-core/).
 
-## Modules
-
-| Module | Spring AI features used |
-|--------|-------------------------|
-| `01-intent-alignment` | `ChatClient`, structured output (`.entity()`) |
-| `02-constraint-checking` | adds deterministic/hybrid/LLM-as-judge checks |
-| `03-restaurant-planning` | adds `@Tool` + `ToolCallAdvisor` |
-| `04-decision-support` | adds structured output for action routing + workflow phases |
-
-Each module is a standalone Spring Boot app and contains all the code from
-earlier modules plus whatever the new module adds. Open any module and you have
-the full picture up to that point.
-
-## How to approach them
+## Suggested study order
 
 1. **Start with 01.** Read the alignment pipeline, run it, and watch how the
    extractor, assessor, and composer take turns in the inspector.
@@ -86,8 +67,6 @@ the full picture up to that point.
 4. **Move to 04.** See how the agent stays in a conversational phase after
    planning. Compare restaurants, ask follow-ups, pick one. Notice how
    structured output routes the user's intent to the right handler action.
-5. **Continue with 05+** to see the agent rebuilt with more advanced Spring AI
-   features.
 
 ## Run a module
 
