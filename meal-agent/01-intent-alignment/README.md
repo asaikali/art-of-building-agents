@@ -2,6 +2,9 @@
 
 Turn a messy natural-language request into confirmed, structured meal requirements.
 
+> **Builds on:** nothing — this is the starting point.
+> **Adds:** the alignment pipeline (extractor → assessor → composer) using `ChatClient` and `.entity()`.
+
 ## What this module teaches
 
 - **Structured extraction** — use `ChatClient.entity()` to extract typed data from free text
@@ -36,20 +39,6 @@ Key classes:
   checked with Java. Follow-up questions ("ask about cuisine?") are model-generated.
 - **JSON is the context format.** `UserRequirements` is serialized to JSON for the model.
 
-## Run it
+## Running and testing
 
-```bash
-cd meal-agent/01-intent-alignment
-../../mvnw spring-boot:run
-# Open http://localhost:8080
-```
-
-## Tests
-
-```bash
-# Unit tests (no API key needed)
-../../mvnw test
-
-# Integration tests (requires API key)
-../../mvnw test -Dgroups=integration
-```
+See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.

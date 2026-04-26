@@ -2,6 +2,9 @@
 
 Use Spring AI tool calling to search for restaurants and evaluate them against constraints.
 
+> **Builds on:** 02 (constraint checks).
+> **Adds:** the constraint checks become `@Tool` methods; one `ChatClient.call()` with `ToolCallAdvisor` lets the model search and shortlist autonomously.
+
 ## What this module teaches
 
 - **Tool calling with Spring AI** — register `@Tool` methods, let the model decide which
@@ -32,6 +35,9 @@ The planning flow:
 4. Model calls `checkRestaurantCandidate` on promising candidates → gets check results
 5. Model produces a shortlist or explains what failed
 
+Trace `VegetarianDinnerWalkthrough` for a full session showing how the model picks tools,
+evaluates candidates, and produces a shortlist.
+
 ## Key design decisions
 
 - **No while loop.** Spring AI's `ToolCallAdvisor` handles the multi-turn tool calling
@@ -39,20 +45,6 @@ The planning flow:
 - **Tone rules in the prompt.** The model writes like a concierge — no PASS/FAIL jargon
   in the user-facing response. Failed restaurants are omitted entirely.
 
-## Run it
+## Running and testing
 
-```bash
-cd meal-agent/03-restaurant-planning
-../../mvnw spring-boot:run
-# Open http://localhost:8080
-```
-
-## Tests
-
-```bash
-# Unit tests (no API key needed)
-../../mvnw test
-
-# Integration walkthrough (requires API key)
-../../mvnw test -Dgroups=integration -Dtest=VegetarianDinnerWalkthrough
-```
+See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.

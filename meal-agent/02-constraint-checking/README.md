@@ -2,6 +2,9 @@
 
 Define how each user requirement can be checked against a restaurant candidate.
 
+> **Builds on:** 01 (intent alignment).
+> **Adds:** five checks against a restaurant — three deterministic, one hybrid, one LLM-as-judge — plus an aggregator service.
+
 ## What this module teaches
 
 - **Three types of checks** — deterministic (pure Java), hybrid (Java evidence + LLM
@@ -17,13 +20,13 @@ Define how each user requirement can be checked against a restaurant candidate.
 ```
 constraints/
   deterministic/
-    budget/     BudgetPerPersonCheck    — compare budget to restaurant price range
-    noise/      NoiseLevelCheck         — ranked comparison (QUIET ≤ MODERATE ≤ LOUD)
-    travel/     TravelTimeCheck         — fake neighborhood matrix + mode adjustments
+    budget/      BudgetPerPersonCheck    — compare budget to restaurant price range
+    noise/       NoiseLevelCheck         — ranked comparison (QUIET ≤ MODERATE ≤ LOUD)
+    travel/      TravelTimeCheck         — fake neighborhood matrix + mode adjustments
   hybrid/
-    dietary/    DietarySuitabilityCheck  — Java filters menu to mains, LLM judges fit
+    dietary/     DietarySuitabilityCheck — Java filters menu to mains, LLM judges fit
   llmjudge/
-    suitability/ MealSuitabilityCheck   — LLM evaluates overall venue fit from metadata
+    suitability/ MealSuitabilityCheck    — LLM evaluates overall venue fit from metadata
 
 RestaurantCandidateCheckService          — runs all 5 checks, returns aggregate result
 ```
@@ -40,20 +43,6 @@ RestaurantCandidateCheckService          — runs all 5 checks, returns aggregat
   (used by the budget check). UNSURE means not enough evidence (used by the hybrid and
   LLM-judge checks when inputs or context are missing).
 
-## Run it
+## Running and testing
 
-```bash
-cd meal-agent/02-constraint-checking
-../../mvnw spring-boot:run
-# Open http://localhost:8080
-```
-
-## Tests
-
-```bash
-# Unit tests — deterministic checks + orchestration (no API key needed)
-../../mvnw test
-
-# Integration tests — hybrid and LLM checks (requires API key)
-../../mvnw test -Dgroups=integration
-```
+See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.

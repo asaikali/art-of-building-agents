@@ -2,6 +2,9 @@
 
 Let the user explore the shortlist, compare restaurants, ask questions, and pick one.
 
+> **Builds on:** 03 (restaurant planning).
+> **Adds:** workflow phase tracking + structured-output action routing for the post-shortlist conversation.
+
 ## What this module teaches
 
 - **Workflow phases** — the agent tracks whether it's in alignment or exploring options.
@@ -25,8 +28,8 @@ decisionsupport/
 
 agent/
   WorkflowPhase.java            — ALIGNMENT, EXPLORING_OPTIONS
-  JarvisAgentContext.java        — tracks phase, alignment status, shortlist
-  JarvisAgentHandler.java        — routes by phase:
+  JarvisAgentContext.java       — tracks phase, alignment status, shortlist
+  JarvisAgentHandler.java       — routes by phase:
                                     ALIGNMENT → alignment pipeline → planning
                                     EXPLORING_OPTIONS → decision support
 ```
@@ -38,6 +41,9 @@ The decision support flow:
 4. User says "book Canoe" → model returns `action: "selected"` → handler logs event, resets
 5. User says "try a higher budget" → model returns `action: "restart"` → back to alignment
 
+Trace `VegetarianDinnerWalkthrough` for a full end-to-end session covering alignment,
+planning, and decision-support phases.
+
 ## Key design decisions
 
 - **The model classifies intent via structured output.** Instead of parsing keywords from
@@ -48,20 +54,6 @@ The decision support flow:
   logs a `restaurant-booked` event and resets. No separate booking phase needed for the
   workshop.
 
-## Run it
+## Running and testing
 
-```bash
-cd meal-agent/04-decision-support
-../../mvnw spring-boot:run
-# Open http://localhost:8080
-```
-
-## Tests
-
-```bash
-# Unit tests (no API key needed)
-../../mvnw test
-
-# Integration walkthrough (requires API key)
-../../mvnw test -Dgroups=integration -Dtest=VegetarianDinnerWalkthrough
-```
+See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.
