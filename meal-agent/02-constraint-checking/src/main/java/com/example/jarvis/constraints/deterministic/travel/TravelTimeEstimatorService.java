@@ -4,6 +4,27 @@ import com.example.jarvis.requirements.TravelMode;
 import com.example.restaurant.TravelTimeMatrix;
 import org.springframework.stereotype.Service;
 
+/**
+ * Estimates travel time in minutes between two neighborhoods for a given travel mode, using the
+ * fake matrix loaded by {@link com.example.restaurant.TravelTimeMatrix}.
+ *
+ * <p>The estimate is computed in two steps: a baseline neighborhood-to-neighborhood lookup,
+ * followed by a per-mode adjustment:
+ *
+ * <ul>
+ *   <li>{@code WALKING} — base minutes
+ *   <li>{@code TRANSIT} — {@code round(base * 1.3)}
+ *   <li>{@code DRIVING} — {@code max(8, round(base * 0.9))}
+ *   <li>{@code TAXI} — {@code max(8, round(base * 1.0))}
+ * </ul>
+ *
+ * <p>These multipliers are not trying to model real Toronto traffic. They are tuned to be
+ * predictable, visibly different per mode, and easy to reason about in workshop scenarios.
+ *
+ * <p>If the matrix has no entry for a neighborhood pair, the estimator returns a fixed fallback of
+ * 60 minutes and intentionally <em>skips</em> the travel-mode adjustment — the fallback already
+ * means "we don't really know", so layering arithmetic on top would be misleading.
+ */
 @Service
 public class TravelTimeEstimatorService {
 

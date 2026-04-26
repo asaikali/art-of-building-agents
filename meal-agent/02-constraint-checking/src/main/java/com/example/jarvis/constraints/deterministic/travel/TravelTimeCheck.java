@@ -4,6 +4,16 @@ import com.example.jarvis.requirements.TravelMode;
 import com.example.restaurant.RestaurantService;
 import org.springframework.stereotype.Component;
 
+/**
+ * Deterministic check comparing an estimated travel time to the attendee's maximum allowed minutes.
+ *
+ * <p>Returns {@link TravelTimeCheckStatus#PASS} when the estimate fits within the limit, {@link
+ * TravelTimeCheckStatus#FAIL} when it exceeds the limit, and {@link TravelTimeCheckStatus#UNSURE}
+ * when any required input (origin neighborhood, travel mode, or limit) is missing.
+ *
+ * <p>The actual estimate is delegated to {@link TravelTimeEstimatorService}, which is fake by
+ * design — see the package-level docs for why.
+ */
 @Component
 public class TravelTimeCheck {
 
