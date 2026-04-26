@@ -68,13 +68,25 @@ agent-specific work lives.
 
 ## Run a module
 
+The meal-agent backend and the inspector UI run as two processes.
+
+In one terminal, start the backend for the module you want:
+
 ```bash
 cd meal-agent/<module>
 ../../mvnw spring-boot:run
 ```
 
-Then open <http://localhost:8080> — that's the inspector UI. Chat on the left,
-agent state and events on the right.
+In another terminal, start the inspector (see
+[`../scaffold/inspector/README.md`](../scaffold/inspector/README.md) for setup):
+
+```bash
+cd scaffold/inspector
+npm run dev
+```
+
+Then open <http://localhost:5173>. Chat on the left, agent state and events on
+the right. The inspector proxies its API calls to the backend on port 8080.
 
 Any module is runnable on its own. Later modules contain everything earlier
 modules have, so running 04 is the way to see the full agent end-to-end.
