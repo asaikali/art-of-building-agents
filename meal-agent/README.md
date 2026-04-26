@@ -4,28 +4,31 @@ An end-to-end agent that helps a user plan a business meal — aligning intent,
 checking constraints, picking a restaurant, and guiding the final decision.
 
 Every numbered module under this directory is a complete, standalone Spring Boot
-app that implements the same agent. The numbered sequence has two parts.
+app that implements the same agent.
 
-**Modules 01-04 teach the core capabilities of building an agent** — the things an
-agent has to *do*, taught in the order you'd build them:
+**Modules 01-04 walk through the capabilities a real agent needs**, in the order
+you'd build them:
 
-1. **Understand and align with the user's intent** — turn messy natural language
-   into a confirmed, structured representation of what the user wants.
-2. **Know whether a candidate meets that intent** — given a restaurant, check
-   each requirement against it.
-3. **Find candidates autonomously** — let the agent search and evaluate restaurants
-   itself instead of being walked through it step by step.
-4. **Help the user decide** — answer questions, compare options, and recognize when
-   they've picked one or want to start over.
+1. **Understand and align with the user's intent** — turn what the user types into
+   a confirmed, structured statement of what they want. *Extract date, time, party
+   size, budget, and dietary needs from a free-form chat.*
+2. **Check whether a candidate meets the requirements** — given a single option,
+   evaluate it against each requirement, using code where the answer is mechanical
+   and the model where it isn't. *Check a restaurant against budget, noise, travel
+   time, dietary fit, and venue suitability.*
+3. **Discover and evaluate options autonomously** — let the agent search through
+   options and produce a shortlist on its own, rather than being walked through
+   every step. *Search the restaurant catalog and evaluate each candidate against
+   the user's constraints.*
+4. **Help the user reach a decision** — answer questions, compare options, and
+   recognize when they've chosen one or want to start over. *Compare restaurants,
+   look up a menu, book one, or restart with relaxed requirements.*
 
-**Modules 05+ shift focus to Spring AI features.** Each rebuilds the agent using a
-specific feature — memory, MCP, human-in-the-loop, sub-agents, and so on — so you
-can see that feature in a real agent context. The naming convention is
-`NN-with-{feature}`.
+The same shape applies in other domains — a vacation planner, a hiring shortlist,
+a vendor selection — only the candidates and the requirements change.
 
-Spring AI features are the vehicle either way: 01-04 reach for whichever feature
-best demonstrates the capability being taught; 05+ each lead with one specific
-feature.
+Spring AI features are the vehicle: each module uses whichever feature best
+demonstrates the capability being taught.
 
 ## What's in this directory
 
