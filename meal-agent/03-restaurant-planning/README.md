@@ -3,7 +3,9 @@
 Use Spring AI tool calling to search for restaurants and evaluate them against constraints.
 
 > **Builds on:** 02 (constraint checks).
-> **Adds:** the constraint checks become `@Tool` methods; one `ChatClient.call()` with `ToolCallAdvisor` lets the model search and shortlist autonomously.
+> **Adds:** letting the model search and evaluate candidates autonomously —
+> implemented by exposing the constraint checks as `@Tool` methods and letting
+> `ToolCallAdvisor` run the loop.
 
 ## What this module teaches
 

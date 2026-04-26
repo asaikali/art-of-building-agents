@@ -3,7 +3,9 @@
 Turn a messy natural-language request into confirmed, structured meal requirements.
 
 > **Builds on:** nothing — this is the starting point.
-> **Adds:** the alignment pipeline (extractor → assessor → composer) using `ChatClient` and `.entity()`.
+> **Adds:** understanding the user's intent — turning messy natural language into a
+> confirmed, structured representation, implemented as a 3-step pipeline
+> (extractor → assessor → composer) using `ChatClient` and `.entity()`.
 
 ## What this module teaches
 

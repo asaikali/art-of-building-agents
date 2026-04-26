@@ -3,7 +3,9 @@
 Define how each user requirement can be checked against a restaurant candidate.
 
 > **Builds on:** 01 (intent alignment).
-> **Adds:** five checks against a restaurant — three deterministic, one hybrid, one LLM-as-judge — plus an aggregator service.
+> **Adds:** knowing whether a restaurant meets the user's intent — five checks
+> (three deterministic, one hybrid, one LLM-as-judge) and an aggregator service
+> that runs them all against a candidate.
 
 ## What this module teaches
 

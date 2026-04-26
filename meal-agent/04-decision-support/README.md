@@ -3,7 +3,9 @@
 Let the user explore the shortlist, compare restaurants, ask questions, and pick one.
 
 > **Builds on:** 03 (restaurant planning).
-> **Adds:** workflow phase tracking + structured-output action routing for the post-shortlist conversation.
+> **Adds:** supporting the user's decision after the shortlist — answering,
+> comparing, picking, restarting — via workflow phase tracking and
+> structured-output action routing.
 
 ## What this module teaches
 

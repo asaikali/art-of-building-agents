@@ -4,11 +4,28 @@ An end-to-end agent that helps a user plan a business meal — aligning intent,
 checking constraints, picking a restaurant, and guiding the final decision.
 
 Every numbered module under this directory is a complete, standalone Spring Boot
-app that implements the same agent. What differs between modules is **which Spring
-AI features the agent is built with**. The numbered sequence walks from the most
-basic implementation (just `ChatClient` and structured output) to progressively
-richer variations (tool calling, memory, MCP, human-in-the-loop, sub-agents, and
-so on).
+app that implements the same agent. The numbered sequence has two parts.
+
+**Modules 01-04 teach the core capabilities of building an agent** — the things an
+agent has to *do*, taught in the order you'd build them:
+
+1. **Understand and align with the user's intent** — turn messy natural language
+   into a confirmed, structured representation of what the user wants.
+2. **Know whether a candidate meets that intent** — given a restaurant, check
+   each requirement against it.
+3. **Find candidates autonomously** — let the agent search and evaluate restaurants
+   itself instead of being walked through it step by step.
+4. **Help the user decide** — answer questions, compare options, and recognize when
+   they've picked one or want to start over.
+
+**Modules 05+ shift focus to Spring AI features.** Each rebuilds the agent using a
+specific feature — memory, MCP, human-in-the-loop, sub-agents, and so on — so you
+can see that feature in a real agent context. The naming convention is
+`NN-with-{feature}`.
+
+Spring AI features are the vehicle either way: 01-04 reach for whichever feature
+best demonstrates the capability being taught; 05+ each lead with one specific
+feature.
 
 ## What's in this directory
 
@@ -48,10 +65,6 @@ and [`../scaffold/agent-core/`](../scaffold/agent-core/).
 | `02-constraint-checking` | adds deterministic/hybrid/LLM-as-judge checks |
 | `03-restaurant-planning` | adds `@Tool` + `ToolCallAdvisor` |
 | `04-decision-support` | adds structured output for action routing + workflow phases |
-
-Later modules (05+) follow the convention `NN-with-{feature}` — e.g.
-`05-with-memory`, `06-with-mcp` — each rebuilding the agent using a different
-Spring AI feature to show that feature in a real agent context.
 
 Each module is a standalone Spring Boot app and contains all the code from
 earlier modules plus whatever the new module adds. Open any module and you have
