@@ -5,7 +5,7 @@ import com.example.jarvis.requirements.UserRequirements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * uses Spring AI tool calling to discover and evaluate restaurant candidates.
  *
  * <p>The model drives the planning by calling tools: first finding available restaurants, then
- * evaluating them against the confirmed constraints. Spring AI's {@link ToolCallAdvisor} handles
+ * evaluating them against the confirmed constraints. Spring AI's {@link ToolCallingAdvisor} handles
  * tool execution automatically.
  */
 @Service
@@ -59,7 +59,7 @@ public class RestaurantPlanner {
                 - If a restaurant doesn't fit, explain why naturally without jargon.
                 """)
             .defaultTools(planningTools)
-            .defaultAdvisors(ToolCallAdvisor.builder().build())
+            .defaultAdvisors(ToolCallingAdvisor.builder().build())
             .build();
   }
 

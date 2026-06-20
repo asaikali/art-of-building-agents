@@ -5,7 +5,7 @@ Use Spring AI tool calling to search for restaurants and evaluate them against c
 > **Builds on:** 02 (constraint checks).
 > **Adds:** letting the model search and evaluate candidates autonomously —
 > implemented by exposing the constraint checks as `@Tool` methods and letting
-> `ToolCallAdvisor` run the loop.
+> `ToolCallingAdvisor` run the loop.
 
 ## What this module teaches
 
@@ -42,7 +42,7 @@ evaluates candidates, and produces a shortlist.
 
 ## Key design decisions
 
-- **No while loop.** Spring AI's `ToolCallAdvisor` handles the multi-turn tool calling
+- **No while loop.** Spring AI's `ToolCallingAdvisor` handles the multi-turn tool calling
   automatically. The Java code makes one call.
 - **Tone rules in the prompt.** The model writes like a concierge — no PASS/FAIL jargon
   in the user-facing response. Failed restaurants are omitted entirely.

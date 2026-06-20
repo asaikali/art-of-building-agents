@@ -6,7 +6,7 @@ import com.example.jarvis.requirements.UserRequirements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,7 +47,7 @@ public class DecisionSupport {
                 - Don't mention internal check names or status codes.
                 """)
             .defaultTools(planningTools)
-            .defaultAdvisors(ToolCallAdvisor.builder().build())
+            .defaultAdvisors(ToolCallingAdvisor.builder().build())
             .build();
   }
 
