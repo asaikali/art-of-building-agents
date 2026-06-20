@@ -2,12 +2,14 @@ package com.example.jarvis.constraints.hybrid.dietary;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.DietaryConstraint;
+import com.example.restaurant.MenuItem;
 import com.example.restaurant.MenuSection;
 import com.example.restaurant.MenuService;
 import com.example.restaurant.RestaurantMenu;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +40,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DietarySuitabilityCheck {
+
+  private static final int MIN_SUITABLE_MAIN_COURSES = 3;
 
   private final MenuService menuService;
   private final ChatClient chatClient;
@@ -78,6 +82,12 @@ public class DietarySuitabilityCheck {
       return new DietarySuitabilityResult(
           DietarySuitabilityStatus.UNSURE,
           "No main course sections found in the menu to evaluate.");
+    }
+
+    var weakTaggedEvidence =
+        checkMinimumTaggedMainCourseEvidence(normalizedConstraints, mainCourseSections);
+    if (weakTaggedEvidence != null) {
+      return weakTaggedEvidence;
     }
 
     return chatClient
@@ -125,6 +135,8 @@ public class DietarySuitabilityCheck {
           "wine",
           "beer",
           "sauce",
+          "small bite",
+          "small plate",
           "add-on",
           "enhancement",
           "spread");
@@ -138,5 +150,57 @@ public class DietarySuitabilityCheck {
   private boolean isNonMainSection(String sectionName) {
     var lower = sectionName.toLowerCase(Locale.ROOT);
     return NON_MAIN_KEYWORDS.stream().anyMatch(lower::contains);
+  }
+
+  private DietarySuitabilityResult checkMinimumTaggedMainCourseEvidence(
+      List<DietaryConstraint> dietaryConstraints, List<MenuSection> mainCourseSections) {
+
+    var tagBackedConstraints = dietaryConstraints.stream().filter(this::isTagBacked).toList();
+    if (tagBackedConstraints.isEmpty()) {
+      return null;
+    }
+
+    long suitableMainCourseCount =
+        mainCourseSections.stream()
+            .flatMap(section -> section.items().stream())
+            .filter(item -> satisfiesAllTagBackedConstraints(item, tagBackedConstraints))
+            .count();
+
+    if (suitableMainCourseCount >= MIN_SUITABLE_MAIN_COURSES) {
+      return null;
+    }
+
+    return new DietarySuitabilityResult(
+        DietarySuitabilityStatus.UNSURE,
+        "Menu evidence is too thin to confirm enough suitable main-course options.");
+  }
+
+  private boolean isTagBacked(DietaryConstraint dietaryConstraint) {
+    return dietaryConstraint == DietaryConstraint.VEGETARIAN
+        || dietaryConstraint == DietaryConstraint.VEGAN
+        || dietaryConstraint == DietaryConstraint.GLUTEN_FREE;
+  }
+
+  private boolean satisfiesAllTagBackedConstraints(
+      MenuItem item, List<DietaryConstraint> dietaryConstraints) {
+    var dietaryTags =
+        item.dietaryTags() == null
+            ? Set.<String>of()
+            : item.dietaryTags().stream()
+                .filter(tag -> tag != null && !tag.isBlank())
+                .map(tag -> tag.toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
+
+    return dietaryConstraints.stream()
+        .allMatch(dietaryConstraint -> isSatisfiedByTags(dietaryConstraint, dietaryTags));
+  }
+
+  private boolean isSatisfiedByTags(DietaryConstraint dietaryConstraint, Set<String> dietaryTags) {
+    return switch (dietaryConstraint) {
+      case VEGETARIAN -> dietaryTags.contains("vegetarian") || dietaryTags.contains("vegan");
+      case VEGAN -> dietaryTags.contains("vegan");
+      case GLUTEN_FREE -> dietaryTags.contains("gluten-free");
+      default -> true;
+    };
   }
 }
