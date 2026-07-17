@@ -34,5 +34,3 @@ Rather than treating agents as black boxes, we’ll make the loop visible and co
 * Familiar with foundational AI concepts (models, prompts, embeddings, and tool calling).
 * Basic experience with **Spring AI** (key concepts will be reviewed as needed).
 * An interest in learning how to architect and build AI agents.
-
-Would you like me to create a stylized header image for this workshop or perhaps draft a LinkedIn post to promote it?
