@@ -89,6 +89,7 @@ dist/
 .vite/
 .eslintcache
 .stylelintcache
+*.tsbuildinfo
 
 ### Slidev ###
 .slidev/
