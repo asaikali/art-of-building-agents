@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.1</version>
     <relativePath/>
   </parent>
   <groupId>com.example</groupId>
@@ -19,7 +19,7 @@
 
   <properties>
     <java.version>25</java.version>
-    <spring-ai.version>2.0.0</spring-ai.version>
+    <spring-ai.version>2.0.1</spring-ai.version>
     <spotless.version>3.8.0</spotless.version>
     <argLine/>
   </properties>
