@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Start the inspector dev server on http://localhost:5173 (proxies /api to port 8080)"
+
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+# shellcheck disable=SC1091
+source "${MISE_PROJECT_ROOT:?}/.mise/lib/terminal.sh"
+set_terminal_title "ui"
+
+readonly inspector_root="${MISE_PROJECT_ROOT}/scaffold/inspector"
+
+# Make a fresh checkout demo-ready with a single command.
+if [[ ! -d "${inspector_root}/node_modules" ]]; then
+    npm --prefix "${inspector_root}" ci
+fi
+
+exec npm --prefix "${inspector_root}" run dev -- "$@"

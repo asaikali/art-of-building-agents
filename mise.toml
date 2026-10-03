@@ -1,0 +1,4 @@
+[tools]
+java = "temurin-25"
+# Latest Node LTS; used by the inspector (scaffold/inspector).
+node = "24"

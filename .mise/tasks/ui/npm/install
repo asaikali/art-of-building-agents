@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Install the inspector dependencies from the lockfile"
+
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+exec npm --prefix "${MISE_PROJECT_ROOT:?}/scaffold/inspector" ci
