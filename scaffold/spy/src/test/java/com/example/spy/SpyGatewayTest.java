@@ -222,7 +222,7 @@ class SpyGatewayTest {
     long id = store.list().getFirst().id();
     assertThat(get("/spy/api/exchanges/" + id).body()).contains("request-5");
     assertThat(get("/spy").body())
-        .contains("App → model", "Model → app")
+        .contains("Request: App → Model", "Response: Model → App")
         .doesNotContain("Request headers", "Response headers", "requestHeaders", "responseHeaders");
     var root = get("/");
     assertThat(root.statusCode()).isEqualTo(200);
