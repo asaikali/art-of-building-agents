@@ -3,6 +3,7 @@ package com.example.jarvis.decisionsupport;
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.planning.PlanningTools;
 import com.example.jarvis.requirements.UserRequirements;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -20,10 +21,8 @@ public class DecisionSupport {
   private static final Logger log = LoggerFactory.getLogger(DecisionSupport.class);
 
   private final ChatClient chatClient;
-  private final PlanningTools planningTools;
 
   public DecisionSupport(ChatClient.Builder chatClientBuilder, PlanningTools planningTools) {
-    this.planningTools = planningTools;
     this.chatClient =
         chatClientBuilder
             .defaultSystem(
@@ -55,12 +54,10 @@ public class DecisionSupport {
       UserRequirements requirements, String shortlist, String userMessage) {
     log.info("ask | userMessage=\"{}\"", userMessage);
 
-    // Make requirements available to tools that need them
-    planningTools.setCurrentRequirements(requirements);
-
     var response =
         chatClient
             .prompt()
+            .toolContext(Map.of(PlanningTools.REQUIREMENTS, requirements))
             .user(
                 u ->
                     u.text(

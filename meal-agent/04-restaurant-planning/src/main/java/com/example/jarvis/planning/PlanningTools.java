@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,7 @@ public class PlanningTools {
   private final RestaurantService restaurantService;
   private final RestaurantCandidateCheckService checkService;
 
-  // Set by the handler before each planning call. Not thread-safe — fine for a workshop.
-  private UserRequirements currentRequirements;
+  public static final String REQUIREMENTS = "meal.requirements";
 
   public PlanningTools(
       RestaurantAvailabilityService availabilityService,
@@ -36,10 +36,6 @@ public class PlanningTools {
     this.availabilityService = availabilityService;
     this.restaurantService = restaurantService;
     this.checkService = checkService;
-  }
-
-  public void setCurrentRequirements(UserRequirements requirements) {
-    this.currentRequirements = requirements;
   }
 
   @Tool(
@@ -104,13 +100,16 @@ public class PlanningTools {
       FAIL = hard violation (deal-breaker). MAYBE/UNSURE = soft (worth noting).
       PASS = constraint satisfied.""")
   public String checkRestaurantCandidate(
-      @ToolParam(description = "The restaurant ID to evaluate") String restaurantId) {
+      @ToolParam(description = "The restaurant ID to evaluate") String restaurantId,
+      ToolContext toolContext) {
 
     log.info("checkRestaurantCandidate | restaurantId={}", restaurantId);
 
+    // Spring AI supplies this call's requirements; the model only supplies the restaurant ID.
+    var currentRequirements = (UserRequirements) toolContext.getContext().get(REQUIREMENTS);
     if (currentRequirements == null) {
       throw new IllegalStateException(
-          "UserRequirements must be set before calling checkRestaurantCandidate");
+          "UserRequirements must be supplied in tool context before checking a restaurant");
     }
 
     var restaurant =

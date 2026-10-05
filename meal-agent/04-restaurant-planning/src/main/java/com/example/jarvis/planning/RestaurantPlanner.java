@@ -2,6 +2,7 @@ package com.example.jarvis.planning;
 
 import com.example.agent.core.json.JsonUtils;
 import com.example.jarvis.requirements.UserRequirements;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -22,10 +23,8 @@ public class RestaurantPlanner {
   private static final Logger log = LoggerFactory.getLogger(RestaurantPlanner.class);
 
   private final ChatClient chatClient;
-  private final PlanningTools planningTools;
 
   public RestaurantPlanner(ChatClient.Builder chatClientBuilder, PlanningTools planningTools) {
-    this.planningTools = planningTools;
     this.chatClient =
         chatClientBuilder
             .defaultSystem(
@@ -66,12 +65,10 @@ public class RestaurantPlanner {
   public String plan(UserRequirements confirmedRequirements) {
     log.info("plan | starting with requirements={}", JsonUtils.toJson(confirmedRequirements));
 
-    // Make requirements available to the checkRestaurantCandidate tool
-    planningTools.setCurrentRequirements(confirmedRequirements);
-
     String reply =
         chatClient
             .prompt()
+            .toolContext(Map.of(PlanningTools.REQUIREMENTS, confirmedRequirements))
             .user(
                 u ->
                     u.text(
