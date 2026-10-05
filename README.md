@@ -34,7 +34,8 @@ The code lessons alternate Spring AI foundations with their application in the
 meal agent. Start with [ChatClient](foundations/01-chat-client/README.md) and
 [structured output](foundations/02-structured-output/README.md), then build
 [intent alignment](meal-agent/01-intent-alignment/README.md). Next, learn
-[tool calling](foundations/03-tool-calling/README.md) and apply it to
+[tool calling](foundations/03-tool-calling/README.md), observe its loop with
+[advisors](foundations/04-advisor/README.md), and apply tool calling to
 [restaurant search](meal-agent/02-restaurant-search/README.md). The search results
 motivate [constraint checking](meal-agent/03-constraint-checking/README.md), followed
 by [evaluated planning](meal-agent/04-restaurant-planning/README.md) and
