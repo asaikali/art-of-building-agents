@@ -1,0 +1,31 @@
+@baseUrl = http://localhost:8080
+
+### 1. A user message in, assistant text out — .user().call().content()
+POST {{baseUrl}}/chat/basic
+Content-Type: text/plain
+
+What is the color of a carrot?
+
+### 2a. Same question, with a fruits-only system prompt — .system() + .user()
+POST {{baseUrl}}/chat/system
+Content-Type: text/plain
+
+What is the color of a carrot?
+
+### 2b. A fruit question fits the system instructions
+POST {{baseUrl}}/chat/system
+Content-Type: text/plain
+
+What is the color of a banana?
+
+### 3a. Substitute a topic into "Tell me a short joke about {topic}."
+POST {{baseUrl}}/chat/template
+Content-Type: text/plain
+
+cows
+
+### 3b. Same template, different parameter value — .text() + .param()
+POST {{baseUrl}}/chat/template
+Content-Type: text/plain
+
+computers
