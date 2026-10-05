@@ -65,7 +65,15 @@ public class RequirementsAligner {
     log.info("status | {} → {}", currentStatus.label(), updatedStatus.label());
 
     // Step 3: Compose reply — model writes a response appropriate to the status
-    String reply = composeReply(updatedStatus, missingFields, updatedRequirements);
+    String reply =
+        switch (updatedStatus) {
+          case GATHERING_REQUIREMENTS ->
+              composer.askForMissingField(missingFields.getFirst(), updatedRequirements);
+          case CONFIRMING_REQUIREMENTS ->
+              composer.askForConfirmation(
+                  assessor.suggestFollowUp(updatedRequirements), updatedRequirements);
+          case REQUIREMENTS_CONFIRMED -> composer.acknowledgeConfirmation(updatedRequirements);
+        };
     log.info("reply | \"{}\"", reply);
 
     return new Result(updatedRequirements, missingFields, updatedStatus, reply);
@@ -86,20 +94,5 @@ public class RequirementsAligner {
     }
     // All required fields present but not yet confirmed — ask the user to confirm
     return AlignmentStatus.CONFIRMING_REQUIREMENTS;
-  }
-
-  private String composeReply(
-      AlignmentStatus updatedStatus,
-      List<String> missingFields,
-      UserRequirements updatedRequirements) {
-    return switch (updatedStatus) {
-      case GATHERING_REQUIREMENTS ->
-          composer.askForMissingField(missingFields.getFirst(), updatedRequirements);
-      case CONFIRMING_REQUIREMENTS -> {
-        String suggestion = assessor.suggestFollowUp(updatedRequirements);
-        yield composer.askForConfirmation(suggestion, updatedRequirements);
-      }
-      case REQUIREMENTS_CONFIRMED -> composer.acknowledgeConfirmation(updatedRequirements);
-    };
   }
 }
