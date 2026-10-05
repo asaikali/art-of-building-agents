@@ -4,6 +4,10 @@ Spy supplies the shared application configuration and embeds a Spring Cloud Gate
 
 The viewer shows each exchange separately, including prompts, tool definitions, tool results, response bodies, status, and duration. Exchanges run from oldest at the top to latest at the bottom. It follows the latest exchange automatically; select an earlier exchange to walk through it. Clear the history before starting another demo.
 
+Each body defaults to **Formatted**, the first view button. It shows readable content as an indented, syntax-highlighted code view with braces and brackets. JSON inside a string is expanded with a `JSON inside string` annotation; multiline prompts use triple quotes and real line breaks. This is a display representation.
+
+**Parsed** provides an expandable tree. Click an object or array to expand or collapse it, or use **Expand all** and **Collapse all**. Prompt strings show real line breaks; JSON inside strings, including tool arguments, structured responses, and fenced schemas, is decoded and labeled so its original string type is clear. Polling preserves the branches you are exploring. **Raw** shows valid JSON with indentation and syntax highlighting while preserving the original string escaping and number values. Plain text and incomplete streaming bodies remain readable as text in every view.
+
 ## Shared defaults
 
 All common settings live in [spy-defaults.properties](src/main/resources/spy-defaults.properties):

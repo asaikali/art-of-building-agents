@@ -14,8 +14,9 @@ The samples in
 [StructuredOutputController](src/main/java/com/example/foundations/structured/StructuredOutputController.java)
 use Douglas Adams, the author of *The Hitchhiker's Guide to the Galaxy*.
 Start with one book as text, return it as a record, then ask for all his books.
-Finally, use a second record to get publication years from the same prompt.
-All four samples are ready to run; no source edits or restarts are needed
+Use a second record to get publication years from the same prompt, then
+compare the single-book request with native structured output.
+All five samples are ready to run; no source edits or restarts are needed
 between them.
 
 ## 1. Ask for the first book as text
@@ -132,11 +133,51 @@ its knowledge.
 For a quick factual check, *The Hitchhiker's Guide to the Galaxy* was
 published in 1979. See [the publisher's page](https://www.panmacmillan.com/authors/douglas-adams/the-hitchhikers-guide-to-the-galaxy/9781509809066).
 
+## 5. Return one book with native structured output
+
+Keep the single-book question and record from sample 2. Enable the provider's
+structured output support on this call:
+
+```java
+@GetMapping(path = "/book/native", produces = MediaType.APPLICATION_JSON_VALUE)
+public Book firstBookNative(@RequestParam(defaultValue = "Douglas Adams") String author) {
+  return chatClient
+      .prompt()
+      .user(u -> u.text("What is the first book published by {author}?")
+          .param("author", author))
+      .call()
+      .entity(Book.class, spec -> spec.useProviderStructuredOutput());
+}
+```
+
+Run the two single-book variants back to back:
+
+```bash
+http GET :8080/structured-output/book
+http GET :8080/structured-output/book/native
+```
+
+**What to observe:** both endpoints return a `Book`. Spring AI still
+generates the schema from the record in both cases. Compare the raw request
+bodies in Spy:
+
+| Request field | `/book` | `/book/native` |
+| --- | --- | --- |
+| `messages` | Question plus schema and JSON formatting instructions | Question without the added formatting instructions |
+| `response_format` | Absent | `type: "json_schema"` with the schema in `json_schema.schema` |
+
+The native call sends the schema as an OpenAI API parameter so the provider
+enforces the response structure. Spring AI then deserializes the returned
+JSON into the same `Book` record.
+
+See [Spring AI's native structured output reference](https://docs.spring.io/spring-ai/reference/api/structured-output/native.html).
+
 ## Takeaways
 
 - `.content()` gives the application text; `.entity(...)` gives it typed data.
 - The record defines the fields, and an array asks for a collection of records.
 - A different record changes the schema while the user prompt stays the same.
+- Native structured output sends the schema through the provider API.
 
 Structured output defines the answer's shape. The facts and completeness of
 the book list still depend on the model's knowledge.

@@ -30,6 +30,28 @@
     article { min-width: 0; background: white; border: 1px solid #d7e0eb; border-radius: 8px; overflow: hidden; }
     article h2 { font-size: 18px; margin: 0; padding: 14px 18px; border-bottom: 1px solid #d7e0eb; }
     pre { font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+    .body-controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 18px; border-bottom: 1px solid #d7e0eb; }
+    .body-controls button { font-size: 13px; padding: 5px 9px; }
+    .body-controls button[aria-pressed="true"] { background: #edf3ff; border-color: #3262c0; color: #214b99; }
+    .view-hint { color: #526278; font-size: 12px; margin: 0; padding: 0 18px 12px; }
+    .json-tree { font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 12px 18px; overflow-wrap: anywhere; }
+    .json-tree details { margin: 4px 0; }
+    .json-tree summary { cursor: pointer; padding: 4px 0; }
+    .json-children { margin-left: 8px; padding-left: 14px; border-left: 1px solid #d7e0eb; }
+    .json-key { color: #214b99; font-weight: 600; }
+    .json-type { color: #526278; font: 12px system-ui, sans-serif; margin-left: 8px; }
+    .json-leaf { padding: 5px 0; }
+    .json-string { background: #f6f8fb; border-radius: 4px; margin: 5px 0; }
+    .json-string pre { padding: 10px 12px; }
+    .json-string > details { padding: 8px 12px; }
+    .json-value { color: #825124; margin-left: 8px; }
+    .json-text { color: #2b6147; margin-left: 8px; white-space: pre-wrap; }
+    .syntax-key { color: #214b99; font-weight: 600; }
+    .syntax-string { color: #2b6147; }
+    .syntax-number { color: #825124; }
+    .syntax-boolean { color: #753a94; }
+    .syntax-null, .syntax-punctuation { color: #526278; }
+    .syntax-note { color: #526278; font-style: italic; }
     .notice { margin: 0; padding: 10px 18px; background: #fff3cc; font-size: 14px; }
     #connection { font-size: 13px; color: #ffda86; }
     [hidden] { display: none !important; }
@@ -56,13 +78,33 @@
         <div class="messages">
           <article>
             <h2>App → model</h2>
+            <div class="body-controls" role="group" aria-label="Request body view">
+              <button id="request-formatted-button" type="button" aria-pressed="true">Formatted</button>
+              <button id="request-parsed-button" type="button" aria-pressed="false">Parsed</button>
+              <button id="request-raw-button" type="button" aria-pressed="false">Raw</button>
+              <button id="request-expand" type="button" hidden>Expand all</button>
+              <button id="request-collapse" type="button" hidden>Collapse all</button>
+            </div>
+            <p id="request-hint" class="view-hint">Readable display with decoded strings. Raw shows the original JSON types and escaping.</p>
             <p id="request-notice" class="notice" hidden></p>
-            <pre id="request-body"></pre>
+            <div id="request-parsed" class="json-tree" hidden></div>
+            <pre id="request-formatted"></pre>
+            <pre id="request-raw" hidden></pre>
           </article>
           <article>
             <h2>Model → app</h2>
+            <div class="body-controls" role="group" aria-label="Response body view">
+              <button id="response-formatted-button" type="button" aria-pressed="true">Formatted</button>
+              <button id="response-parsed-button" type="button" aria-pressed="false">Parsed</button>
+              <button id="response-raw-button" type="button" aria-pressed="false">Raw</button>
+              <button id="response-expand" type="button" hidden>Expand all</button>
+              <button id="response-collapse" type="button" hidden>Collapse all</button>
+            </div>
+            <p id="response-hint" class="view-hint">Readable display with decoded strings. Raw shows the original JSON types and escaping.</p>
             <p id="response-notice" class="notice" hidden></p>
-            <pre id="response-body"></pre>
+            <div id="response-parsed" class="json-tree" hidden></div>
+            <pre id="response-formatted"></pre>
+            <pre id="response-raw" hidden></pre>
           </article>
         </div>
       </div>
@@ -72,14 +114,210 @@
     const api = location.pathname.replace(/\/spy\/?$/, '/spy/api/exchanges');
     const element = id => document.getElementById(id);
     let selectedId = null, paused = false, refreshing = false;
-    const pretty = text => { try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; } };
     const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');
+    const viewHints = {
+      formatted: 'Readable display with decoded strings. Raw shows the original JSON types and escaping.',
+      parsed: 'Strings are unescaped for reading. Embedded JSON is labeled.',
+      raw: 'JSON is formatted and highlighted; string escaping is preserved.'
+    };
+    const bodyViews = new Map(['request', 'response'].map(prefix => [prefix, {
+      mode: 'formatted', exchangeId: null, text: null, expanded: new Map()
+    }]));
+
+    function textNode(tag, text, className) {
+      const node = document.createElement(tag);
+      node.textContent = text;
+      if (className) node.className = className;
+      return node;
+    }
+
+    function embeddedJson(text) {
+      const trimmed = text.trim();
+      if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
+      try { return JSON.parse(trimmed); } catch { return null; }
+    }
+
+    function renderRaw(container, text) {
+      try { JSON.parse(text); }
+      catch { container.textContent = text || '(empty body)'; return; }
+      // Format original tokens rather than re-serialize: preserve escapes and exact numbers.
+      const tokens = text.match(/"(?:\\[\s\S]|[^"\\])*"|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null|[{}\[\],:]/g);
+      const output = document.createDocumentFragment();
+      let depth = 0;
+      const newline = () => output.append(document.createTextNode('\n' + '  '.repeat(depth)));
+      tokens.forEach((token, index) => {
+        const previous = tokens[index - 1], next = tokens[index + 1];
+        const closing = token === '}' || token === ']';
+        const empty = closing && (previous === '{' || previous === '[');
+        if (closing && !empty) { depth--; newline(); }
+        let type = 'punctuation';
+        if (token.startsWith('"')) type = next === ':' ? 'key' : 'string';
+        else if (token === 'true' || token === 'false') type = 'boolean';
+        else if (token === 'null') type = 'null';
+        else if (/^-?\d/.test(token)) type = 'number';
+        output.append(textNode('span', token, `syntax-${type}`));
+        if ((token === '{' && next !== '}') || (token === '[' && next !== ']')) { depth++; newline(); }
+        else if (token === ',') newline();
+        else if (token === ':') output.append(document.createTextNode(' '));
+      });
+      container.replaceChildren(output);
+    }
+
+    function renderFormatted(container, value) {
+      const output = document.createDocumentFragment();
+      const token = (text, type = 'punctuation') => output.append(textNode('span', text, `syntax-${type}`));
+      const newline = depth => output.append(document.createTextNode('\n' + '  '.repeat(depth)));
+      function write(item, depth) {
+        if (depth >= 40) { token(JSON.stringify(item), 'string'); return; }
+        if (typeof item === 'string') {
+          const json = embeddedJson(item);
+          if (json !== null) {
+            token('/* JSON inside string */ ', 'note');
+            write(json, depth);
+          } else if (item.includes('\n')) {
+            token('/* Multiline string */', 'note');
+            newline(depth);
+            token('"""', 'string');
+            // Keep the prompt as text, with fenced schemas formatted for reading.
+            const readable = item.replace(/```(?:json[ \t]*\r?\n)?([\s\S]*?)```/g, (fence, body) => {
+              const schema = embeddedJson(body);
+              return schema === null ? fence : '```json\n' + JSON.stringify(schema, null, 2) + '\n```';
+            });
+            for (const line of readable.split('\n')) { newline(depth); token(line, 'string'); }
+            newline(depth);
+            token('"""', 'string');
+          } else token(JSON.stringify(item), 'string');
+          return;
+        }
+        if (item === null || typeof item !== 'object') {
+          token(JSON.stringify(item), item === null ? 'null' : typeof item);
+          return;
+        }
+        const array = Array.isArray(item), entries = Object.entries(item);
+        token(array ? '[' : '{');
+        entries.forEach(([key, child], index) => {
+          newline(depth + 1);
+          if (!array) { token(JSON.stringify(key), 'key'); token(': '); }
+          write(child, depth + 1);
+          if (index < entries.length - 1) token(',');
+        });
+        if (entries.length) newline(depth);
+        token(array ? ']' : '}');
+      }
+      write(value, 0);
+      container.replaceChildren(output);
+    }
+
+    function branch(label, type, path, depth, state) {
+      const node = document.createElement('details');
+      node.dataset.path = path;
+      node.open = state.expanded.get(path) ?? (depth < 3 || ['message', 'content', 'arguments', 'JSON'].includes(label));
+      const summary = document.createElement('summary');
+      summary.append(textNode('span', label, 'json-key'), textNode('span', type, 'json-type'));
+      const children = document.createElement('div');
+      children.className = 'json-children';
+      node.append(summary, children);
+      node.addEventListener('toggle', () => {
+        if (node.isConnected) state.expanded.set(path, node.open);
+      });
+      return { node, children };
+    }
+
+    function stringContent(text, path, depth, state) {
+      const container = document.createElement('div');
+      container.className = 'json-string';
+      // Spring AI converter prompts contain fenced schemas inside a longer string.
+      const fences = /```(?:json[ \t]*\r?\n)?([\s\S]*?)```/g;
+      let offset = 0, index = 0;
+      for (const match of text.matchAll(fences)) {
+        const json = embeddedJson(match[1]);
+        if (json === null) continue;
+        if (match.index > offset) container.append(textNode('pre', text.slice(offset, match.index)));
+        container.append(jsonNode('JSON', json, `${path}/fence/${index++}`, depth + 1, state, 'JSON inside string'));
+        offset = match.index + match[0].length;
+      }
+      if (offset < text.length || offset === 0) container.append(textNode('pre', text.slice(offset) || '(empty string)'));
+      return container;
+    }
+
+    function jsonNode(label, value, path, depth, state, typeOverride) {
+      const parsedString = typeof value === 'string' ? embeddedJson(value) : null;
+      const embedded = parsedString !== null;
+      const displayed = embedded ? parsedString : value;
+      if (displayed !== null && typeof displayed === 'object' && depth < 40) {
+        const array = Array.isArray(displayed);
+        const entries = Object.entries(displayed);
+        const unit = array ? 'item' : 'field';
+        const type = typeOverride || (embedded ? 'String · parsed JSON' : `${array ? 'Array' : 'Object'} · ${entries.length} ${unit}${entries.length === 1 ? '' : 's'}`);
+        const { node, children } = branch(label, type, path, depth, state);
+        for (const [key, item] of entries) {
+          children.append(jsonNode(array ? `[${key}]` : key, item, `${path}/${JSON.stringify(key)}`, depth + 1, state));
+        }
+        if (!entries.length) children.append(textNode('span', array ? '[]' : '{}', 'json-value'));
+        return node;
+      }
+      const node = document.createElement('div');
+      node.className = 'json-leaf';
+      node.append(textNode('span', label, 'json-key'));
+      if (typeof displayed === 'string') {
+        if (!displayed.includes('\n') && displayed.length <= 120) {
+          node.append(textNode('span', displayed || '(empty string)', 'json-text'));
+        } else {
+          node.append(textNode('span', 'String', 'json-type'), stringContent(displayed, path, depth, state));
+        }
+      } else {
+        node.append(textNode('span', JSON.stringify(displayed, null, 2), 'json-value'));
+      }
+      return node;
+    }
+
+    function setBodyMode(prefix, mode) {
+      bodyViews.get(prefix).mode = mode;
+      element(`${prefix}-hint`).textContent = viewHints[mode];
+      for (const name of Object.keys(viewHints)) {
+        element(`${prefix}-${name}`).hidden = name !== mode;
+        element(`${prefix}-${name}-button`).setAttribute('aria-pressed', name === mode);
+      }
+      for (const name of ['expand', 'collapse']) element(`${prefix}-${name}`).hidden = mode !== 'parsed';
+    }
 
     function renderBody(prefix, body) {
-      element(`${prefix}-body`).textContent = pretty(body.text) || '(empty body)';
+      const state = bodyViews.get(prefix);
+      if (state.exchangeId !== selectedId) {
+        state.exchangeId = selectedId;
+        state.text = null;
+        state.expanded.clear();
+      }
+      // Polling must not replace a tree the presenter is exploring unless its body changes.
+      if (state.text !== body.text) {
+        state.text = body.text;
+        renderRaw(element(`${prefix}-raw`), body.text);
+        let node;
+        try {
+          const value = JSON.parse(body.text);
+          node = jsonNode('Body', value, '$', 0, state);
+          renderFormatted(element(`${prefix}-formatted`), value);
+        } catch {
+          node = textNode('pre', body.text || '(empty body)');
+          element(`${prefix}-formatted`).textContent = body.text || '(empty body)';
+        }
+        element(`${prefix}-parsed`).replaceChildren(node);
+      }
       const notice = element(`${prefix}-notice`);
       notice.hidden = !body.truncated;
       notice.textContent = `Display truncated. ${body.totalBytes.toLocaleString()} bytes were forwarded.`;
+    }
+
+    for (const prefix of bodyViews.keys()) {
+      for (const mode of Object.keys(viewHints)) element(`${prefix}-${mode}-button`).onclick = () => setBodyMode(prefix, mode);
+      for (const [action, open] of [['expand', true], ['collapse', false]]) {
+        element(`${prefix}-${action}`).onclick = () => {
+          for (const node of element(`${prefix}-parsed`).querySelectorAll('details')) {
+            node.open = open;
+            bodyViews.get(prefix).expanded.set(node.dataset.path, open);
+          }
+        };
+      }
     }
 
     async function refresh() {

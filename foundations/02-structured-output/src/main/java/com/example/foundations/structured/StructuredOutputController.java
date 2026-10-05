@@ -57,4 +57,14 @@ public class StructuredOutputController {
         .call()
         .entity(BookWithPublicationYear[].class);
   }
+
+  // 5. Send the same book schema through the provider's API-level structured output support.
+  @GetMapping(path = "/book/native", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Book firstBookNative(@RequestParam(defaultValue = "Douglas Adams") String author) {
+    return chatClient
+        .prompt()
+        .user(u -> u.text("What is the first book published by {author}?").param("author", author))
+        .call()
+        .entity(Book.class, spec -> spec.useProviderStructuredOutput());
+  }
 }
