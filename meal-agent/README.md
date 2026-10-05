@@ -84,6 +84,22 @@ lessons do not depend on one another.
 
 The meal-agent backend and the inspector UI run as two processes.
 
+With `OPENAI_API_KEY` set, use the mise tasks from the repository root. Each
+backend task builds the selected lesson and its shared dependencies before starting:
+
+| Command | Lesson |
+| --- | --- |
+| `mise run 1:start` | Intent alignment |
+| `mise run 2:start` | Restaurant search |
+| `mise run 3:start` | Constraint checking |
+| `mise run 4:start` | Restaurant planning |
+| `mise run 5:start` | Decision support |
+
+Run one backend at a time on port 8080. In another terminal, run
+`mise run ui:start` to start the inspector on port 5173.
+
+Alternatively, run Maven and npm directly:
+
 Set `OPENAI_API_KEY`. From the repository root, build the selected lesson and its
 shared dependencies, then start its backend (02 shown here):
 

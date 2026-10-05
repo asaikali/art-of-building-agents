@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-#MISE description="Start meal-agent 02-constraint-checking (constraint checking) on port 8080"
+#MISE description="Start meal-agent 02-restaurant-search (restaurant search) on port 8080"
 
 set -Eeuo pipefail
 IFS=$'\n\t'
 
 # shellcheck disable=SC1091
 source "${MISE_PROJECT_ROOT:?}/.mise/lib/meal-agent.sh"
-start_meal_agent_module "02-constraint-checking" "$@"
+start_meal_agent_module "02-restaurant-search" "$@"
