@@ -27,9 +27,7 @@ public class RequirementsAssessor {
   private final ChatClient chatClient;
 
   public RequirementsAssessor(ChatClient.Builder chatClientBuilder) {
-    // TODO: null check exists so RequirementsAssessorTest can test findMissingRequiredFields
-    // without a model. We'll clean this up when we revisit testability.
-    this.chatClient = chatClientBuilder == null ? null : chatClientBuilder.build();
+    this.chatClient = chatClientBuilder.build();
   }
 
   /**
