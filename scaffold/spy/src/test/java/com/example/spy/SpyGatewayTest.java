@@ -108,9 +108,7 @@ class SpyGatewayTest {
     var capture = latest();
     assertThat(capture.requestBody().text()).isEqualTo(RECEIVED.get().body());
     assertThat(capture.responseBody().text()).contains("Stub answer");
-    assertThat(capture.requestHeaders().toString())
-        .contains("[redacted]")
-        .doesNotContain("spy-test-key");
+    assertThat(JSON.writeValueAsString(capture)).doesNotContain("spy-test-key");
   }
 
   @Test
@@ -126,8 +124,10 @@ class SpyGatewayTest {
     assertThat(capture.summary().complete()).isTrue();
     assertThat(capture.requestBody().text()).isEqualTo(body);
     assertThat(capture.responseBody().text()).isEqualTo(body);
-    assertThat(capture.requestHeaders().toString()).doesNotContain("secret", "private");
-    assertThat(capture.responseHeaders().toString()).doesNotContain("cookie-secret");
+    var detail = get("/spy/api/exchanges/" + capture.summary().id()).body();
+    assertThat(JSON.readTree(detail).has("requestHeaders")).isFalse();
+    assertThat(JSON.readTree(detail).has("responseHeaders")).isFalse();
+    assertThat(detail).doesNotContain("secret", "private", "cookie-secret", "custom-key");
   }
 
   @Test
@@ -221,7 +221,9 @@ class SpyGatewayTest {
     assertThat(JSON.readTree(list.body()).size()).isEqualTo(4);
     long id = store.list().getFirst().id();
     assertThat(get("/spy/api/exchanges/" + id).body()).contains("request-5");
-    assertThat(get("/spy").body()).contains("App → model", "Model → app");
+    assertThat(get("/spy").body())
+        .contains("App → model", "Model → app")
+        .doesNotContain("Request headers", "Response headers", "requestHeaders", "responseHeaders");
     assertThat(store.list()).hasSize(4);
     var deleted =
         CLIENT.send(
@@ -240,6 +242,7 @@ class SpyGatewayTest {
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer secret")
                 .header("X-Api-Key", "private")
+                .header("X-Custom-Credential", "custom-key")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build(),
             HttpResponse.BodyHandlers.ofString());
@@ -286,6 +289,7 @@ class SpyGatewayTest {
       String result = body;
       exchange.getResponseHeaders().set("Content-Type", "application/json");
       exchange.getResponseHeaders().set("Set-Cookie", "cookie-secret");
+      exchange.getResponseHeaders().set("X-Custom-Credential", "custom-key");
       if (exchange.getRequestURI().getPath().endsWith("/chat/completions")) {
         result =
             "{\"id\":\"demo\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"gpt-5.4-mini\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Stub answer\"},\"finish_reason\":\"stop\"}]}";

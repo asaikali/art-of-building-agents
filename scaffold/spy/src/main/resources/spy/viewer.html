@@ -30,8 +30,6 @@
     article { min-width: 0; background: white; border: 1px solid #d7e0eb; border-radius: 8px; overflow: hidden; }
     article h2 { font-size: 18px; margin: 0; padding: 14px 18px; border-bottom: 1px solid #d7e0eb; }
     pre { font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
-    details { border-top: 1px solid #d7e0eb; }
-    summary { cursor: pointer; padding: 12px 18px; font-size: 14px; color: #526278; }
     .notice { margin: 0; padding: 10px 18px; background: #fff3cc; font-size: 14px; }
     #connection { font-size: 13px; color: #ffda86; }
     [hidden] { display: none !important; }
@@ -60,13 +58,11 @@
             <h2>App → model</h2>
             <p id="request-notice" class="notice" hidden></p>
             <pre id="request-body"></pre>
-            <details><summary>Request headers</summary><pre id="request-headers"></pre></details>
           </article>
           <article>
             <h2>Model → app</h2>
             <p id="response-notice" class="notice" hidden></p>
             <pre id="response-body"></pre>
-            <details><summary>Response headers</summary><pre id="response-headers"></pre></details>
           </article>
         </div>
       </div>
@@ -128,8 +124,6 @@
           element('status').textContent = `${status(item.summary)} · ${item.summary.durationMs} ms · Exchange #${item.summary.id}`;
           renderBody('request', item.requestBody);
           renderBody('response', item.responseBody);
-          element('request-headers').textContent = JSON.stringify(item.requestHeaders, null, 2);
-          element('response-headers').textContent = JSON.stringify(item.responseHeaders, null, 2);
         }
       } catch {
         element('connection').textContent = 'Cannot reach the app. Retrying…';

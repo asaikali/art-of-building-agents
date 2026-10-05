@@ -10,11 +10,6 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import org.springframework.cloud.gateway.server.mvc.common.MvcUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,9 +26,6 @@ final class SpyGatewayFilters {
   private static final String EXCHANGE_ATTRIBUTE = SpyGatewayFilters.class.getName() + ".exchange";
   private static final byte[] GATEWAY_ERROR_BODY =
       "{\"error\":\"The model provider request failed.\"}".getBytes(StandardCharsets.UTF_8);
-  private static final Set<String> SECRET_HEADERS =
-      Set.of(
-          "authorization", "proxy-authorization", "x-api-key", "api-key", "cookie", "set-cookie");
   private final SpyExchangeStore store;
 
   SpyGatewayFilters(SpyExchangeStore store) {
@@ -50,11 +42,7 @@ final class SpyGatewayFilters {
             .build(true)
             .toUri();
     var body = MvcUtils.cacheBody(request);
-    var exchange =
-        store.begin(
-            request.method().name(),
-            destination.toString(),
-            redactHeaders(request.headers().asHttpHeaders()));
+    var exchange = store.begin(request.method().name(), destination.toString());
     MvcUtils.putAttribute(request, EXCHANGE_ATTRIBUTE, exchange);
     try {
       body.transferTo(exchange.requestBody);
@@ -67,7 +55,10 @@ final class SpyGatewayFilters {
 
   ServerResponse captureResponse(ServerRequest request, ServerResponse response) {
     SpyExchangeStore.Exchange exchange = MvcUtils.getAttribute(request, EXCHANGE_ATTRIBUTE);
-    exchange.responseStarted(response.statusCode().value(), redactHeaders(response.headers()));
+    boolean gzip =
+        response.headers().getOrEmpty(HttpHeaders.CONTENT_ENCODING).stream()
+            .anyMatch(value -> value.equalsIgnoreCase("gzip"));
+    exchange.responseStarted(response.statusCode().value(), gzip);
     InputStream body = MvcUtils.getAttribute(request, MvcUtils.CLIENT_RESPONSE_INPUT_STREAM_ATTR);
     if (body != null) {
       // Gateway reads this stream when it writes the response, including each SSE chunk.
@@ -87,18 +78,6 @@ final class SpyGatewayFilters {
     return ServerResponse.status(HttpStatus.BAD_GATEWAY)
         .contentType(MediaType.APPLICATION_JSON)
         .body(GATEWAY_ERROR_BODY);
-  }
-
-  private static Map<String, List<String>> redactHeaders(HttpHeaders headers) {
-    var captured = new LinkedHashMap<String, List<String>>();
-    headers.forEach(
-        (name, values) ->
-            captured.put(
-                name,
-                SECRET_HEADERS.contains(name.toLowerCase(Locale.ROOT))
-                    ? List.of("[redacted]")
-                    : List.copyOf(values)));
-    return captured;
   }
 
   private static final class CapturingInputStream extends FilterInputStream {
@@ -153,11 +132,7 @@ final class SpyGatewayFilters {
         error = exception.getClass().getSimpleName();
         throw exception;
       } finally {
-        var headers = new HttpHeaders();
-        response
-            .getHeaderNames()
-            .forEach(name -> headers.put(name, List.copyOf(response.getHeaders(name))));
-        exchange.finish(response.getStatus(), redactHeaders(headers), error);
+        exchange.finish(response.getStatus(), error);
       }
     }
   }

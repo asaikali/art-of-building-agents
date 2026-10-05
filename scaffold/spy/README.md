@@ -41,7 +41,7 @@ Gateway removes `/spy/proxy/openai` and forwards the remaining path, query, head
 .onError(Exception.class, capture::gatewayError)
 ```
 
-The request filter uses Gateway's body cache to record the request; `adaptCachedBody()` makes that same body available for forwarding. The response filter observes Gateway's response stream as it is read, so streaming responses continue to flow. History records completion after Gateway finishes writing the response. Capture limits only truncate the viewer's stored copy. Credentials in authorization, API key, and cookie headers are redacted in the viewer and forwarded unchanged.
+The request filter uses Gateway's body cache to record the request; `adaptCachedBody()` makes that same body available for forwarding. The response filter observes Gateway's response stream as it is read, so streaming responses continue to flow. History records completion after Gateway finishes writing the response. Capture limits only truncate the viewer's stored copy. HTTP headers are forwarded unchanged but are never stored or exposed by Spy. Only a gzip flag is retained to decode compressed response bodies for display.
 
 Gzip responses are decoded for display while their original compressed bytes are forwarded unchanged.
 

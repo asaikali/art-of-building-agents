@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
@@ -25,10 +24,8 @@ public class SpyExchangeStore {
     this.maxBodyBytes = maxBodyBytes;
   }
 
-  synchronized Exchange begin(
-      String method, String destination, Map<String, List<String>> requestHeaders) {
-    var exchange =
-        new Exchange(sequence.incrementAndGet(), method, destination, requestHeaders, maxBodyBytes);
+  synchronized Exchange begin(String method, String destination) {
+    var exchange = new Exchange(sequence.incrementAndGet(), method, destination, maxBodyBytes);
     exchanges.addFirst(exchange);
     while (exchanges.size() > maxExchanges) {
       exchanges.removeLast();
@@ -60,12 +57,7 @@ public class SpyExchangeStore {
 
   public record Body(String text, long totalBytes, boolean truncated) {}
 
-  public record ExchangeView(
-      Summary summary,
-      Map<String, List<String>> requestHeaders,
-      Body requestBody,
-      Map<String, List<String>> responseHeaders,
-      Body responseBody) {}
+  public record ExchangeView(Summary summary, Body requestBody, Body responseBody) {}
 
   static final class Exchange {
     private final long id;
@@ -73,40 +65,32 @@ public class SpyExchangeStore {
     private final long startedNanos = System.nanoTime();
     private final String method;
     private final String destination;
-    private final Map<String, List<String>> requestHeaders;
     final BodyCapture requestBody;
     final BodyCapture responseBody;
-    private Map<String, List<String>> responseHeaders = Map.of();
+    private boolean gzip;
     private int status;
     private long durationMs;
     private boolean complete;
     private String error;
 
-    Exchange(
-        long id,
-        String method,
-        String destination,
-        Map<String, List<String>> requestHeaders,
-        int limit) {
+    Exchange(long id, String method, String destination, int limit) {
       this.id = id;
       this.method = method;
       this.destination = destination;
-      this.requestHeaders = Map.copyOf(requestHeaders);
       requestBody = new BodyCapture(limit);
       responseBody = new BodyCapture(limit);
     }
 
-    synchronized void finish(int status, Map<String, List<String>> headers, String error) {
+    synchronized void finish(int status, String error) {
       this.status = status;
-      responseHeaders = Map.copyOf(headers);
       this.error = error;
       durationMs = elapsedMillis();
       complete = true;
     }
 
-    synchronized void responseStarted(int status, Map<String, List<String>> headers) {
+    synchronized void responseStarted(int status, boolean gzip) {
       this.status = status;
-      responseHeaders = Map.copyOf(headers);
+      this.gzip = gzip;
     }
 
     synchronized Summary summary() {
@@ -123,11 +107,7 @@ public class SpyExchangeStore {
 
     synchronized ExchangeView view() {
       return new ExchangeView(
-          summary(),
-          requestHeaders,
-          requestBody.snapshot(),
-          responseHeaders,
-          responseBody.snapshot(responseHeaders, complete));
+          summary(), requestBody.snapshot(), responseBody.snapshot(gzip, complete));
     }
 
     private long elapsedMillis() {
@@ -163,12 +143,7 @@ public class SpyExchangeStore {
           bytes.toString(StandardCharsets.UTF_8), totalBytes, totalBytes > bytes.size());
     }
 
-    synchronized Body snapshot(Map<String, List<String>> headers, boolean complete) {
-      boolean gzip =
-          headers.entrySet().stream()
-              .filter(entry -> entry.getKey().equalsIgnoreCase("Content-Encoding"))
-              .flatMap(entry -> entry.getValue().stream())
-              .anyMatch(value -> value.equalsIgnoreCase("gzip"));
+    synchronized Body snapshot(boolean gzip, boolean complete) {
       if (!gzip) return snapshot();
       boolean truncated = totalBytes > bytes.size();
       if (!complete || truncated) {
