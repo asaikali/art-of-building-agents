@@ -15,6 +15,8 @@
     button { font: inherit; cursor: pointer; border: 1px solid #b8c5d6; border-radius: 6px; padding: 7px 12px; background: white; color: #172333; }
     main { display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: calc(100vh - 90px); }
     aside { border-right: 1px solid #d7e0eb; padding: 16px; }
+    body.navigation-collapsed main { grid-template-columns: minmax(0, 1fr); }
+    body.navigation-collapsed main > aside { display: none; }
     #count { margin: 0 0 12px; font-size: 14px; color: #526278; }
     #exchanges { display: flex; flex-direction: column; gap: 8px; }
     .exchange { text-align: left; width: 100%; padding: 12px; }
@@ -66,6 +68,23 @@
     .tool-color-5 { --tool-background: #dff3f5; --tool-border: #31838b; }
     .notice { margin: 0; padding: 10px 18px; background: #fff3cc; font-size: 14px; }
     #connection { font-size: 13px; color: #ffda86; }
+    .screen-tabs { display: flex; gap: 6px; }
+    .screen-tabs button[aria-pressed="true"] { background: #dce7f8; border-color: #7c96bb; }
+    #advisor-detail { min-width: 0; padding: 24px; }
+    #invocation-count, #advisor-status { color: #526278; font-size: 14px; }
+    #invocations { display: flex; flex-direction: column; gap: 8px; }
+    #advisor-detail h2 { margin: 0 0 12px; font-size: 18px; }
+    #advisor-prompt { overflow-wrap: anywhere; }
+    .advisor-chain { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
+    .advisor-chip { background: #edf3ff; border: 1px solid #b8c5d6; border-radius: 6px; padding: 8px; }
+    .advisor-chip small { display: block; color: #526278; margin-top: 4px; }
+    .sequence { overflow: auto; background: white; border: 1px solid #d7e0eb; border-radius: 8px; }
+    .sequence svg { display: block; }
+    .flow-lane { font: 12px ui-monospace, monospace; fill: #172333; }
+    .flow-order { font: 10px system-ui, sans-serif; fill: #526278; }
+    .flow-name { font: 11px system-ui, sans-serif; fill: #526278; }
+    .flow-label { font: 11px system-ui, sans-serif; fill: #172333; paint-order: stroke; stroke: white; stroke-width: 4px; }
+    .flow-link { cursor: pointer; fill: #214b99; text-decoration: underline; }
     [hidden] { display: none !important; }
     @media (max-width: 1000px) { .messages { grid-template-columns: 1fr; } }
     @media (max-width: 650px) { main { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #d7e0eb; max-height: 240px; overflow: auto; } }
@@ -75,14 +94,19 @@
   <header>
     <div><h1>Spy</h1><p>The HTTP conversation between your app and the model</p></div>
     <div class="controls">
+      <div class="screen-tabs" role="group" aria-label="Spy view">
+        <button id="traffic-tab" type="button" aria-pressed="true">Traffic</button>
+        <button id="advisors-tab" type="button" aria-pressed="false">Advisor flow</button>
+      </div>
+      <button id="navigation-toggle" type="button" aria-expanded="true" aria-controls="traffic-navigation advisor-navigation">Hide navigation</button>
       <label><input id="follow" type="checkbox" checked> Follow latest</label>
       <button id="pause" type="button">Pause</button>
       <button id="clear" type="button">Clear</button>
       <span id="connection" role="status"></span>
     </div>
   </header>
-  <main>
-    <aside><p id="count">0 turns · 0 exchanges</p><nav id="exchanges" aria-label="Model turns"></nav></aside>
+  <main id="traffic-main">
+    <aside id="traffic-navigation"><p id="count">0 turns · 0 exchanges</p><nav id="exchanges" aria-label="Model turns"></nav></aside>
     <section id="detail">
       <div id="empty"><h2>Waiting for a model call</h2><p>Run a sample request, then inspect its prompts, tool calls, and response here.</p></div>
       <div id="selected" hidden>
@@ -122,12 +146,29 @@
       </div>
     </section>
   </main>
+  <main id="advisor-main" hidden>
+    <aside id="advisor-navigation"><p id="invocation-count">Waiting for an invocation</p><nav id="invocations" aria-label="Chat client invocations"></nav></aside>
+    <section id="advisor-detail">
+      <div id="advisor-empty"><h2>Waiting for advisor activity</h2><p>Run a sample request to see its configured advisors and execution sequence. Earlier HTTP captures do not contain advisor traces.</p></div>
+      <div id="advisor-selected" hidden>
+        <h2 id="advisor-title"></h2><p id="advisor-prompt"></p><p id="advisor-status"></p>
+        <h2>Configured chains</h2><div id="advisor-chains"></div>
+        <h2>Observed execution</h2>
+        <p class="view-hint">Solid arrows enter; dashed arrows return. Advisors before a tool loop run around the turn; advisors inside it can run repeatedly. Click an HTTP exchange label to inspect its traffic.</p>
+        <p id="advisor-notice" class="notice" hidden>Trace limit reached. The sequence shows only the retained activity.</p>
+        <div id="advisor-sequence" class="sequence"></div>
+      </div>
+    </section>
+  </main>
   <script type="module">
     const api = location.pathname.replace(/\/spy\/?$/, '').replace(/\/$/, '') + '/spy/api/exchanges';
     const { inspectExchange, groupTurns, toolPairColors } = await import(api.replace('/api/exchanges', '/turns.js'));
+    const { renderSequence, linkModelExchanges } = await import(api.replace('/api/exchanges', '/advisor-flow.js'));
     const element = id => document.getElementById(id);
     const captured = new Map(), expandedTurns = new Map();
     let selectedId = null, paused = false, refreshing = false;
+    let screen = 'traffic', selectedInvocation = null, advisorVersion = null;
+    const invocationApi = api.replace('/exchanges', '/invocations');
     const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');
     const viewHints = {
       formatted: 'Readable display with decoded strings. Matching tool calls and results share a color. Raw shows the original JSON types and escaping.',
@@ -143,6 +184,85 @@
       node.textContent = text;
       if (className) node.className = className;
       return node;
+    }
+
+    function setNavigationCollapsed(collapsed) {
+      document.body.classList.toggle('navigation-collapsed', collapsed);
+      const button = element('navigation-toggle');
+      button.textContent = collapsed ? 'Show navigation' : 'Hide navigation';
+      button.setAttribute('aria-expanded', !collapsed);
+      try { sessionStorage.setItem('spy.navigationCollapsed', String(collapsed)); } catch {}
+    }
+    element('navigation-toggle').onclick = () => setNavigationCollapsed(!document.body.classList.contains('navigation-collapsed'));
+    try { setNavigationCollapsed(sessionStorage.getItem('spy.navigationCollapsed') === 'true'); } catch {}
+
+    function setScreen(next) {
+      screen = next;
+      element('traffic-main').hidden = next !== 'traffic';
+      element('advisor-main').hidden = next !== 'advisors';
+      element('traffic-tab').setAttribute('aria-pressed', next === 'traffic');
+      element('advisors-tab').setAttribute('aria-pressed', next === 'advisors');
+      refresh();
+    }
+    element('traffic-tab').onclick = () => setScreen('traffic');
+    element('advisors-tab').onclick = () => setScreen('advisors');
+
+    async function refreshAdvisors() {
+      const response = await fetch(invocationApi, { cache: 'no-store' });
+      if (response.status === 404) {
+        element('invocation-count').textContent = 'Restart the sample to enable advisor tracing';
+        element('advisor-empty').hidden = false; element('advisor-selected').hidden = true;
+        return;
+      }
+      if (!response.ok) throw new Error();
+      const { enabled, items } = await response.json();
+      const chronological = [...items].reverse();
+      if (element('follow').checked || !items.some(item => item.id === selectedInvocation)) selectedInvocation = items[0]?.id ?? null;
+      element('invocation-count').textContent = enabled ? `${items.length} invocation${items.length === 1 ? '' : 's'}` : 'Advisor tracing is disabled';
+      element('invocations').replaceChildren(...chronological.map((item, index) => {
+        const button = textNode('button', `Invocation ${index + 1} · ${item.error ? 'Failed' : item.complete ? 'Complete' : 'In progress'}`, 'exchange');
+        button.type = 'button'; button.setAttribute('aria-pressed', item.id === selectedInvocation);
+        button.append(textNode('small', item.prompt), textNode('small', `${new Date(item.startedAt).toLocaleTimeString()} · ${item.spanCount} observations · ${item.durationMs} ms`));
+        button.onclick = () => {
+          selectedInvocation = item.id; element('follow').checked = false;
+          paused = false; element('pause').textContent = 'Pause'; refresh();
+        };
+        return button;
+      }));
+      element('advisor-empty').hidden = selectedInvocation !== null;
+      element('advisor-selected').hidden = selectedInvocation === null;
+      if (selectedInvocation === null) { advisorVersion = null; return; }
+      const detail = await fetch(`${invocationApi}/${selectedInvocation}`, { cache: 'no-store' });
+      if (detail.status === 404) return;
+      if (!detail.ok) throw new Error();
+      const invocation = await detail.json();
+      const links = linkModelExchanges(invocation.spans, [...captured.values()]);
+      const version = JSON.stringify([invocation, [...links]]);
+      // Preserve diagram scroll and focus while the presenter explores a completed invocation.
+      if (version === advisorVersion) return;
+      advisorVersion = version;
+      const index = chronological.findIndex(item => item.id === selectedInvocation);
+      element('advisor-title').textContent = `Invocation ${index + 1}`;
+      element('advisor-prompt').textContent = invocation.summary.prompt;
+      element('advisor-status').textContent = `${invocation.summary.error || (invocation.summary.complete ? 'Complete' : 'In progress')} · ${invocation.summary.durationMs} ms · ${invocation.spans.filter(span => span.kind === 'model').length} model calls`;
+      element('advisor-notice').hidden = !invocation.summary.truncated;
+      const clients = invocation.spans.filter(span => span.kind === 'client');
+      element('advisor-chains').replaceChildren(...clients.map((client, index) => {
+        const section = document.createElement('div');
+        if (clients.length > 1) section.append(textNode('p', `ChatClient ${index + 1}${client.parentId == null ? '' : ' (nested)'}`));
+        const chain = document.createElement('div'); chain.className = 'advisor-chain';
+        for (const [index, advisor] of client.advisors.entries()) {
+          if (index) chain.append(document.createTextNode('→'));
+          const chip = textNode('span', advisor.type || advisor.name, 'advisor-chip');
+          chip.append(textNode('small', `${advisor.type && advisor.type !== advisor.name ? `Name: ${advisor.name} · ` : ''}order ${advisor.order}`)); chain.append(chip);
+        }
+        if (!client.advisors.length) chain.append('No configured advisors captured');
+        section.append(chain); return section;
+      }));
+      if (!clients.length) element('advisor-chains').textContent = 'Direct ChatModel invocation; no ChatClient chain captured.';
+      renderSequence(element('advisor-sequence'), invocation.spans, links, id => {
+        selectedId = id; element('follow').checked = false; setScreen('traffic');
+      });
     }
 
     function embeddedJson(text) {
@@ -430,6 +550,7 @@
           selectedId = items[0]?.id ?? null;
         }
         const turns = groupTurns(await loadExchanges(items));
+        if (screen === 'advisors') await refreshAdvisors();
         renderTurns(turns);
         element('count').textContent = `${turns.length} turn${turns.length === 1 ? '' : 's'} · ${items.length} exchange${items.length === 1 ? '' : 's'}`;
         element('empty').hidden = selectedId !== null;
@@ -464,6 +585,7 @@
         selectedId = null;
         captured.clear();
         expandedTurns.clear();
+        selectedInvocation = null; advisorVersion = null;
         paused = false;
         element('pause').textContent = 'Pause';
         refresh();

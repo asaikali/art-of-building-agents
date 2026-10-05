@@ -1,6 +1,7 @@
 package com.example.spy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -19,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -27,6 +29,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -45,6 +57,7 @@ class SpyGatewayTest {
   private static ConfigurableApplicationContext app;
   private static URI base;
   private static SpyExchangeStore store;
+  private static SpyTraceStore traces;
 
   @BeforeAll
   static void start() throws IOException {
@@ -73,6 +86,7 @@ class SpyGatewayTest {
                 "--spy.max-exchanges=4",
                 "--spy.max-body-bytes=1024");
     store = app.getBean(SpyExchangeStore.class);
+    traces = app.getBean(SpyTraceStore.class);
   }
 
   @AfterAll
@@ -85,11 +99,12 @@ class SpyGatewayTest {
   @BeforeEach
   void clear() {
     store.clear();
+    traces.clear();
     RECEIVED.set(null);
   }
 
   @Test
-  void nativeSdkUsesLoopbackAndSharedModelDefault() throws InterruptedException {
+  void nativeSdkUsesLoopbackAndSharedModelDefault() throws Exception {
     var result =
         app.getBean(ChatClient.Builder.class)
             .build()
@@ -109,6 +124,199 @@ class SpyGatewayTest {
     assertThat(capture.requestBody().text()).isEqualTo(RECEIVED.get().body());
     assertThat(capture.responseBody().text()).contains("Stub answer");
     assertThat(JSON.writeValueAsString(capture)).doesNotContain("spy-test-key");
+    assertThat(traces.list()).hasSize(1);
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(trace.summary().complete()).isTrue();
+    assertThat(trace.spans())
+        .anyMatch(span -> span.kind().equals("model") && "demo".equals(span.responseId()));
+    assertThat(get("/spy/api/invocations").body()).contains("\"enabled\":true");
+    assertThat(JSON.writeValueAsString(trace)).doesNotContain("spy-test-key");
+  }
+
+  @Test
+  void observesAdvisorOrderAndRepeatedToolRoundsWithoutChangingTheResult() throws Exception {
+    var outer = new CountingAdvisor("Turn", ToolCallingAdvisor.DEFAULT_ORDER - 1);
+    var inner = new CountingAdvisor("Model", ToolCallingAdvisor.DEFAULT_ORDER + 1);
+    var tools = new LoopTools();
+    var result =
+        app.getBean(ChatClient.Builder.class)
+            .clone()
+            .defaultAdvisors(
+                outer,
+                ToolCallingAdvisor.builder()
+                    .toolCallingManager(app.getBean(ToolCallingManager.class))
+                    .build(),
+                inner)
+            .build()
+            .prompt()
+            .tools(tools)
+            .user("spy-tool-loop")
+            .call()
+            .content();
+    assertThat(result).isEqualTo("Loop complete");
+    assertThat(outer.calls.get()).isEqualTo(1);
+    assertThat(inner.calls.get()).isEqualTo(3);
+    assertThat(tools.calls.get()).isEqualTo(2);
+    assertThat(store.list()).hasSize(3);
+    assertThat(traces.list()).hasSize(1);
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(trace.summary().complete()).isTrue();
+    assertThat(trace.spans().stream().filter(span -> span.name().equals("Turn"))).hasSize(1);
+    assertThat(trace.spans().stream().filter(span -> span.name().equals("Model"))).hasSize(3);
+    assertThat(trace.spans().stream().filter(span -> span.kind().equals("model")))
+        .extracting(SpyTraceStore.SpanView::responseId)
+        .containsExactly("loop-1", "loop-2", "loop-3");
+    assertThat(trace.spans().stream().filter(span -> span.kind().equals("tool")))
+        .extracting(SpyTraceStore.SpanView::toolCallId)
+        .containsExactly("weather-call", "activity-call");
+    assertThat(trace.spans().getFirst().advisors())
+        .extracting(SpyTraceStore.AdvisorInfo::name)
+        .containsSubsequence("Turn", "Tool Calling Advisor", "Model");
+    var detail = get("/spy/api/invocations/" + trace.summary().id());
+    assertThat(detail.statusCode()).isEqualTo(200);
+    assertThat(detail.body()).doesNotContain("spy-test-key", "toolCallArguments", "toolCallResult");
+  }
+
+  @Test
+  void observesNativeStreamingWithTheSameParentChain() throws InterruptedException {
+    var result =
+        app.getBean(ChatClient.Builder.class).build().prompt().user("spy-native-stream").stream()
+            .content()
+            .collectList()
+            .block(Duration.ofSeconds(10));
+    assertThat(result).containsExactly("Streaming answer");
+    // Reactor's doFinally observations stop after the subscriber receives onComplete.
+    for (int i = 0; i < 100; i++) {
+      var view = traces.find(traces.list().getFirst().id()).orElseThrow();
+      if (view.spans().stream().allMatch(span -> span.endSequence() != null)) break;
+      Thread.sleep(10);
+    }
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(traces.list()).hasSize(1);
+    assertThat(trace.spans().stream().filter(span -> span.kind().equals("model")))
+        .allSatisfy(
+            span -> {
+              assertThat(span.parentId()).isNotNull();
+              assertThat(span.responseId()).isEqualTo("native-stream");
+            });
+  }
+
+  @Test
+  void capturesNestedChatClientsInsideAToolAsOneInvocation() {
+    var nested = app.getBean(ChatClient.Builder.class).clone().build();
+    var result =
+        app.getBean(ChatClient.Builder.class)
+            .clone()
+            .defaultAdvisors(
+                ToolCallingAdvisor.builder()
+                    .toolCallingManager(app.getBean(ToolCallingManager.class))
+                    .build())
+            .build()
+            .prompt()
+            .tools(new LoopTools(nested))
+            .user("spy-tool-loop")
+            .call()
+            .content();
+    assertThat(result).isEqualTo("Loop complete");
+    assertThat(traces.list()).hasSize(1);
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(trace.spans().stream().filter(span -> span.kind().equals("client"))).hasSize(2);
+    var child =
+        trace.spans().stream()
+            .filter(span -> span.kind().equals("client") && span.parentId() != null)
+            .findFirst()
+            .orElseThrow();
+    assertThat(
+            trace.spans().stream()
+                .filter(span -> span.id() == child.parentId())
+                .findFirst()
+                .orElseThrow()
+                .kind())
+        .isEqualTo("tool");
+    assertThat(trace.spans().stream().filter(span -> span.kind().equals("model"))).hasSize(4);
+  }
+
+  @Test
+  void anAdvisorCanShortCircuitWithoutSpyInvokingTheRemainingChain() {
+    CallAdvisor cached =
+        new CallAdvisor() {
+          public String getName() {
+            return "Cache";
+          }
+
+          public int getOrder() {
+            return 0;
+          }
+
+          public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+            return ChatClientResponse.builder()
+                .chatResponse(
+                    new ChatResponse(
+                        java.util.List.of(new Generation(new AssistantMessage("Cached answer")))))
+                .build();
+          }
+        };
+    var result =
+        app.getBean(ChatClient.Builder.class)
+            .clone()
+            .defaultAdvisors(cached)
+            .build()
+            .prompt()
+            .user("Cache hit")
+            .call()
+            .content();
+    assertThat(result).isEqualTo("Cached answer");
+    assertThat(store.list()).isEmpty();
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(trace.spans())
+        .noneMatch(span -> span.kind().equals("model") || span.kind().equals("tool"));
+    assertThat(trace.spans())
+        .extracting(SpyTraceStore.SpanView::name)
+        .contains("Cache")
+        .doesNotContain("call");
+    assertThat(trace.spans().getFirst().advisors())
+        .extracting(SpyTraceStore.AdvisorInfo::name)
+        .contains("Cache", "call");
+  }
+
+  @Test
+  void tracingCanBeDisabledWithoutRemovingTheGateway() {
+    try (var disabled =
+        new SpringApplicationBuilder(TestApp.class)
+            .run(
+                "--server.port=0",
+                "--spring.ai.openai.api-key=unused",
+                "--spy.tracing.enabled=false")) {
+      assertThat(disabled.getBeansOfType(SpyObservationHandler.class)).isEmpty();
+      assertThat(disabled.getBean(SpyController.class).invocations().enabled()).isFalse();
+      assertThat(disabled.getBean(SpyExchangeStore.class)).isNotNull();
+    }
+  }
+
+  @Test
+  void advisorErrorsKeepTheirOriginalExceptionWithoutRecordingItsMessage() {
+    CallAdvisor failed =
+        new CallAdvisor() {
+          public String getName() {
+            return "Failure";
+          }
+
+          public int getOrder() {
+            return 0;
+          }
+
+          public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+            throw new IllegalStateException("private-error-detail");
+          }
+        };
+    var client = app.getBean(ChatClient.Builder.class).clone().defaultAdvisors(failed).build();
+    assertThatThrownBy(() -> client.prompt().user("Fail this invocation").call().content())
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("private-error-detail");
+    var trace = traces.find(traces.list().getFirst().id()).orElseThrow();
+    assertThat(trace.summary().error()).isEqualTo("IllegalStateException");
+    assertThat(JSON.writeValueAsString(trace)).doesNotContain("private-error-detail");
+    assertThat(store.list()).isEmpty();
   }
 
   @Test
@@ -215,6 +423,9 @@ class SpyGatewayTest {
 
   @Test
   void viewerApiDoesNotCaptureItselfAndHistoryIsBoundedAndClearable() throws Exception {
+    app.getBean(ChatClient.Builder.class).build().prompt().user("Trace to clear").call().content();
+    assertThat(traces.list()).hasSize(1);
+    long invocationId = traces.list().getFirst().id();
     for (int i = 0; i < 6; i++) post("/spy/proxy/openai/v1/echo", "request-" + i);
     assertThat(store.list()).hasSize(4);
     var list = get("/spy/api/exchanges");
@@ -233,6 +444,7 @@ class SpyGatewayTest {
     assertThat(turnsScript.statusCode()).isEqualTo(200);
     assertThat(turnsScript.headers().firstValue("content-type").orElseThrow())
         .contains("javascript");
+    assertThat(get("/spy/advisor-flow.js").statusCode()).isEqualTo(200);
     assertThat(store.list()).hasSize(4);
     var deleted =
         CLIENT.send(
@@ -240,7 +452,9 @@ class SpyGatewayTest {
             HttpResponse.BodyHandlers.ofString());
     assertThat(deleted.statusCode()).isEqualTo(204);
     assertThat(store.list()).isEmpty();
+    assertThat(traces.list()).isEmpty();
     assertThat(get("/spy/api/exchanges/" + id).statusCode()).isEqualTo(404);
+    assertThat(get("/spy/api/invocations/" + invocationId).statusCode()).isEqualTo(404);
   }
 
   private static HttpResponse<String> post(String path, String body) throws Exception {
@@ -293,6 +507,13 @@ class SpyGatewayTest {
         Thread.currentThread().interrupt();
       }
       exchange.getResponseBody().write(SECOND_CHUNK.getBytes(StandardCharsets.UTF_8));
+    } else if (body.contains("spy-native-stream")) {
+      exchange.getResponseHeaders().set("Content-Type", "text/event-stream");
+      exchange.sendResponseHeaders(200, 0);
+      String chunks =
+          "data: {\"id\":\"native-stream\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5.4-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Streaming answer\"},\"finish_reason\":null}]}\n\n"
+              + "data: {\"id\":\"native-stream\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-5.4-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n";
+      exchange.getResponseBody().write(chunks.getBytes(StandardCharsets.UTF_8));
     } else {
       int status = 200;
       String result = body;
@@ -302,6 +523,26 @@ class SpyGatewayTest {
       if (exchange.getRequestURI().getPath().endsWith("/chat/completions")) {
         result =
             "{\"id\":\"demo\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"gpt-5.4-mini\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Stub answer\"},\"finish_reason\":\"stop\"}]}";
+        if (body.contains("spy-tool-loop")) {
+          boolean weather = body.contains("\"tool_call_id\":\"weather-call\"");
+          boolean activity = body.contains("\"tool_call_id\":\"activity-call\"");
+          String message =
+              activity
+                  ? "{\"role\":\"assistant\",\"content\":\"Loop complete\"}"
+                  : "{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\""
+                      + (weather ? "activity-call" : "weather-call")
+                      + "\",\"type\":\"function\",\"function\":{\"name\":\""
+                      + (weather ? "activities" : "weather")
+                      + "\",\"arguments\":\"{}\"}}]}";
+          result =
+              "{\"id\":\"loop-"
+                  + (activity ? 3 : weather ? 2 : 1)
+                  + "\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"gpt-5.4-mini\",\"choices\":[{\"index\":0,\"message\":"
+                  + message
+                  + ",\"finish_reason\":\""
+                  + (activity ? "stop" : "tool_calls")
+                  + "\"}]}";
+        }
       } else if (exchange.getRequestURI().getPath().endsWith("/error")) {
         status = 429;
         result = "Provider is busy";
@@ -328,6 +569,56 @@ class SpyGatewayTest {
   }
 
   record Received(String path, String authorization, String apiKey, String body) {}
+
+  static class CountingAdvisor implements CallAdvisor {
+    final AtomicInteger calls = new AtomicInteger();
+    final String name;
+    final int order;
+
+    CountingAdvisor(String name, int order) {
+      this.name = name;
+      this.order = order;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getOrder() {
+      return order;
+    }
+
+    public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+      calls.incrementAndGet();
+      return chain.nextCall(request);
+    }
+  }
+
+  static class LoopTools {
+    final AtomicInteger calls = new AtomicInteger();
+    final ChatClient nested;
+
+    LoopTools() {
+      this(null);
+    }
+
+    LoopTools(ChatClient nested) {
+      this.nested = nested;
+    }
+
+    @Tool(description = "Get weather")
+    public String weather() {
+      calls.incrementAndGet();
+      if (nested != null) return nested.prompt().user("Explain user prompts").call().content();
+      return "Sunny";
+    }
+
+    @Tool(description = "Find activities")
+    public String activities() {
+      calls.incrementAndGet();
+      return "Walk";
+    }
+  }
 
   @Configuration(proxyBeanMethods = false)
   @EnableAutoConfiguration

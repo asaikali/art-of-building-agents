@@ -5,7 +5,8 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("spy")
-public record SpyProperties(Map<String, URI> providers, int maxExchanges, int maxBodyBytes) {
+public record SpyProperties(
+    Map<String, URI> providers, int maxExchanges, int maxBodyBytes, Tracing tracing) {
   public SpyProperties {
     providers = Map.copyOf(providers);
     if (maxExchanges < 1 || maxBodyBytes < 1) {
@@ -24,5 +25,13 @@ public record SpyProperties(Map<String, URI> providers, int maxExchanges, int ma
                 "Spy provider must have a simple name and an HTTP origin: " + name);
           }
         });
+  }
+
+  public record Tracing(boolean enabled, int maxInvocations, int maxSpans) {
+    public Tracing {
+      if (maxInvocations < 1 || maxSpans < 1) {
+        throw new IllegalArgumentException("Spy tracing limits must be positive");
+      }
+    }
   }
 }

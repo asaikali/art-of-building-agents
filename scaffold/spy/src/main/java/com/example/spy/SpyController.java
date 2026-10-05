@@ -17,9 +17,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class SpyController {
   private final SpyExchangeStore store;
+  private final SpyTraceStore traces;
+  private final boolean tracingEnabled;
 
-  public SpyController(SpyExchangeStore store) {
+  public SpyController(SpyExchangeStore store, SpyTraceStore traces, boolean tracingEnabled) {
     this.store = store;
+    this.traces = traces;
+    this.tracingEnabled = tracingEnabled;
   }
 
   @GetMapping(
@@ -45,5 +49,18 @@ public class SpyController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void clear() {
     store.clear();
+    traces.clear();
+  }
+
+  public record Invocations(boolean enabled, List<SpyTraceStore.Summary> items) {}
+
+  @GetMapping("/spy/api/invocations")
+  Invocations invocations() {
+    return new Invocations(tracingEnabled, traces.list());
+  }
+
+  @GetMapping("/spy/api/invocations/{id}")
+  SpyTraceStore.InvocationView invocation(@PathVariable long id) {
+    return traces.find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 }

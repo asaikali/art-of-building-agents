@@ -9,6 +9,7 @@ import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequ
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
@@ -71,7 +72,20 @@ public class SpyAutoConfiguration {
   }
 
   @Bean
-  SpyController spyController(SpyExchangeStore store) {
-    return new SpyController(store);
+  SpyTraceStore spyTraceStore(SpyProperties properties) {
+    return new SpyTraceStore(
+        properties.tracing().maxInvocations(), properties.tracing().maxSpans());
+  }
+
+  @Bean
+  @ConditionalOnProperty(prefix = "spy.tracing", name = "enabled", havingValue = "true")
+  SpyObservationHandler spyObservationHandler(SpyTraceStore store) {
+    return new SpyObservationHandler(store);
+  }
+
+  @Bean
+  SpyController spyController(
+      SpyExchangeStore store, SpyTraceStore traces, SpyProperties properties) {
+    return new SpyController(store, traces, properties.tracing().enabled());
   }
 }

@@ -10,6 +10,20 @@ Each body defaults to **Formatted**, the first view button. It shows readable co
 
 Tool calls and their results share a background color, matched by tool-call ID across both panels and all exchanges in a turn. Each call gets its own color, including parallel calls. The six-color palette repeats after six pairs.
 
+## Advisor flow
+
+Select **Advisor flow** to see each invocation's effective advisor configuration and an execution sequence diagram. This includes advisors configured on the builder and on individual requests, their names, types, and order values. The diagram records actual entry and return events, including repeated calls inside a tool loop, nested ChatClients, and errors. A configured advisor that never executes is absent from the sequence. Solid arrows enter; dashed arrows return. Model return labels link to captured HTTP exchanges using the provider response ID; ambiguous or missing IDs remain unlinked.
+
+Advisor boxes lead with the class name, such as `ChatModelCallAdvisor` or `TraceAdvisor`. A secondary **Name** label preserves Spring AI's advisor name (for example, `call`, `First`, or `Second`) so multiple instances of the same class remain distinguishable.
+
+Spy registers a Micrometer observation handler for Spring AI's existing ChatClient, advisor, ChatModel and tool observations. It does not insert or wrap advisors, modify prompts, or change tool execution. Tool execution appears when its ToolCallingManager uses the application's ObservationRegistry. Only execution metadata and a short invocation prompt are retained; advisor contexts, HTTP headers, tool arguments/results and exception messages are not copied into traces. The HTTP view continues to show captured model traffic. The diagram shows invocation boundaries and message counts, rather than diffs of an advisor's prompt transformations.
+
+Tracing is enabled by default and can be disabled with `spy.tracing.enabled=false`. History is bounded by `spy.tracing.max-invocations=100` and `spy.tracing.max-spans=300` per invocation. A truncated trace is labeled. **Clear** clears traffic and invocation history; **Pause** and **Follow latest** apply to both views. Recording failures are isolated from agent execution.
+
+Restart a running sample after installing this version of Spy to register the observation handler. Calls made before tracing was enabled cannot acquire a sequence retrospectively. The Boot observation module supplies the registry without adding Actuator endpoints or requiring an external tracing service.
+
+Use **Hide navigation** to give the diagram the full window width; **Show navigation** restores the invocation list. The control also works in Traffic view, and its state is remembered across reloads in the same browser tab.
+
 **Parsed** provides an expandable tree. Click an object or array to expand or collapse it, or use **Expand all** and **Collapse all**. Prompt strings show real line breaks; JSON inside strings, including tool arguments, structured responses, and fenced schemas, is decoded and labeled so its original string type is clear. Polling preserves the branches you are exploring. **Raw** shows valid JSON with indentation and syntax highlighting while preserving the original string escaping and number values. Plain text and incomplete streaming bodies remain readable as text in every view.
 
 ## Shared defaults
@@ -65,7 +79,7 @@ Run the Gateway integration tests and the turn-grouping tests from the repositor
 
 ```shell
 ./mvnw -f scaffold/spy/pom.xml test
-node --test scaffold/spy/src/test/javascript/turns.test.mjs
+node --test scaffold/spy/src/test/javascript/*.test.mjs
 ```
 
-The JavaScript tests use Node's built-in test runner and cover interleaved turns, multiple tool rounds, streaming, errors, and missing history.
+The Java tests exercise the native SDK against local stub providers, including advisor order, repeated tool rounds, nested clients, streaming, short-circuiting, disabled tracing and bounded history. The JavaScript tests use Node's built-in test runner and cover turn grouping, pair colors, sequence order and response-ID links.
