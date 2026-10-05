@@ -6,7 +6,7 @@ finding restaurants, checking constraints, and guiding the final decision.
 Every numbered module under this directory is a complete, standalone Spring Boot
 app that implements the same agent.
 
-**Modules 01-05 walk through the capabilities a real agent needs**, in the order
+**Modules 01-06 walk through the capabilities a real agent needs**, in the order
 you'd build them:
 
 1. **Understand and align with the user's intent** — turn what the user types into
@@ -26,6 +26,8 @@ you'd build them:
 5. **Help the user reach a decision** — answer questions, compare options, and
    recognize when they've chosen one or want to start over. *Compare restaurants,
    look up a menu, book one, or restart with relaxed requirements.*
+
+6. **Remember user preferences** — carry favourite restaurants across chats using a custom advisor. *Prioritize qualifying favourites while keeping current meal constraints authoritative.*
 
 The same shape applies in other domains — a vacation planner, a hiring shortlist,
 a vendor selection — only the candidates and the requirements change.
@@ -70,6 +72,8 @@ experience is not assumed:
 | 6 | [Agent 03: Constraint checking](03-constraint-checking/README.md) | Are those restaurants actually suitable? |
 | 7 | [Agent 04: Restaurant planning](04-restaurant-planning/README.md) | How can the agent search and evaluate candidates itself? |
 | 8 | [Agent 05: Decision support](05-decision-support/README.md) | How can it help the user choose? |
+| 9 | [Foundations 04: Advisors](../foundations/04-advisor/README.md) | What surrounds a model call and its tool loop? |
+| 10 | [Agent 06: User preferences](06-user-preferences/README.md) | How can user memory improve future meals? |
 
 In 02, watch a real search and inspect its limited results in Spy. In 03, keep
 that search demo and introduce the checks as separately testable services. In 04,
@@ -94,6 +98,7 @@ backend task builds the selected lesson and its shared dependencies before start
 | `mise run 3:start` | Constraint checking |
 | `mise run 4:start` | Restaurant planning |
 | `mise run 5:start` | Decision support |
+| `mise run 6:start` | User preferences |
 
 Run one backend at a time on port 8080. In another terminal, run
 `mise run ui:start` to start the inspector on port 5173.
@@ -120,7 +125,7 @@ Then open <http://localhost:5173>. Chat on the left, agent state and events on
 the right. The inspector proxies its API calls to the backend on port 8080.
 
 Any module is runnable on its own. Later modules include the earlier capabilities
-and add the next step, so running 05 shows the full agent end-to-end.
+and add the next step, so running 06 shows the full agent with user preference memory.
 
 ## Run the tests
 

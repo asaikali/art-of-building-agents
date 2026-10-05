@@ -20,5 +20,6 @@
     <module>03-constraint-checking</module>
     <module>04-restaurant-planning</module>
     <module>05-decision-support</module>
+    <module>06-user-preferences</module>
   </modules>
 </project>
