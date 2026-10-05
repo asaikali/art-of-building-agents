@@ -1,5 +1,9 @@
 # 03 Tool Calling
 
+Cover this after [Agent 01: Intent Alignment](../../meal-agent/01-intent-alignment/README.md).
+Then apply the same `.tools(...)` pattern in
+[Agent 02: Restaurant Search](../../meal-agent/02-restaurant-search/README.md).
+
 From the repository root, run the app with `OPENAI_API_KEY` set in your environment:
 
 ```shell

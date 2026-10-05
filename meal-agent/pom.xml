@@ -16,8 +16,9 @@
   <modules>
     <module>restaurant-data</module>
     <module>01-intent-alignment</module>
-    <module>02-constraint-checking</module>
-    <module>03-restaurant-planning</module>
-    <module>04-decision-support</module>
+    <module>02-restaurant-search</module>
+    <module>03-constraint-checking</module>
+    <module>04-restaurant-planning</module>
+    <module>05-decision-support</module>
   </modules>
 </project>

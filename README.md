@@ -28,9 +28,22 @@ Rather than treating agents as black boxes, we’ll make the loop visible and co
 7. **Robustness:** Adding termination conditions and error handling for reliable behavior.
 8. **Security Mechanisms:** Applying security standards to request and enforce permissions.
 
+### Workshop sequence
+
+The code lessons alternate Spring AI foundations with their application in the
+meal agent. Start with [ChatClient](foundations/01-chat-client/README.md) and
+[structured output](foundations/02-structured-output/README.md), then build
+[intent alignment](meal-agent/01-intent-alignment/README.md). Next, learn
+[tool calling](foundations/03-tool-calling/README.md) and apply it to
+[restaurant search](meal-agent/02-restaurant-search/README.md). The search results
+motivate [constraint checking](meal-agent/03-constraint-checking/README.md), followed
+by [evaluated planning](meal-agent/04-restaurant-planning/README.md) and
+[decision support](meal-agent/05-decision-support/README.md).
+
 ### Prerequisites
 
 * Comfortable with **Java** and **Spring Boot**.
 * Familiar with foundational AI concepts (models, prompts, embeddings, and tool calling).
-* Basic experience with **Spring AI** (key concepts will be reviewed as needed).
+* No prior **Spring AI** experience is required; the foundations lessons introduce
+  each feature before the agent uses it.
 * An interest in learning how to architect and build AI agents.

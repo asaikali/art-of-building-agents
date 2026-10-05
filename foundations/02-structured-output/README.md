@@ -1,5 +1,8 @@
 # 02 Structured Output
 
+After [01 ChatClient](../01-chat-client/README.md), use this lesson to learn the
+typed model responses needed by [Agent 01: Intent Alignment](../../meal-agent/01-intent-alignment/README.md).
+
 From the repository root, run the app with `OPENAI_API_KEY` set in your environment:
 
 ```shell

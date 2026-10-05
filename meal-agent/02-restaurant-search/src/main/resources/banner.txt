@@ -1,0 +1,7 @@
+
+  ========================================
+             Restaurant Search
+  ========================================
+
+  The Art of Building Agents | Meal Agent 02
+  :: Spring Boot :: ${spring-boot.formatted-version}

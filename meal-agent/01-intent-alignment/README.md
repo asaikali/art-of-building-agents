@@ -2,6 +2,10 @@
 
 Turn a messy natural-language request into confirmed, structured meal requirements.
 
+> **Before this lesson:** work through [Foundations 01: ChatClient](../../foundations/01-chat-client/README.md)
+> and [Foundations 02: Structured output](../../foundations/02-structured-output/README.md).
+> They introduce the model calls and typed extraction used here.
+
 ## What this module teaches
 
 - **Structured extraction** — use `ChatClient.entity()` to extract typed data from free text
@@ -39,3 +43,9 @@ Key classes:
 ## Running and testing
 
 See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.
+
+## Next question
+
+We know what the user wants. How can the agent find restaurants?
+First cover [Foundations 03: Tool calling](../../foundations/03-tool-calling/README.md),
+then apply it in [02 Restaurant Search](../02-restaurant-search/README.md).

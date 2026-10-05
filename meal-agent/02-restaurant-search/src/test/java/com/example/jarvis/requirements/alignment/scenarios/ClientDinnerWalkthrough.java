@@ -1,0 +1,74 @@
+package com.example.jarvis.requirements.alignment.scenarios;
+
+import com.example.agent.core.json.JsonUtils;
+import com.example.jarvis.RestaurantSearchApplication;
+import com.example.jarvis.agent.JarvisAgentContext;
+import com.example.jarvis.requirements.alignment.RequirementsAligner;
+import java.util.Map;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+/**
+ * Student walkthrough: planning a client dinner. Set breakpoints after each processMessage call to
+ * inspect the context, or just run the test and read the console output.
+ *
+ * <pre>
+ * mvn test -Dgroups=integration -Dtest=ClientDinnerWalkthrough
+ * </pre>
+ */
+@SpringBootTest(
+    classes = RestaurantSearchApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@Tag("integration")
+class ClientDinnerWalkthrough {
+
+  @Autowired private RequirementsAligner aligner;
+
+  @Test
+  void clientDinnerForFour() {
+    var context = new JarvisAgentContext();
+
+    // Turn 1: Describe the meal
+    var result1 =
+        aligner.processMessage(
+            context.getUserRequirements(),
+            context.getAlignmentStatus(),
+            "I have a client dinner tomorrow at 7pm for 4 people, one is vegetarian.");
+    applyResult(context, result1);
+    printTurn(1, context, result1);
+
+    // Turn 2: Add budget and origin
+    var result2 =
+        aligner.processMessage(
+            context.getUserRequirements(),
+            context.getAlignmentStatus(),
+            "I'm leaving from Union Station. Keep it under 120 CAD per person.");
+    applyResult(context, result2);
+    printTurn(2, context, result2);
+
+    // Turn 3: Confirm
+    var result3 =
+        aligner.processMessage(context.getUserRequirements(), context.getAlignmentStatus(), "yes");
+    applyResult(context, result3);
+    printTurn(3, context, result3);
+  }
+
+  private void applyResult(JarvisAgentContext context, RequirementsAligner.Result result) {
+    context.setUserRequirements(result.updatedRequirements());
+    context.setAlignmentStatus(result.updatedStatus());
+  }
+
+  private void printTurn(int turn, JarvisAgentContext context, RequirementsAligner.Result result) {
+    System.out.println("\n=== Turn " + turn + " ===");
+    System.out.println("Status: " + context.getAlignmentStatus().label());
+    System.out.println("Assistant: " + result.reply());
+    System.out.println(
+        "State:\n"
+            + JsonUtils.toJson(
+                Map.of(
+                    "requirements", context.getUserRequirements(),
+                    "status", context.getAlignmentStatus())));
+  }
+}

@@ -1,0 +1,52 @@
+# 04 Restaurant Planning
+
+Use Spring AI tool calling to search for restaurants and evaluate them against constraints.
+
+> **Builds on:** 02 (restaurant search) and 03 (constraint checks).
+> **Adds:** combining search and evaluation in one autonomous workflow —
+> implemented by exposing the constraint checks as `@Tool` methods and letting
+> `ToolCallingAdvisor` run the loop.
+
+## What this module teaches
+
+- **Evaluation tools** — extend the search introduced in 02 with details and constraint
+  checks, letting the model decide which candidates to evaluate
+- **Availability-first planning** — cheap deterministic search before expensive LLM checks
+- **Agentic loop** — one `ChatClient.call()` with tools registered. Spring AI handles the
+  tool execution loop. The system prompt tells the model the strategy.
+- **Prompt as strategy** — the system prompt describes the planning approach in plain
+  English. No tool names in the prompt — the model matches actions to tools from their
+  `@Tool` descriptions.
+
+## Architecture
+
+```
+planning/
+  PlanningTools.java       — @Tool methods: findAvailableRestaurants, getRestaurantDetails,
+                             checkRestaurantCandidate
+  RestaurantPlanner.java   — builds ChatClient with tools, makes single planning call
+
+agent/
+  JarvisAgentHandler.java  — after alignment confirms, triggers planning immediately
+```
+
+The planning flow:
+1. Alignment confirms requirements
+2. Handler calls `RestaurantPlanner.plan(confirmedRequirements)`
+3. Model calls `findAvailableRestaurants` → gets candidate list
+4. Model calls `checkRestaurantCandidate` on promising candidates → gets check results
+5. Model produces a shortlist or explains what failed
+
+Trace `VegetarianDinnerWalkthrough` for a full session showing how the model picks tools,
+evaluates candidates, and produces a shortlist.
+
+## Key design decisions
+
+- **No while loop.** Spring AI's `ToolCallingAdvisor` handles the multi-turn tool calling
+  automatically. The Java code makes one call.
+- **Tone rules in the prompt.** The model writes like a concierge — no PASS/FAIL jargon
+  in the user-facing response. Failed restaurants are omitted entirely.
+
+## Running and testing
+
+See [meal-agent/README.md](../README.md#run-a-module) for run and test commands.
