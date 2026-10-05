@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Splitpanes, Pane } from 'splitpanes'
+import { Splitpanes, Pane, type SplitpanesResizePayload } from 'splitpanes'
 import AppHeader from '@/components/AppHeader.vue'
 import SessionNavigator from '@/components/SessionNavigator.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
@@ -85,7 +85,7 @@ function toggleNav() {
   navigatorSize.value = newNavSize
 }
 
-function onResize(panes: { size: number }[]) {
+function onResize({ panes }: SplitpanesResizePayload) {
   if (panes.length >= 3) {
     navigatorSize.value = panes[0].size
     chatSize.value = panes[1].size
