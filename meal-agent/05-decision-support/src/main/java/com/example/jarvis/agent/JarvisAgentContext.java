@@ -42,4 +42,11 @@ public class JarvisAgentContext implements AgentContext {
   public void setShortlist(String shortlist) {
     this.shortlist = shortlist;
   }
+
+  /** Returns to gathering requirements while preserving the captured meal and attendee details. */
+  public void returnToAlignment() {
+    phase = WorkflowPhase.ALIGNMENT;
+    alignmentStatus = AlignmentStatus.GATHERING_REQUIREMENTS;
+    shortlist = null;
+  }
 }

@@ -100,18 +100,14 @@ public class JarvisAgentHandler implements AgentHandler {
     switch (response.action()) {
       case "restart" -> {
         // User wants to change requirements — go back to alignment
-        context.setPhase(WorkflowPhase.ALIGNMENT);
-        context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
-        context.setShortlist(null);
+        context.returnToAlignment();
         session.updateState(
             InspectorState.render(context, "Restarting: " + response.action(), null));
       }
       case "selected" -> {
         session.logEvent("restaurant-booked", Map.of("reply", response.reply()));
         // Reset to alignment so the user can plan another meal
-        context.setPhase(WorkflowPhase.ALIGNMENT);
-        context.setAlignmentStatus(AlignmentStatus.GATHERING_REQUIREMENTS);
-        context.setShortlist(null);
+        context.returnToAlignment();
         session.updateState(InspectorState.render(context, "Restaurant booked", null));
       }
       default -> {
