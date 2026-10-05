@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spy · Model traffic</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #172333; background: #f3f6fa; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 28px; background: #172333; color: white; }
+    h1 { margin: 0; font-size: 24px; }
+    header p { margin: 3px 0 0; color: #c2cede; }
+    .controls { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+    button { font: inherit; cursor: pointer; border: 1px solid #b8c5d6; border-radius: 6px; padding: 7px 12px; background: white; color: #172333; }
+    main { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: calc(100vh - 90px); }
+    aside { border-right: 1px solid #d7e0eb; padding: 16px; }
+    #count { margin: 0 0 12px; font-size: 14px; color: #526278; }
+    #exchanges { display: flex; flex-direction: column; gap: 8px; }
+    .exchange { text-align: left; width: 100%; padding: 12px; }
+    .exchange[aria-pressed="true"] { border-color: #3262c0; box-shadow: 0 0 0 1px #3262c0; background: #edf3ff; }
+    .exchange small { display: block; margin-top: 6px; overflow-wrap: anywhere; color: #526278; }
+    #detail { padding: 24px; min-width: 0; }
+    #empty { padding: 50px 10px; text-align: center; color: #526278; }
+    #empty h2 { color: #172333; }
+    .meta { margin-bottom: 20px; overflow-wrap: anywhere; }
+    #destination { margin: 0 0 8px; font-family: ui-monospace, monospace; font-size: 17px; }
+    #status { color: #526278; }
+    .messages { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+    article { min-width: 0; background: white; border: 1px solid #d7e0eb; border-radius: 8px; overflow: hidden; }
+    article h2 { font-size: 18px; margin: 0; padding: 14px 18px; border-bottom: 1px solid #d7e0eb; }
+    pre { font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+    details { border-top: 1px solid #d7e0eb; }
+    summary { cursor: pointer; padding: 12px 18px; font-size: 14px; color: #526278; }
+    .notice { margin: 0; padding: 10px 18px; background: #fff3cc; font-size: 14px; }
+    #connection { font-size: 13px; color: #ffda86; }
+    [hidden] { display: none !important; }
+    @media (max-width: 1000px) { .messages { grid-template-columns: 1fr; } }
+    @media (max-width: 650px) { main { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #d7e0eb; max-height: 240px; overflow: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>Spy</h1><p>The HTTP conversation between your app and the model</p></div>
+    <div class="controls">
+      <label><input id="follow" type="checkbox" checked> Follow latest</label>
+      <button id="pause" type="button">Pause</button>
+      <button id="clear" type="button">Clear</button>
+      <span id="connection" role="status"></span>
+    </div>
+  </header>
+  <main>
+    <aside><p id="count">0 exchanges</p><nav id="exchanges" aria-label="Model exchanges"></nav></aside>
+    <section id="detail">
+      <div id="empty"><h2>Waiting for a model call</h2><p>Run a sample request, then inspect its prompts, tool calls, and response here.</p></div>
+      <div id="selected" hidden>
+        <div class="meta"><p id="destination"></p><span id="status"></span></div>
+        <div class="messages">
+          <article>
+            <h2>App → model</h2>
+            <p id="request-notice" class="notice" hidden></p>
+            <pre id="request-body"></pre>
+            <details><summary>Request headers</summary><pre id="request-headers"></pre></details>
+          </article>
+          <article>
+            <h2>Model → app</h2>
+            <p id="response-notice" class="notice" hidden></p>
+            <pre id="response-body"></pre>
+            <details><summary>Response headers</summary><pre id="response-headers"></pre></details>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const api = location.pathname.replace(/\/spy\/?$/, '/spy/api/exchanges');
+    const element = id => document.getElementById(id);
+    let selectedId = null, paused = false, refreshing = false;
+    const pretty = text => { try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; } };
+    const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');
+
+    function renderBody(prefix, body) {
+      element(`${prefix}-body`).textContent = pretty(body.text) || '(empty body)';
+      const notice = element(`${prefix}-notice`);
+      notice.hidden = !body.truncated;
+      notice.textContent = `Display truncated. ${body.totalBytes.toLocaleString()} bytes were forwarded.`;
+    }
+
+    async function refresh() {
+      if (paused || refreshing) return;
+      refreshing = true;
+      try {
+        const response = await fetch(api, { cache: 'no-store' });
+        if (!response.ok) throw new Error();
+        const items = await response.json();
+        element('connection').textContent = '';
+        element('count').textContent = `${items.length} exchange${items.length === 1 ? '' : 's'}`;
+        if (element('follow').checked || !items.some(item => item.id === selectedId)) {
+          selectedId = items[0]?.id ?? null;
+        }
+        element('exchanges').replaceChildren(...items.map(item => {
+          const button = document.createElement('button');
+          button.className = 'exchange';
+          button.type = 'button';
+          button.setAttribute('aria-pressed', item.id === selectedId);
+          button.append(`#${item.id} · ${status(item)}`);
+          const caption = document.createElement('small');
+          caption.textContent = `${new Date(item.startedAt).toLocaleTimeString()} · ${item.durationMs} ms\n${item.method} ${new URL(item.destination, location.origin).pathname}`;
+          button.append(caption);
+          button.onclick = () => {
+            selectedId = item.id;
+            element('follow').checked = false;
+            paused = false;
+            element('pause').textContent = 'Pause';
+            refresh();
+          };
+          return button;
+        }));
+        element('empty').hidden = selectedId !== null;
+        element('selected').hidden = selectedId === null;
+        if (selectedId !== null) {
+          const detail = await fetch(`${api}/${selectedId}`, { cache: 'no-store' });
+          if (detail.status === 404) { selectedId = null; return; }
+          if (!detail.ok) throw new Error();
+          const item = await detail.json();
+          element('destination').textContent = `${item.summary.method} ${item.summary.destination}`;
+          element('status').textContent = `${status(item.summary)} · ${item.summary.durationMs} ms · Exchange #${item.summary.id}`;
+          renderBody('request', item.requestBody);
+          renderBody('response', item.responseBody);
+          element('request-headers').textContent = JSON.stringify(item.requestHeaders, null, 2);
+          element('response-headers').textContent = JSON.stringify(item.responseHeaders, null, 2);
+        }
+      } catch {
+        element('connection').textContent = 'Cannot reach the app. Retrying…';
+      } finally { refreshing = false; }
+    }
+
+    element('pause').onclick = () => {
+      paused = !paused;
+      element('pause').textContent = paused ? 'Resume' : 'Pause';
+      if (!paused) refresh();
+    };
+    element('clear').onclick = async () => {
+      try {
+        const response = await fetch(api, { method: 'DELETE' });
+        if (!response.ok) throw new Error();
+        selectedId = null;
+        paused = false;
+        element('pause').textContent = 'Pause';
+        refresh();
+      } catch { element('connection').textContent = 'Could not clear history.'; }
+    };
+    element('follow').onchange = () => { if (element('follow').checked) refresh(); };
+    setInterval(refresh, 1000);
+    refresh();
+  </script>
+</body>
+</html>

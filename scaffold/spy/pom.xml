@@ -6,14 +6,22 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>foundations</artifactId>
+    <artifactId>scaffold</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>02-structured-output</artifactId>
-  <packaging>jar</packaging>
-  <description>Spring AI structured output and output converter foundations</description>
+  <artifactId>spy</artifactId>
+  <description>Shared application defaults and an embedded model traffic viewer</description>
 
   <dependencies>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-model-openai</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+      <version>5.0.3</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>

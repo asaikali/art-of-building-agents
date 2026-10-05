@@ -14,6 +14,7 @@
   <description>Shared scaffold for agent applications</description>
 
   <modules>
+    <module>spy</module>
     <module>agent-core</module>
   </modules>
 </project>

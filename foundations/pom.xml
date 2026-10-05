@@ -13,6 +13,14 @@
   <packaging>pom</packaging>
   <description>Focused examples of the Spring AI features and concepts used by the meal agent</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>spy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
   <modules>
     <module>01-chat-client</module>
     <module>02-structured-output</module>
