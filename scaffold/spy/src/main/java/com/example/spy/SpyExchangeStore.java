@@ -3,6 +3,7 @@ package com.example.spy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -103,6 +104,11 @@ public class SpyExchangeStore {
       complete = true;
     }
 
+    synchronized void responseStarted(int status, Map<String, List<String>> headers) {
+      this.status = status;
+      responseHeaders = Map.copyOf(headers);
+    }
+
     synchronized Summary summary() {
       return new Summary(
           id,
@@ -129,7 +135,7 @@ public class SpyExchangeStore {
     }
   }
 
-  static final class BodyCapture {
+  static final class BodyCapture extends OutputStream {
     private final int limit;
     private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     private long totalBytes;
@@ -138,12 +144,14 @@ public class SpyExchangeStore {
       this.limit = limit;
     }
 
-    synchronized void append(byte[] buffer, int offset, int length) {
+    @Override
+    public synchronized void write(byte[] buffer, int offset, int length) {
       bytes.write(buffer, offset, Math.min(length, limit - bytes.size()));
       totalBytes += length;
     }
 
-    synchronized void append(int value) {
+    @Override
+    public synchronized void write(int value) {
       if (bytes.size() < limit) {
         bytes.write(value);
       }

@@ -2,25 +2,22 @@ package com.example.spy;
 
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.stripPrefix;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.filter.BodyFilterFunctions.adaptCachedBody;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
 
-import java.util.Map;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpClientSettings;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.gateway.server.mvc.GatewayServerMvcAutoConfiguration;
 import org.springframework.cloud.gateway.server.mvc.config.GatewayMvcProperties;
 import org.springframework.cloud.gateway.server.mvc.handler.ProxyExchange;
 import org.springframework.cloud.gateway.server.mvc.handler.RestClientProxyExchange;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -52,8 +49,10 @@ public class SpyAutoConfiguration {
   }
 
   @Bean
-  RouterFunction<ServerResponse> spyProviderRoutes(SpyProperties properties) {
+  RouterFunction<ServerResponse> spyProviderRoutes(
+      SpyProperties properties, SpyExchangeStore store) {
     var routes = RouterFunctions.route();
+    var capture = new SpyGatewayFilters(store);
     properties
         .providers()
         .forEach(
@@ -63,23 +62,12 @@ public class SpyAutoConfiguration {
                         .route(path("/spy/proxy/" + name + "/**"), http())
                         .before(uri(upstream))
                         .before(stripPrefix(3))
+                        .before(capture::captureRequest)
+                        .before(adaptCachedBody())
+                        .after(capture::captureResponse)
+                        .onError(Exception.class, capture::gatewayError)
                         .build()));
-    return routes
-        .onError(
-            Exception.class,
-            (exception, request) ->
-                ServerResponse.status(HttpStatus.BAD_GATEWAY)
-                    .body(Map.of("error", "The model provider request failed.")))
-        .build();
-  }
-
-  @Bean
-  FilterRegistrationBean<SpyCaptureFilter> spyCaptureFilter(
-      SpyExchangeStore store, SpyProperties properties) {
-    var registration = new FilterRegistrationBean<>(new SpyCaptureFilter(store, properties));
-    registration.addUrlPatterns("/spy/proxy/*");
-    registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
-    return registration;
+    return routes.build();
   }
 
   @Bean
