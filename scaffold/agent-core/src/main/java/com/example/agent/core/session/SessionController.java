@@ -24,7 +24,7 @@ public class SessionController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public AgentSessionMeta createSession(@RequestBody CreateSessionRequest request) {
-    Session session = agentSessionService.createSession(request.title());
+    Session session = agentSessionService.createSession(request.title(), request.userId());
     return metaAssembler.toMeta(session.id());
   }
 
@@ -38,5 +38,5 @@ public class SessionController {
     return metaAssembler.toMeta(id);
   }
 
-  public record CreateSessionRequest(String title) {}
+  public record CreateSessionRequest(String title, String userId) {}
 }

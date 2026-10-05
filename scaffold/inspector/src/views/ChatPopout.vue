@@ -19,12 +19,16 @@ const isStale = computed(() => {
 
 watch(
   sessionId,
-  async (id) => {
+  async (id, _previousId, onCleanup) => {
+    let cancelled = false
+    onCleanup(() => { cancelled = true })
+    if (!isStale.value) meta.value = null
     if (id) {
       try {
-        meta.value = await apiGet<AgentSessionMeta>(`/sessions/${id}/meta`)
+        const fetched = await apiGet<AgentSessionMeta>(`/sessions/${id}/meta`)
+        if (!cancelled) meta.value = fetched
       } catch {
-        if (!isStale.value) {
+        if (!cancelled && !isStale.value) {
           meta.value = null
         }
       }
@@ -43,6 +47,6 @@ watch(
       sse-status="disconnected"
       :is-stale="isStale"
     />
-    <ChatPanel :session-id="sessionId" :is-stale="isStale" class="flex-1" />
+    <ChatPanel :session-id="sessionId" :user-id="meta?.userId" :agent-name="meta?.agentName" :is-stale="isStale" class="flex-1" />
   </div>
 </template>

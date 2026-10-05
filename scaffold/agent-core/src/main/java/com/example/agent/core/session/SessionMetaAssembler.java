@@ -26,6 +26,7 @@ public class SessionMetaAssembler {
         session.id(),
         session.title(),
         session.agentName(),
+        session.userId(),
         stateService.getLatestRevision(sessionId),
         eventService.getEventCount(sessionId),
         session.lastUpdatedAt());

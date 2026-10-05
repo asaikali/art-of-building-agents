@@ -26,8 +26,14 @@ public class SessionManager {
   }
 
   public Session createSession(String agentName, String title) {
+    return createSession(agentName, title, "alex");
+  }
+
+  public Session createSession(String agentName, String title, String userId) {
+    String resolvedUserId = userId == null || userId.isBlank() ? "alex" : userId.trim();
     var id = new SessionId(sessionCounter.incrementAndGet());
-    var session = new Session(id, agentName, title, chatService, eventService, stateService);
+    var session =
+        new Session(id, agentName, title, resolvedUserId, chatService, eventService, stateService);
     sessions.put(id, session);
     return session;
   }

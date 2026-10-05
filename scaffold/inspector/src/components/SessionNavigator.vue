@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSessions } from '@/composables/useSessions'
 import { useHeartbeat } from '@/composables/useHeartbeat'
@@ -24,15 +24,30 @@ function navigateTo(id: number) {
   router.push(`/sessions/${id}`)
 }
 
-async function handleNewChat() {
-  const title = window.prompt('Session name:')
-  if (title === null) return // user cancelled
+const newChatDialog = ref<HTMLDialogElement | null>(null)
+const newChatTitle = ref('')
+const newChatUser = ref('alex')
+const creating = ref(false)
+const creationError = ref('')
 
+function openNewChat() {
+  newChatTitle.value = ''
+  creationError.value = ''
+  newChatDialog.value?.showModal()
+}
+
+async function handleNewChat() {
+  if (creating.value) return
+  creating.value = true
+  creationError.value = ''
   try {
-    const meta = await createSession(title.trim() || 'New Session')
+    const meta = await createSession(newChatTitle.value.trim() || 'New Session', newChatUser.value)
+    newChatDialog.value?.close()
     router.push(`/sessions/${meta.sessionId}`)
   } catch (e) {
-    console.error('Failed to create session:', e)
+    creationError.value = e instanceof Error ? e.message : 'Failed to create session'
+  } finally {
+    creating.value = false
   }
 }
 </script>
@@ -86,12 +101,33 @@ async function handleNewChat() {
     <!-- New Chat button at bottom -->
     <div v-show="!props.collapsed" class="p-2 shrink-0">
       <button
-        @click="handleNewChat"
+        @click="openNewChat"
         :disabled="heartbeatStatus !== 'connected'"
         class="w-full text-sm font-semibold text-white bg-blue-600 rounded-md px-3 py-2 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         + New Chat
       </button>
     </div>
+    <dialog ref="newChatDialog" class="m-auto w-96 max-w-[90vw] rounded-lg p-6 shadow-xl backdrop:bg-black/40">
+      <form @submit.prevent="handleNewChat" class="space-y-4">
+        <h2 class="text-lg font-semibold">New chat</h2>
+        <label class="block text-sm">
+          Chat name
+          <input v-model="newChatTitle" autofocus class="mt-1 w-full rounded border border-gray-300 px-3 py-2" placeholder="New Session" />
+        </label>
+        <fieldset>
+          <legend class="text-sm mb-2">User</legend>
+          <div class="flex gap-6">
+            <label class="flex items-center gap-2"><input v-model="newChatUser" type="radio" name="user" value="alex" /> Alex</label>
+            <label class="flex items-center gap-2"><input v-model="newChatUser" type="radio" name="user" value="ben" /> Ben</label>
+          </div>
+        </fieldset>
+        <p v-if="creationError" role="alert" class="text-sm text-red-600">{{ creationError }}</p>
+        <div class="flex justify-end gap-2">
+          <button type="button" @click="newChatDialog?.close()" class="rounded px-3 py-2 hover:bg-gray-100">Cancel</button>
+          <button type="submit" :disabled="creating || heartbeatStatus !== 'connected'" class="rounded bg-blue-600 px-3 py-2 text-white disabled:opacity-50">{{ creating ? 'Creating...' : 'Create chat' }}</button>
+        </div>
+      </form>
+    </dialog>
   </nav>
 </template>

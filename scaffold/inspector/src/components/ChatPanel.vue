@@ -8,8 +8,15 @@ const md = new MarkdownIt({ html: false })
 
 const props = defineProps<{
   sessionId: string
+  userId?: string
+  agentName?: string
   isStale?: boolean
 }>()
+
+const userLabel = computed(() => {
+  const id = props.userId
+  return id ? id.charAt(0).toUpperCase() + id.slice(1) : ''
+})
 
 const sessionIdRef = computed(() => props.sessionId || null)
 const isStaleRef = computed(() => props.isStale ?? false)
@@ -98,7 +105,9 @@ defineExpose({ refreshMessages: refresh })
   <div class="flex flex-col h-full bg-white">
     <!-- Panel title bar -->
     <div class="flex items-center justify-between bg-gray-100 border-b border-gray-300 px-4 py-2.5 shrink-0">
-      <span class="text-base font-bold text-gray-800">Chat</span>
+      <div class="flex items-center gap-3">
+        <span class="text-base font-bold text-gray-800">Chat<span v-if="userLabel" class="ml-1">{{ props.agentName ?? 'Agent' }} &lt;&gt; {{ userLabel }}</span></span>
+      </div>
       <span class="text-sm font-semibold text-gray-700 font-mono">{{ messages.length }} messages</span>
     </div>
 

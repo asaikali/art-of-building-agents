@@ -13,6 +13,7 @@ export interface AgentSessionMeta {
   sessionId: number
   title: string
   agentName: string
+  userId: string
   stateRev: number
   eventCount: number
   lastUpdatedAt: string // Instant serializes as ISO-8601 string
@@ -47,6 +48,7 @@ export interface HeartbeatMessage {
 
 export interface CreateSessionRequest {
   title: string
+  userId: string
 }
 
 export interface AppendMessageRequest {

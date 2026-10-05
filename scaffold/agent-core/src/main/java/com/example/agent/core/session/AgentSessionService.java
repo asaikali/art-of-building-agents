@@ -17,8 +17,13 @@ public class AgentSessionService {
   }
 
   public Session createSession(String title) {
-    Session session = sessionManager.createSession(agentHandler.getName(), title);
-    session.logEvent("session-started", Map.of("agent", agentHandler.getName()));
+    return createSession(title, "alex");
+  }
+
+  public Session createSession(String title, String userId) {
+    Session session = sessionManager.createSession(agentHandler.getName(), title, userId);
+    session.logEvent(
+        "session-started", Map.of("agent", agentHandler.getName(), "userId", session.userId()));
 
     String initialMessage = agentHandler.getInitialAssistantMessage();
     if (initialMessage != null && !initialMessage.isBlank()) {

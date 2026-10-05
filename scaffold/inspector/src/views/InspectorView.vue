@@ -43,13 +43,17 @@ const meta = ref<AgentSessionMeta | null>(null)
 
 watch(
   sessionId,
-  async (id) => {
+  async (id, _previousId, onCleanup) => {
+    let cancelled = false
+    onCleanup(() => { cancelled = true })
+    if (!isStale.value) meta.value = null
     if (id) {
       try {
-        meta.value = await apiGet<AgentSessionMeta>(`/sessions/${id}/meta`)
+        const fetched = await apiGet<AgentSessionMeta>(`/sessions/${id}/meta`)
+        if (!cancelled) meta.value = fetched
       } catch {
         // If stale, keep the last-known meta so the header still shows the title
-        if (!isStale.value) {
+        if (!cancelled && !isStale.value) {
           meta.value = null
         }
       }
@@ -114,7 +118,7 @@ function onResize({ panes }: SplitpanesResizePayload) {
 
       <!-- Chat panel -->
       <Pane :size="chatSize" :min-size="15">
-        <ChatPanel v-if="sessionId" ref="chatPanelRef" :session-id="sessionId" :is-stale="isStale" />
+        <ChatPanel v-if="sessionId" ref="chatPanelRef" :session-id="sessionId" :user-id="meta?.userId" :agent-name="meta?.agentName" :is-stale="isStale" />
         <div v-else class="flex items-center justify-center h-full bg-white text-gray-400 text-sm">
           Select a session to start chatting
         </div>

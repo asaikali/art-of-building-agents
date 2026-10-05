@@ -6,6 +6,7 @@ public record AgentSessionMeta(
     SessionId sessionId,
     String title,
     String agentName,
+    String userId,
     long stateRev,
     long eventCount,
     Instant lastUpdatedAt) {}

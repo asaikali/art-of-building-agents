@@ -22,6 +22,7 @@ public class Session {
   private final SessionId sessionId;
   private final String agentName;
   private final String title;
+  private final String userId;
   private final Instant createdAt;
   private volatile Instant lastUpdatedAt;
   private volatile AgentContext agentContext;
@@ -34,12 +35,14 @@ public class Session {
       SessionId sessionId,
       String agentName,
       String title,
+      String userId,
       ChatService chatService,
       EventService eventService,
       StateService stateService) {
     this.sessionId = sessionId;
     this.agentName = agentName;
     this.title = title;
+    this.userId = userId;
     this.createdAt = Instant.now();
     this.lastUpdatedAt = this.createdAt;
     this.chatService = chatService;
@@ -106,6 +109,10 @@ public class Session {
 
   public String agentName() {
     return agentName;
+  }
+
+  public String userId() {
+    return userId;
   }
 
   public String title() {
