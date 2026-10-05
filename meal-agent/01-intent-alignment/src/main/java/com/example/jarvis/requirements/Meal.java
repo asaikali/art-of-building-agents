@@ -100,6 +100,14 @@ public class Meal {
     this.cuisinePreferences = sanitize(cuisinePreferences);
   }
 
+  /**
+   * Treats null, empty, or whitespace-only text as unknown ({@code null}) and trims surrounding
+   * whitespace from other values. This keeps incidental spacing from changing snapshot equality
+   * when checking whether the user confirmed unchanged requirements.
+   *
+   * @param value text captured from the user, possibly null or blank
+   * @return trimmed text, or null when no meaningful text was provided
+   */
   private static String normalizeText(String value) {
     return value == null || value.isBlank() ? null : value.trim();
   }
