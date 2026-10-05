@@ -98,7 +98,8 @@
         if (element('follow').checked || !items.some(item => item.id === selectedId)) {
           selectedId = items[0]?.id ?? null;
         }
-        element('exchanges').replaceChildren(...items.map(item => {
+        const chronologicalItems = [...items].reverse();
+        element('exchanges').replaceChildren(...chronologicalItems.map(item => {
           const button = document.createElement('button');
           button.className = 'exchange';
           button.type = 'button';
