@@ -17,7 +17,8 @@ inspect the model requests and responses.
 The samples in
 [ToolCallingController](src/main/java/com/example/foundations/tools/ToolCallingController.java)
 start with one weather lookup, then use multiple lookups to give packing
-advice for a trip to Toronto and Paris.
+advice for a trip to Toronto and Paris. The third example adds an activity
+finder that needs the weather result before it can be called.
 
 ## Define the weather tool
 
@@ -84,9 +85,11 @@ As in the other foundations, the controller builds a client from Spring
 Boot's configured builder and injects the weather service:
 
 ```java
-public ToolCallingController(ChatClient.Builder builder, WeatherService weatherService) {
+public ToolCallingController(
+    ChatClient.Builder builder, WeatherService weatherService, ActivityService activityService) {
   this.chatClient = builder.build();
   this.weatherService = weatherService;
+  this.activityService = activityService;
 }
 ```
 
@@ -162,11 +165,73 @@ To compare with packing for just one city, change only the parameter:
 http GET :8080/tools/pack cities==Toronto
 ```
 
+## 3. Two different tools, successive calls
+
+Ask for activities suited to today's weather:
+
+```bash
+http GET :8080/tools/activities
+```
+
+The [ActivityService](src/main/java/com/example/foundations/tools/ActivityService.java)
+exposes a second annotated tool:
+
+```java
+@Tool(description = "Find activities from a simulated catalog that suit a city's current weather. First call getCurrentWeather and use its returned weatherCondition and temperature; do not guess these values.")
+public ActivityResponse findActivities(
+    @ToolParam(description = "City name from the weather result") String city,
+    @ToolParam(description = "weatherCondition returned by getCurrentWeather") String weatherCondition,
+    @ToolParam(description = "temperature in Celsius returned by getCurrentWeather") double temperature)
+```
+
+It selects activities from a small simulated catalog: indoor activities for
+rain or snow, shaded walks on hot days, and walking tours or picnics in mild
+weather. These are generic suggestions, not live venue listings.
+
+The controller makes both tools available in the same request:
+
+```java
+@GetMapping("/activities")
+public String activities(@RequestParam(defaultValue = "Toronto") String city) {
+  return chatClient
+      .prompt()
+      .tools(weatherService, activityService)
+      .user(
+          u -> u.text("""
+              What should I do in {city} today?
+              First check the current weather, then use the activity finder
+              with the returned weather condition and temperature.
+              Base your recommendations on the activities it returns.
+              """)
+              .param("city", city))
+      .call()
+      .content();
+}
+```
+
+**What to observe:** clear Spy before running this example. The expected
+sequence contains three model HTTP exchanges:
+
+1. The model requests `getCurrentWeather` for Toronto. Spring AI runs it.
+2. The next request includes the weather result. The model requests
+   `findActivities`, using the returned `city`, `weatherCondition`, and
+   `temperature`. Spring AI runs that tool.
+3. The final request includes both tool results. The model writes its
+   recommendation.
+
+Compare the activity tool's arguments with the weather result in Spy.
+Unlike two independent city lookups, the second tool needs data from the
+first. There is still only one `.call()` in the controller; Spring AI
+handles the successive tool calls. The prompt and tool descriptions guide
+the sequence, but the model controls the calls and the exact exchange count
+can vary.
+
 ## Takeaways
 
 - `@Tool` exposes a method; `@ToolParam` describes its inputs.
 - `.tools(weatherService)` makes the tool available for a request.
 - The model chooses the tool calls and arguments; Spring AI executes the methods.
 - One user request can produce multiple tool calls before the final answer.
+- A tool that needs another tool's result introduces another model round trip.
 
 See [Spring AI's tool calling reference](https://docs.spring.io/spring-ai/reference/api/tools.html).

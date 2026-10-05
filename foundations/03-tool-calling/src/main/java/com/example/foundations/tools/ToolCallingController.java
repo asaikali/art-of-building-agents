@@ -13,10 +13,13 @@ public class ToolCallingController {
 
   private final ChatClient chatClient;
   private final WeatherService weatherService;
+  private final ActivityService activityService;
 
-  public ToolCallingController(ChatClient.Builder builder, WeatherService weatherService) {
+  public ToolCallingController(
+      ChatClient.Builder builder, WeatherService weatherService, ActivityService activityService) {
     this.chatClient = builder.build();
     this.weatherService = weatherService;
+    this.activityService = activityService;
   }
 
   // 1. One city needs one weather tool call.
@@ -43,6 +46,26 @@ public class ToolCallingController {
                         I am traveling to {cities}. What clothes should I pack.
                         """)
                     .param("cities", cities))
+        .call()
+        .content();
+  }
+
+  // 3. The activity finder needs the result of the weather tool first.
+  @GetMapping("/activities")
+  public String activities(@RequestParam(defaultValue = "Toronto") String city) {
+    return chatClient
+        .prompt()
+        .tools(weatherService, activityService)
+        .user(
+            u ->
+                u.text(
+                        """
+                        What should I do in {city} today?
+                        First check the current weather, then use the activity finder
+                        with the returned weather condition and temperature.
+                        Base your recommendations on the activities it returns.
+                        """)
+                    .param("city", city))
         .call()
         .content();
   }
