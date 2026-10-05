@@ -7,7 +7,7 @@ From the repository root, run the app:
 ./mvnw -f foundations/01-chat-client/pom.xml spring-boot:run
 ```
 
-Open [Spy](http://localhost:8080/spy) to see the model requests and responses as you run each command.
+Open [Spy](http://localhost:8080/) to see the model requests and responses as you run each command.
 
 Walk through the samples below: each pairs a method from
 [ChatClientController](src/main/java/com/example/foundations/chat/ChatClientController.java)

@@ -1,6 +1,6 @@
 # Spy
 
-Spy supplies the shared application configuration and embeds a Spring Cloud Gateway MVC proxy in each sample. Open [http://localhost:8080/spy](http://localhost:8080/spy) while running a sample to inspect the actual HTTP requests and responses sent between the app and the model.
+Spy supplies the shared application configuration and embeds a Spring Cloud Gateway MVC proxy in each sample. Open [http://localhost:8080/](http://localhost:8080/) while running a sample to inspect the actual HTTP requests and responses sent between the app and the model. `/spy` remains available as an alias. Meal-agent APIs stay under `/api`; the separate inspector runs on port 5173.
 
 The viewer shows each exchange separately, including prompts, tool definitions, tool results, response bodies, status, and duration. Exchanges run from oldest at the top to latest at the bottom. It follows the latest exchange automatically; select an earlier exchange to walk through it. Clear the history before starting another demo.
 

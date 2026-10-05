@@ -8,7 +8,7 @@ From the repository root, run the app with `OPENAI_API_KEY` set in your environm
 ```
 
 Stop lesson 01 first if it is still using port 8080. Open
-[Spy](http://localhost:8080/spy) to inspect the model requests and responses.
+[Spy](http://localhost:8080/) to inspect the model requests and responses.
 
 The samples in
 [StructuredOutputController](src/main/java/com/example/foundations/structured/StructuredOutputController.java)

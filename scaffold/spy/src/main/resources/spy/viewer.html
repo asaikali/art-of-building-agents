@@ -111,7 +111,7 @@
     </section>
   </main>
   <script>
-    const api = location.pathname.replace(/\/spy\/?$/, '/spy/api/exchanges');
+    const api = location.pathname.replace(/\/spy\/?$/, '').replace(/\/$/, '') + '/spy/api/exchanges';
     const element = id => document.getElementById(id);
     let selectedId = null, paused = false, refreshing = false;
     const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');

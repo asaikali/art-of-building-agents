@@ -224,6 +224,11 @@ class SpyGatewayTest {
     assertThat(get("/spy").body())
         .contains("App → model", "Model → app")
         .doesNotContain("Request headers", "Response headers", "requestHeaders", "responseHeaders");
+    var root = get("/");
+    assertThat(root.statusCode()).isEqualTo(200);
+    assertThat(root.headers().firstValue("cache-control")).contains("no-store");
+    assertThat(root.body()).isEqualTo(get("/spy").body());
+    assertThat(get("/spy/").body()).isEqualTo(root.body());
     assertThat(store.list()).hasSize(4);
     var deleted =
         CLIENT.send(
