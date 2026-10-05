@@ -8,44 +8,82 @@ From the repository root, run the app with `OPENAI_API_KEY` set in your environm
 ```
 
 Stop lesson 01 first if it is still using port 8080. Open
-[Spy](http://localhost:8080/spy) to see the model requests and responses as you
-run each command.
+[Spy](http://localhost:8080/spy) to inspect the model requests and responses.
 
-Walk through the samples below: each pairs a method from
+The samples in
 [StructuredOutputController](src/main/java/com/example/foundations/structured/StructuredOutputController.java)
-with an HTTPie command. All four ask the same question about novels the model
-already knows. The return type changes from text to a list, a map, and typed
-records.
+use Douglas Adams, the author of *The Hitchhiker's Guide to the Galaxy*.
+Start with one book as text, return it as a record, then ask for all his books.
+Finally, use a second record to get publication years from the same prompt.
+All four samples are ready to run; no source edits or restarts are needed
+between them.
 
-## Creating the ChatClient
-
-As in lesson 01, Spring Boot supplies a configured `ChatClient.Builder`:
+## 1. Ask for the first book as text
 
 ```java
-private final ChatClient chatClient;
-
-public StructuredOutputController(ChatClient.Builder builder) {
-  this.chatClient = builder.build();
+@GetMapping(path = "/book/text", produces = MediaType.TEXT_PLAIN_VALUE)
+public String firstBookText(@RequestParam(defaultValue = "Douglas Adams") String author) {
+  return chatClient
+      .prompt()
+      .user(u -> u.text("What is the first book published by {author}?")
+          .param("author", author))
+      .call()
+      .content();
 }
 ```
 
-## 1. Get text back
+```bash
+http GET :8080/structured-output/book/text
+```
 
-Ask for Jane Austen's novels and finish with `.content()`:
+**What to observe:** the model answers the question, but the application gets
+a string. The title and author are not separate fields it can use.
+
+## 2. Return the same book as a record
+
+Define the shape of the answer in
+[Book](src/main/java/com/example/foundations/structured/Book.java):
 
 ```java
-@GetMapping(path = "/books", produces = MediaType.TEXT_PLAIN_VALUE)
-public String books(@RequestParam(defaultValue = "Jane Austen") String author) {
+public record Book(String author, String title) {}
+```
+
+Keep the question and finish with `.entity(Book.class)`:
+
+```java
+@GetMapping(path = "/book", produces = MediaType.APPLICATION_JSON_VALUE)
+public Book firstBook(@RequestParam(defaultValue = "Douglas Adams") String author) {
   return chatClient
       .prompt()
-      .user(
-          u -> u.text("""
-              List the novels written by {author}.
-              Provide only the list, with no other commentary.
-              """)
-              .param("author", author))
+      .user(u -> u.text("What is the first book published by {author}?")
+          .param("author", author))
       .call()
-      .content();
+      .entity(Book.class);
+}
+```
+
+```bash
+http GET :8080/structured-output/book
+```
+
+**What to observe:** the controller returns a `Book`, which Spring MVC
+serializes as a JSON object with `author` and `title`. In Spy, compare this
+request with the text sample: Spring AI adds a schema derived from the
+record and converts the model's answer into that record.
+
+## 3. Ask for all the books
+
+Change the question to ask for all the author's books and return `Book[]`:
+
+```java
+@GetMapping(path = "/books", produces = MediaType.APPLICATION_JSON_VALUE)
+public Book[] books(@RequestParam(defaultValue = "Douglas Adams") String author) {
+  return chatClient
+      .prompt()
+      .user(u -> u.text("List all the books written by {author}.")
+          .param("author", author))
+      .call()
+      .entity(Book[].class);
 }
 ```
 
@@ -53,142 +91,52 @@ public String books(@RequestParam(defaultValue = "Jane Austen") String author) {
 http GET :8080/structured-output/books
 ```
 
-**What to observe:** the answer is a string. The model chooses how to present
-the list, such as numbered lines or bullet points. The application has no
-individual book objects to work with.
+**What to observe:** the response is now a JSON array. Each entry has the
+same fields as the single-book response. The Java return type describes
+whether the application expects one book or a collection.
 
-## 2. Convert the answer to a list
+## 4. Get publication years with a second record
 
-Keep the prompt and replace `.content()` with a `ListOutputConverter`:
+The second record adds one field:
 
 ```java
-@GetMapping(path = "/books/list", produces = MediaType.APPLICATION_JSON_VALUE)
-public List<String> booksList(@RequestParam(defaultValue = "Jane Austen") String author) {
+public record BookWithPublicationYear(String author, String title, Integer publicationYear) {}
+```
+
+Use that type with the exact same prompt as the previous sample:
+
+```java
+@GetMapping(path = "/books/with-year", produces = MediaType.APPLICATION_JSON_VALUE)
+public BookWithPublicationYear[] booksWithYear(
+    @RequestParam(defaultValue = "Douglas Adams") String author) {
   return chatClient
       .prompt()
-      .user(
-          u -> u.text("""
-              List the novels written by {author}.
-              Provide only the list, with no other commentary.
-              """)
-              .param("author", author))
+      .user(u -> u.text("List all the books written by {author}.")
+          .param("author", author))
       .call()
-      .entity(new ListOutputConverter(new DefaultConversionService()));
+      .entity(BookWithPublicationYear[].class);
 }
 ```
 
 ```bash
-http GET :8080/structured-output/books/list
+http GET :8080/structured-output/books/with-year
 ```
 
-**What to observe:** the controller returns a `List<String>` and Spring MVC
-serializes it as a JSON array. In Spy, look for the converter's instructions
-requesting comma-separated values. The model's response is converted to a
-Java list before the controller returns it.
+**What to observe:** the response now includes `publicationYear`, even though
+the user prompt never asks for it. Compare the last two requests in Spy:
+the question is identical, while the schema from
+[BookWithPublicationYear](src/main/java/com/example/foundations/structured/BookWithPublicationYear.java)
+includes the extra field. The model is asked to populate that field from
+its knowledge.
 
-## 3. Convert the answer to a map
-
-Use a `MapOutputConverter` to get a JSON object as a Java map:
-
-```java
-@GetMapping(path = "/books/map", produces = MediaType.APPLICATION_JSON_VALUE)
-public Map<String, Object> booksMap(@RequestParam(defaultValue = "Jane Austen") String author) {
-  return chatClient
-      .prompt()
-      .user(
-          u -> u.text("""
-              List the novels written by {author}.
-              Provide only the list, with no other commentary.
-              """)
-              .param("author", author))
-      .call()
-      .entity(new MapOutputConverter());
-}
-```
-
-```bash
-http GET :8080/structured-output/books/map
-```
-
-**What to observe:** the response is a JSON object. The converter requests
-JSON, but the model still chooses the keys and values. The application gets
-a `Map<String, Object>` without a domain type defining its fields.
-
-## 4. Let a record define the output
-
-Define the fields the application needs in
-[Book](src/main/java/com/example/foundations/structured/Book.java):
-
-```java
-public record Book(String author, String title) {}
-```
-
-Pass `Book[].class` to `.entity(...)`:
-
-```java
-@GetMapping(path = "/books/object", produces = MediaType.APPLICATION_JSON_VALUE)
-public Book[] booksObject(@RequestParam(defaultValue = "Jane Austen") String author) {
-  return chatClient
-      .prompt()
-      .user(
-          u -> u.text("""
-              List the novels written by {author}.
-              Provide only the list, with no other commentary.
-              """)
-              .param("author", author))
-      .call()
-      .entity(Book[].class);
-}
-```
-
-```bash
-http GET :8080/structured-output/books/object
-```
-
-**What to observe:** each object has `author` and `title` fields. Spring AI
-derives a JSON schema from the record, includes formatting instructions in
-the model request, and converts the answer to a `Book[]`. Inspect the request
-in Spy to see the generated schema.
-
-Change only the author to reuse the same prompt and record:
-
-```bash
-http GET :8080/structured-output/books/object author=='George Orwell'
-```
-
-## 5. Live demo: add a field to the record
-
-The checked-in record contains only `author` and `title`. During the talk,
-change it to:
-
-```java
-public record Book(String author, String title, Integer publicationYear) {}
-```
-
-Restart the app to compile and load the changed record. Leave the controller
-and prompt as they are, then repeat the exact same request:
-
-```bash
-http GET :8080/structured-output/books/object
-```
-
-**What to observe:** the generated schema now includes `publicationYear`.
-The model sees that field in the schema and is asked to fill it using its
-knowledge, even though the user prompt still just asks for novels. Each
-returned `Book` now has a publication year. Compare the requests in Spy
-before and after the edit to connect the record change to the new schema.
-
-Restore the two-field record when preparing to give the demo again.
+For a quick factual check, *The Hitchhiker's Guide to the Galaxy* was
+published in 1979. See [the publisher's page](https://www.panmacmillan.com/authors/douglas-adams/the-hitchhikers-guide-to-the-galaxy/9781509809066).
 
 ## Takeaways
 
-- `.content()` returns the model's answer as text.
-- Output converters supply format instructions and parse the model's answer.
-- `.entity(Book[].class)` uses the record to define the output structure.
-- Adding a record field changes the generated schema without changing the prompt.
-- Structured output defines the shape of the answer; factual accuracy still
-  depends on the model's knowledge.
+- `.content()` gives the application text; `.entity(...)` gives it typed data.
+- The record defines the fields, and an array asks for a collection of records.
+- A different record changes the schema while the user prompt stays the same.
 
-See the Spring AI reference for
-[structured output](https://docs.spring.io/spring-ai/reference/api/structured-output.html)
-and [output converters](https://docs.spring.io/spring-ai/reference/api/structured-output/converters.html).
+Structured output defines the answer's shape. The facts and completeness of
+the book list still depend on the model's knowledge.

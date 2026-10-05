@@ -1,11 +1,6 @@
 package com.example.foundations.structured;
 
-import java.util.List;
-import java.util.Map;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.converter.ListOutputConverter;
-import org.springframework.ai.converter.MapOutputConverter;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,71 +17,44 @@ public class StructuredOutputController {
     this.chatClient = builder.build();
   }
 
-  // 1. The model knows the books; content() returns its answer as text.
-  @GetMapping(path = "/books", produces = MediaType.TEXT_PLAIN_VALUE)
-  public String books(@RequestParam(defaultValue = "Jane Austen") String author) {
+  // 1. Ask for one book and get the answer as text.
+  @GetMapping(path = "/book/text", produces = MediaType.TEXT_PLAIN_VALUE)
+  public String firstBookText(@RequestParam(defaultValue = "Douglas Adams") String author) {
     return chatClient
         .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
-                        List the novels written by {author}.
-                        Provide only the list, with no other commentary.
-                        """)
-                    .param("author", author))
+        .user(u -> u.text("What is the first book published by {author}?").param("author", author))
         .call()
         .content();
   }
 
-  // 2. A converter asks for comma-separated output and turns it into a Java list.
-  @GetMapping(path = "/books/list", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<String> booksList(@RequestParam(defaultValue = "Jane Austen") String author) {
+  // 2. Keep the same question and ask Spring AI for a Book.
+  @GetMapping(path = "/book", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Book firstBook(@RequestParam(defaultValue = "Douglas Adams") String author) {
     return chatClient
         .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
-                        List the novels written by {author}.
-                        Provide only the list, with no other commentary.
-                        """)
-                    .param("author", author))
+        .user(u -> u.text("What is the first book published by {author}?").param("author", author))
         .call()
-        .entity(new ListOutputConverter(new DefaultConversionService()));
+        .entity(Book.class);
   }
 
-  // 3. A converter asks for a JSON object and turns it into a Java map.
-  @GetMapping(path = "/books/map", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Map<String, Object> booksMap(@RequestParam(defaultValue = "Jane Austen") String author) {
+  // 3. Ask for all the books and return an array of the same record.
+  @GetMapping(path = "/books", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Book[] books(@RequestParam(defaultValue = "Douglas Adams") String author) {
     return chatClient
         .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
-                        List the novels written by {author}.
-                        Provide only the list, with no other commentary.
-                        """)
-                    .param("author", author))
-        .call()
-        .entity(new MapOutputConverter());
-  }
-
-  // 4. The record defines the schema. Add a field to Book during the live demo.
-  @GetMapping(path = "/books/object", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Book[] booksObject(@RequestParam(defaultValue = "Jane Austen") String author) {
-    return chatClient
-        .prompt()
-        .user(
-            u ->
-                u.text(
-                        """
-                        List the novels written by {author}.
-                        Provide only the list, with no other commentary.
-                        """)
-                    .param("author", author))
+        .user(u -> u.text("List all the books written by {author}.").param("author", author))
         .call()
         .entity(Book[].class);
+  }
+
+  // 4. Keep the same prompt; the second record adds the publication year to the schema.
+  @GetMapping(path = "/books/with-year", produces = MediaType.APPLICATION_JSON_VALUE)
+  public BookWithPublicationYear[] booksWithYear(
+      @RequestParam(defaultValue = "Douglas Adams") String author) {
+    return chatClient
+        .prompt()
+        .user(u -> u.text("List all the books written by {author}.").param("author", author))
+        .call()
+        .entity(BookWithPublicationYear[].class);
   }
 }
