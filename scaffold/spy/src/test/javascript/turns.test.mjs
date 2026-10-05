@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { groupTurns, inspectExchange } from '../../main/resources/static/spy/turns.js';
+import { groupTurns, inspectExchange, toolPairColors } from '../../main/resources/static/spy/turns.js';
 
 const tool = (id, name = 'weather') => ({ id, type: 'function', function: { name, arguments: '{}' } });
 const body = text => ({ text, truncated: false, totalBytes: text.length });
@@ -21,6 +21,20 @@ function exchange(id, { prompt = 'Weather?', results = [], calls = [], finish = 
     }, finish_reason: finish }] }))
   };
 }
+
+test('tool pairs keep distinct colors through successive rounds and repeated history', () => {
+  const first = exchange(1, { calls: [tool('weather')] });
+  const second = exchange(2, { results: ['weather'], calls: [tool('activities')] });
+  const third = exchange(3, { results: ['activities'] });
+  assert.deepEqual([...toolPairColors([third, first, second])], [['weather', 0], ['activities', 1]]);
+  assert.deepEqual([...toolPairColors([second, third])], [['weather', 0], ['activities', 1]]);
+});
+
+test('parallel calls get individual colors and the palette is reused after six pairs', () => {
+  const ids = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+  const colors = toolPairColors([exchange(1, { calls: ids.map(id => tool(id)) }), exchange(2, { results: ids })]);
+  assert.deepEqual([...colors.values()], [0, 1, 2, 3, 4, 5, 0]);
+});
 
 test('one round with parallel tools counts tool calls separately from HTTP exchanges', () => {
   const turns = groupTurns([exchange(2, { results: ['a', 'b'] }), exchange(1, { calls: [tool('a'), tool('b')] })]);

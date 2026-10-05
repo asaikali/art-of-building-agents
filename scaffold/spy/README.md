@@ -8,6 +8,8 @@ Turn grouping matches OpenAI tool-call IDs returned by the model to the tool-res
 
 Each body defaults to **Formatted**, the first view button. It shows readable content as an indented, syntax-highlighted code view with braces and brackets. JSON inside a string is expanded with a `JSON inside string` annotation; multiline prompts use triple quotes and real line breaks. This is a display representation.
 
+Tool calls and their results share a background color, matched by tool-call ID across both panels and all exchanges in a turn. Each call gets its own color, including parallel calls. The six-color palette repeats after six pairs.
+
 **Parsed** provides an expandable tree. Click an object or array to expand or collapse it, or use **Expand all** and **Collapse all**. Prompt strings show real line breaks; JSON inside strings, including tool arguments, structured responses, and fenced schemas, is decoded and labeled so its original string type is clear. Polling preserves the branches you are exploring. **Raw** shows valid JSON with indentation and syntax highlighting while preserving the original string escaping and number values. Plain text and incomplete streaming bodies remain readable as text in every view.
 
 ## Shared defaults

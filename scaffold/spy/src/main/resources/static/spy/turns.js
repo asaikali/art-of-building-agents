@@ -2,6 +2,23 @@
 // This module only reads captured bodies; it never changes provider traffic.
 const parse = text => { try { return JSON.parse(text); } catch { return null; } };
 
+// Assign colors in call order, including history, so pairs keep their color across exchanges.
+export function toolPairColors(exchanges, paletteSize = 6) {
+  const colors = new Map();
+  const add = id => {
+    if (typeof id === 'string' && id && !colors.has(id)) colors.set(id, colors.size % paletteSize);
+  };
+  for (const exchange of [...exchanges].sort((a, b) => a.summary.id - b.summary.id)) {
+    const request = parse(exchange.requestBody.text);
+    for (const message of Array.isArray(request?.messages) ? request.messages : []) {
+      if (Array.isArray(message?.tool_calls)) for (const call of message.tool_calls) add(call?.id);
+      if (message?.role === 'tool') add(message.tool_call_id);
+    }
+    for (const call of (exchange.analysis || inspectExchange(exchange)).toolCalls) add(call.id);
+  }
+  return colors;
+}
+
 export function inspectExchange(exchange) {
   const request = parse(exchange.requestBody.text);
   const messages = Array.isArray(request?.messages) ? request.messages : [];

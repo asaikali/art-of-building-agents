@@ -57,6 +57,13 @@
     .syntax-boolean { color: #753a94; }
     .syntax-null, .syntax-punctuation { color: #526278; }
     .syntax-note { color: #526278; font-style: italic; }
+    .tool-pair { display: block; border-left: 3px solid var(--tool-border); background: var(--tool-background); border-radius: 4px; padding-right: 8px; }
+    .tool-color-0 { --tool-background: #fff0ce; --tool-border: #b77912; }
+    .tool-color-1 { --tool-background: #e5efff; --tool-border: #3768b3; }
+    .tool-color-2 { --tool-background: #e1f4eb; --tool-border: #348261; }
+    .tool-color-3 { --tool-background: #f1e7fb; --tool-border: #8750ac; }
+    .tool-color-4 { --tool-background: #ffe7e2; --tool-border: #b65e4a; }
+    .tool-color-5 { --tool-background: #dff3f5; --tool-border: #31838b; }
     .notice { margin: 0; padding: 10px 18px; background: #fff3cc; font-size: 14px; }
     #connection { font-size: 13px; color: #ffda86; }
     [hidden] { display: none !important; }
@@ -90,7 +97,7 @@
               <button id="request-expand" type="button" hidden>Expand all</button>
               <button id="request-collapse" type="button" hidden>Collapse all</button>
             </div>
-            <p id="request-hint" class="view-hint">Readable display with decoded strings. Raw shows the original JSON types and escaping.</p>
+            <p id="request-hint" class="view-hint">Readable display with decoded strings. Matching tool calls and results share a color. Raw shows the original JSON types and escaping.</p>
             <p id="request-notice" class="notice" hidden></p>
             <div id="request-parsed" class="json-tree" hidden></div>
             <pre id="request-formatted"></pre>
@@ -105,7 +112,7 @@
               <button id="response-expand" type="button" hidden>Expand all</button>
               <button id="response-collapse" type="button" hidden>Collapse all</button>
             </div>
-            <p id="response-hint" class="view-hint">Readable display with decoded strings. Raw shows the original JSON types and escaping.</p>
+            <p id="response-hint" class="view-hint">Readable display with decoded strings. Matching tool calls and results share a color. Raw shows the original JSON types and escaping.</p>
             <p id="response-notice" class="notice" hidden></p>
             <div id="response-parsed" class="json-tree" hidden></div>
             <pre id="response-formatted"></pre>
@@ -117,18 +124,18 @@
   </main>
   <script type="module">
     const api = location.pathname.replace(/\/spy\/?$/, '').replace(/\/$/, '') + '/spy/api/exchanges';
-    const { inspectExchange, groupTurns } = await import(api.replace('/api/exchanges', '/turns.js'));
+    const { inspectExchange, groupTurns, toolPairColors } = await import(api.replace('/api/exchanges', '/turns.js'));
     const element = id => document.getElementById(id);
     const captured = new Map(), expandedTurns = new Map();
     let selectedId = null, paused = false, refreshing = false;
     const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');
     const viewHints = {
-      formatted: 'Readable display with decoded strings. Raw shows the original JSON types and escaping.',
+      formatted: 'Readable display with decoded strings. Matching tool calls and results share a color. Raw shows the original JSON types and escaping.',
       parsed: 'Strings are unescaped for reading. Embedded JSON is labeled.',
       raw: 'JSON is formatted and highlighted; string escaping is preserved.'
     };
     const bodyViews = new Map(['request', 'response'].map(prefix => [prefix, {
-      mode: 'formatted', exchangeId: null, text: null, expanded: new Map()
+      mode: 'formatted', exchangeId: null, text: null, colors: null, expanded: new Map()
     }]));
 
     function textNode(tag, text, className) {
@@ -170,11 +177,26 @@
       container.replaceChildren(output);
     }
 
-    function renderFormatted(container, value) {
-      const output = document.createDocumentFragment();
+    function renderFormatted(container, value, colors) {
+      let output = document.createDocumentFragment();
+      const root = output;
       const token = (text, type = 'punctuation') => output.append(textNode('span', text, `syntax-${type}`));
       const newline = depth => output.append(document.createTextNode('\n' + '  '.repeat(depth)));
-      function write(item, depth) {
+      function write(item, depth, toolCalls = false) {
+        const id = item?.role === 'tool' ? item.tool_call_id : toolCalls && !Array.isArray(item) ? item?.id : null;
+        const color = colors.get(id);
+        const parent = output;
+        if (color !== undefined) {
+          output = document.createElement('span');
+          output.className = `tool-pair tool-color-${color}`;
+          output.dataset.toolCallId = id;
+          output.title = `Tool call / result · ${id}`;
+          parent.append(output);
+        }
+        writeValue(item, depth, toolCalls);
+        output = parent;
+      }
+      function writeValue(item, depth, toolCalls) {
         if (depth >= 40) { token(JSON.stringify(item), 'string'); return; }
         if (typeof item === 'string') {
           const json = embeddedJson(item);
@@ -205,14 +227,14 @@
         entries.forEach(([key, child], index) => {
           newline(depth + 1);
           if (!array) { token(JSON.stringify(key), 'key'); token(': '); }
-          write(child, depth + 1);
+          write(child, depth + 1, array ? toolCalls : key === 'tool_calls');
           if (index < entries.length - 1) token(',');
         });
         if (entries.length) newline(depth);
         token(array ? ']' : '}');
       }
       write(value, 0);
-      container.replaceChildren(output);
+      container.replaceChildren(root);
     }
 
     function branch(label, type, path, depth, state) {
@@ -288,27 +310,33 @@
       for (const name of ['expand', 'collapse']) element(`${prefix}-${name}`).hidden = mode !== 'parsed';
     }
 
-    function renderBody(prefix, body) {
+    function renderBody(prefix, body, colors) {
       const state = bodyViews.get(prefix);
+      const colorKey = JSON.stringify([...colors]);
       if (state.exchangeId !== selectedId) {
         state.exchangeId = selectedId;
         state.text = null;
+        state.colors = null;
         state.expanded.clear();
       }
       // Polling must not replace a tree the presenter is exploring unless its body changes.
-      if (state.text !== body.text) {
+      const bodyChanged = state.text !== body.text;
+      if (bodyChanged) {
         state.text = body.text;
         renderRaw(element(`${prefix}-raw`), body.text);
         let node;
         try {
           const value = JSON.parse(body.text);
           node = jsonNode('Body', value, '$', 0, state);
-          renderFormatted(element(`${prefix}-formatted`), value);
         } catch {
           node = textNode('pre', body.text || '(empty body)');
-          element(`${prefix}-formatted`).textContent = body.text || '(empty body)';
         }
         element(`${prefix}-parsed`).replaceChildren(node);
+      }
+      if (bodyChanged || state.colors !== colorKey) {
+        state.colors = colorKey;
+        try { renderFormatted(element(`${prefix}-formatted`), JSON.parse(body.text), colors); }
+        catch { element(`${prefix}-formatted`).textContent = body.text || '(empty body)'; }
       }
       const notice = element(`${prefix}-notice`);
       notice.hidden = !body.truncated;
@@ -415,8 +443,9 @@
           element('turn-context').textContent = `Turn ${turn.number} · Exchange ${index + 1} of ${turn.steps.length} · ${step.input} → ${step.phase}`;
           element('destination').textContent = `${item.summary.method} ${item.summary.destination}`;
           element('status').textContent = `${status(item.summary)} · ${item.summary.durationMs} ms · Exchange #${item.summary.id}`;
-          renderBody('request', item.requestBody);
-          renderBody('response', item.responseBody);
+          const colors = toolPairColors(turn.steps.map(step => captured.get(step.exchange.id)));
+          renderBody('request', item.requestBody, colors);
+          renderBody('response', item.responseBody, colors);
         }
       } catch {
         element('connection').textContent = 'Cannot reach the app. Retrying…';
