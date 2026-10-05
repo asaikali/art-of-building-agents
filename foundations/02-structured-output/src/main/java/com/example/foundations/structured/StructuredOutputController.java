@@ -67,4 +67,14 @@ public class StructuredOutputController {
         .call()
         .entity(Book.class, spec -> spec.useProviderStructuredOutput());
   }
+
+  // 6. Validate the response against the book schema and retry with feedback if it fails.
+  @GetMapping(path = "/book/validated", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Book firstBookValidated(@RequestParam(defaultValue = "Douglas Adams") String author) {
+    return chatClient
+        .prompt()
+        .user(u -> u.text("What is the first book published by {author}?").param("author", author))
+        .call()
+        .entity(Book.class, spec -> spec.validateSchema());
+  }
 }

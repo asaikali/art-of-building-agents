@@ -15,8 +15,8 @@ The samples in
 use Douglas Adams, the author of *The Hitchhiker's Guide to the Galaxy*.
 Start with one book as text, return it as a record, then ask for all his books.
 Use a second record to get publication years from the same prompt, then
-compare the single-book request with native structured output.
-All five samples are ready to run; no source edits or restarts are needed
+compare the single-book request with native structured output and schema validation.
+All six samples are ready to run; no source edits or restarts are needed
 between them.
 
 ## 1. Ask for the first book as text
@@ -172,12 +172,45 @@ JSON into the same `Book` record.
 
 See [Spring AI's native structured output reference](https://docs.spring.io/spring-ai/reference/api/structured-output/native.html).
 
+## 6. Validate the single-book response
+
+Use the same question and record, this time enabling schema validation:
+
+```java
+@GetMapping(path = "/book/validated", produces = MediaType.APPLICATION_JSON_VALUE)
+public Book firstBookValidated(@RequestParam(defaultValue = "Douglas Adams") String author) {
+  return chatClient
+      .prompt()
+      .user(u -> u.text("What is the first book published by {author}?")
+          .param("author", author))
+      .call()
+      .entity(Book.class, spec -> spec.validateSchema());
+}
+```
+
+```bash
+http GET :8080/structured-output/book/validated
+```
+
+**What to explain:** Spring AI checks the returned JSON against the `Book`
+schema. If validation fails, it adds the specific errors to the user message
+and asks the model to correct its answer, allowing three retries by default.
+Validation checks the structure, not whether the book facts are correct.
+
+A valid answer needs only one model call, so this sample may look just like
+`/book` in Spy. If a response fails validation, Spy shows the extra calls and
+the validation feedback in their prompts. This sample is ready to explain
+without needing to provoke a model error during the talk.
+
+See [Spring AI's schema validation reference](https://docs.spring.io/spring-ai/reference/api/structured-output/validation.html).
+
 ## Takeaways
 
 - `.content()` gives the application text; `.entity(...)` gives it typed data.
 - The record defines the fields, and an array asks for a collection of records.
 - A different record changes the schema while the user prompt stays the same.
 - Native structured output sends the schema through the provider API.
+- Schema validation checks the response and retries with feedback when it fails.
 
 Structured output defines the answer's shape. The facts and completeness of
 the book list still depend on the model's knowledge.
