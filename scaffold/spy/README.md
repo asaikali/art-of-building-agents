@@ -2,7 +2,9 @@
 
 Spy supplies the shared application configuration and embeds a Spring Cloud Gateway MVC proxy in each sample. Open [http://localhost:8080/](http://localhost:8080/) while running a sample to inspect the actual HTTP requests and responses sent between the app and the model. `/spy` remains available as an alias. Meal-agent APIs stay under `/api`; the separate inspector runs on port 5173.
 
-The viewer shows each exchange separately, including prompts, tool definitions, tool results, response bodies, status, and duration. Exchanges run from oldest at the top to latest at the bottom. It follows the latest exchange automatically; select an earlier exchange to walk through it. Clear the history before starting another demo.
+The navigator groups HTTP exchanges into expandable **turns**, from the initial prompt through tool requests and tool results to the final model response. Each exchange remains selectable, with prompts, tool definitions, tool results, response bodies, status, and duration. Turns and their exchanges run from oldest at the top to latest at the bottom. The viewer follows the latest exchange automatically; select an earlier exchange to walk through it. Clear the history before starting another demo.
+
+Turn grouping matches OpenAI tool-call IDs returned by the model to the tool-result IDs in the following request, including streamed responses. Repeated prompts and interleaved requests stay separate. HTTP exchanges and tool calls are counted separately: two tools requested together can still mean only two HTTP exchanges. Tool execution itself happens in the app; Spy shows the messages exchanged with the model. Calls without matching IDs are shown separately, and a retained continuation whose earlier exchange is missing is labeled **Start not captured**. Arbitrary agent workflows with independent model calls would need an explicit turn ID for broader grouping.
 
 Each body defaults to **Formatted**, the first view button. It shows readable content as an indented, syntax-highlighted code view with braces and brackets. JSON inside a string is expanded with a `JSON inside string` annotation; multiline prompts use triple quotes and real line breaks. This is a display representation.
 
@@ -54,3 +56,14 @@ History is in memory and disappears when the app stops. The viewer contains the 
 `spy.providers` maps provider names to upstream HTTP origins. Adding a provider route requires no SDK-specific capture code; its Spring AI starter and model configuration must also be selected. The `/v1` prefix belongs in the OpenAI SDK base URL and is forwarded exactly once.
 
 Model integration tests that start without a web server use the upstream URL directly, since they have no local gateway. An explicit `spring.ai.openai.base-url` also overrides loopback when needed.
+
+## Checks
+
+Run the Gateway integration tests and the turn-grouping tests from the repository root:
+
+```shell
+./mvnw -f scaffold/spy/pom.xml test
+node --test scaffold/spy/src/test/javascript/turns.test.mjs
+```
+
+The JavaScript tests use Node's built-in test runner and cover interleaved turns, multiple tool rounds, streaming, errors, and missing history.

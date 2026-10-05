@@ -229,6 +229,10 @@ class SpyGatewayTest {
     assertThat(root.headers().firstValue("cache-control")).contains("no-store");
     assertThat(root.body()).isEqualTo(get("/spy").body());
     assertThat(get("/spy/").body()).isEqualTo(root.body());
+    var turnsScript = get("/spy/turns.js");
+    assertThat(turnsScript.statusCode()).isEqualTo(200);
+    assertThat(turnsScript.headers().firstValue("content-type").orElseThrow())
+        .contains("javascript");
     assertThat(store.list()).hasSize(4);
     var deleted =
         CLIENT.send(

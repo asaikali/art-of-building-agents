@@ -13,13 +13,18 @@
     header p { margin: 3px 0 0; color: #c2cede; }
     .controls { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
     button { font: inherit; cursor: pointer; border: 1px solid #b8c5d6; border-radius: 6px; padding: 7px 12px; background: white; color: #172333; }
-    main { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: calc(100vh - 90px); }
+    main { display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: calc(100vh - 90px); }
     aside { border-right: 1px solid #d7e0eb; padding: 16px; }
     #count { margin: 0 0 12px; font-size: 14px; color: #526278; }
     #exchanges { display: flex; flex-direction: column; gap: 8px; }
     .exchange { text-align: left; width: 100%; padding: 12px; }
     .exchange[aria-pressed="true"] { border-color: #3262c0; box-shadow: 0 0 0 1px #3262c0; background: #edf3ff; }
     .exchange small { display: block; margin-top: 6px; overflow-wrap: anywhere; color: #526278; }
+    .turn { border: 1px solid #d7e0eb; border-radius: 8px; background: white; }
+    .turn > summary { cursor: pointer; padding: 12px; font-weight: 600; }
+    .turn > summary small { display: block; margin-top: 6px; font-weight: 400; color: #526278; overflow-wrap: anywhere; }
+    .turn-steps { display: flex; flex-direction: column; gap: 8px; padding: 0 10px 10px; }
+    #turn-context { margin: 0 0 8px; font-size: 14px; color: #214b99; }
     #detail { padding: 24px; min-width: 0; }
     #empty { padding: 50px 10px; text-align: center; color: #526278; }
     #empty h2 { color: #172333; }
@@ -70,11 +75,11 @@
     </div>
   </header>
   <main>
-    <aside><p id="count">0 exchanges</p><nav id="exchanges" aria-label="Model exchanges"></nav></aside>
+    <aside><p id="count">0 turns · 0 exchanges</p><nav id="exchanges" aria-label="Model turns"></nav></aside>
     <section id="detail">
       <div id="empty"><h2>Waiting for a model call</h2><p>Run a sample request, then inspect its prompts, tool calls, and response here.</p></div>
       <div id="selected" hidden>
-        <div class="meta"><p id="destination"></p><span id="status"></span></div>
+        <div class="meta"><p id="turn-context"></p><p id="destination"></p><span id="status"></span></div>
         <div class="messages">
           <article>
             <h2>Request: App → Model</h2>
@@ -110,9 +115,11 @@
       </div>
     </section>
   </main>
-  <script>
+  <script type="module">
     const api = location.pathname.replace(/\/spy\/?$/, '').replace(/\/$/, '') + '/spy/api/exchanges';
+    const { inspectExchange, groupTurns } = await import(api.replace('/api/exchanges', '/turns.js'));
     const element = id => document.getElementById(id);
+    const captured = new Map(), expandedTurns = new Map();
     let selectedId = null, paused = false, refreshing = false;
     const status = item => item.error || (item.complete ? `HTTP ${item.status}` : 'In progress');
     const viewHints = {
@@ -320,6 +327,69 @@
       }
     }
 
+    async function loadExchanges(items) {
+      const ids = new Set(items.map(item => item.id));
+      for (const id of captured.keys()) if (!ids.has(id)) captured.delete(id);
+      // Fetch bodies once for completed exchanges; refresh pending streams as they grow.
+      const missing = items.filter(item => {
+        const cached = captured.get(item.id);
+        return !cached || !cached.summary.complete || !item.complete || cached.summary.startedAt !== item.startedAt;
+      });
+      for (let offset = 0; offset < missing.length; offset += 8) {
+        await Promise.all(missing.slice(offset, offset + 8).map(async item => {
+          const response = await fetch(`${api}/${item.id}`, { cache: 'no-store' });
+          if (response.status === 404) { captured.delete(item.id); return; }
+          if (!response.ok) throw new Error();
+          const exchange = await response.json();
+          exchange.analysis = inspectExchange(exchange);
+          captured.set(item.id, exchange);
+        }));
+      }
+      return items.map(item => captured.get(item.id)).filter(Boolean);
+    }
+
+    function renderTurns(turns) {
+      const ids = new Set(turns.map(turn => turn.id));
+      for (const id of expandedTurns.keys()) if (!ids.has(id)) expandedTurns.delete(id);
+      element('exchanges').replaceChildren(...turns.map(turn => {
+        const card = document.createElement('details');
+        card.className = 'turn';
+        card.open = expandedTurns.get(turn.id) ?? true;
+        const heading = document.createElement('summary');
+        heading.append(`Turn ${turn.number} · ${turn.state}`);
+        heading.append(textNode('small', turn.prompt));
+        heading.append(textNode('small', `${turn.steps.length} HTTP exchange${turn.steps.length === 1 ? '' : 's'} · ${turn.toolCallCount} tool call${turn.toolCallCount === 1 ? '' : 's'}${turn.partial ? ' · Start not captured' : ''}`));
+        const steps = document.createElement('div');
+        steps.className = 'turn-steps';
+        for (const step of turn.steps) {
+          const item = step.exchange;
+          const button = document.createElement('button');
+          button.className = 'exchange';
+          button.type = 'button';
+          button.setAttribute('aria-pressed', item.id === selectedId);
+          button.append(`#${item.id} · ${step.input} → ${step.phase}`);
+          const toolNames = step.toolCalls.map(call => call.name || 'Tool').join(', ');
+          const notes = [new Date(item.startedAt).toLocaleTimeString(), status(item), `${item.durationMs} ms`];
+          if (step.results.length) notes.push(`${step.results.length} tool result${step.results.length === 1 ? '' : 's'} sent`);
+          if (toolNames) notes.push(`Requests: ${toolNames}`);
+          button.append(textNode('small', notes.join(' · ')));
+          button.onclick = () => {
+            selectedId = item.id;
+            element('follow').checked = false;
+            paused = false;
+            element('pause').textContent = 'Pause';
+            refresh();
+          };
+          steps.append(button);
+        }
+        card.append(heading, steps);
+        card.addEventListener('toggle', () => {
+          if (card.isConnected) expandedTurns.set(turn.id, card.open);
+        });
+        return card;
+      }));
+    }
+
     async function refresh() {
       if (paused || refreshing) return;
       refreshing = true;
@@ -328,36 +398,21 @@
         if (!response.ok) throw new Error();
         const items = await response.json();
         element('connection').textContent = '';
-        element('count').textContent = `${items.length} exchange${items.length === 1 ? '' : 's'}`;
         if (element('follow').checked || !items.some(item => item.id === selectedId)) {
           selectedId = items[0]?.id ?? null;
         }
-        const chronologicalItems = [...items].reverse();
-        element('exchanges').replaceChildren(...chronologicalItems.map(item => {
-          const button = document.createElement('button');
-          button.className = 'exchange';
-          button.type = 'button';
-          button.setAttribute('aria-pressed', item.id === selectedId);
-          button.append(`#${item.id} · ${status(item)}`);
-          const caption = document.createElement('small');
-          caption.textContent = `${new Date(item.startedAt).toLocaleTimeString()} · ${item.durationMs} ms\n${item.method} ${new URL(item.destination, location.origin).pathname}`;
-          button.append(caption);
-          button.onclick = () => {
-            selectedId = item.id;
-            element('follow').checked = false;
-            paused = false;
-            element('pause').textContent = 'Pause';
-            refresh();
-          };
-          return button;
-        }));
+        const turns = groupTurns(await loadExchanges(items));
+        renderTurns(turns);
+        element('count').textContent = `${turns.length} turn${turns.length === 1 ? '' : 's'} · ${items.length} exchange${items.length === 1 ? '' : 's'}`;
         element('empty').hidden = selectedId !== null;
         element('selected').hidden = selectedId === null;
         if (selectedId !== null) {
-          const detail = await fetch(`${api}/${selectedId}`, { cache: 'no-store' });
-          if (detail.status === 404) { selectedId = null; return; }
-          if (!detail.ok) throw new Error();
-          const item = await detail.json();
+          const item = captured.get(selectedId);
+          if (!item) { selectedId = null; return; }
+          const turn = turns.find(turn => turn.steps.some(step => step.exchange.id === selectedId));
+          const index = turn.steps.findIndex(step => step.exchange.id === selectedId);
+          const step = turn.steps[index];
+          element('turn-context').textContent = `Turn ${turn.number} · Exchange ${index + 1} of ${turn.steps.length} · ${step.input} → ${step.phase}`;
           element('destination').textContent = `${item.summary.method} ${item.summary.destination}`;
           element('status').textContent = `${status(item.summary)} · ${item.summary.durationMs} ms · Exchange #${item.summary.id}`;
           renderBody('request', item.requestBody);
@@ -378,6 +433,8 @@
         const response = await fetch(api, { method: 'DELETE' });
         if (!response.ok) throw new Error();
         selectedId = null;
+        captured.clear();
+        expandedTurns.clear();
         paused = false;
         element('pause').textContent = 'Pause';
         refresh();
